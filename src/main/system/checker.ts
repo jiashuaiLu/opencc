@@ -1,4 +1,4 @@
-import { exec } from 'child_process';
+import { exec, execSync } from 'child_process';
 import { promisify } from 'util';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -13,21 +13,38 @@ const mkdir = promisify(fs.mkdir);
 function getShellEnv(): { env: NodeJS.ProcessEnv; shell: string } {
   const shell = process.env.SHELL || '/bin/zsh';
   
-  const env = {
-    ...process.env,
-    PATH: [
-      '/usr/local/bin',
-      '/usr/bin',
-      '/bin',
-      '/usr/sbin',
-      '/sbin',
-      '/opt/homebrew/bin',
-      path.join(os.homedir(), '.nvm/versions/node'),
-      process.env.PATH || ''
-    ].filter(Boolean).join(':'),
-  };
-  
-  return { env, shell };
+  try {
+    const pathOutput = execSync(
+      `${shell} -l -c 'echo $PATH'`,
+      { encoding: 'utf-8', timeout: 5000 }
+    ).trim();
+    
+    const env = {
+      ...process.env,
+      PATH: pathOutput,
+      HOME: os.homedir(),
+    };
+    
+    return { env, shell };
+  } catch (error) {
+    const env = {
+      ...process.env,
+      PATH: [
+        '/usr/local/bin',
+        '/usr/bin',
+        '/bin',
+        '/usr/sbin',
+        '/sbin',
+        '/opt/homebrew/bin',
+        path.join(os.homedir(), '.nvm/versions/node'),
+        path.join(os.homedir(), '.local/bin'),
+        process.env.PATH || ''
+      ].filter(Boolean).join(':'),
+      HOME: os.homedir(),
+    };
+    
+    return { env, shell };
+  }
 }
 
 export interface CheckResult {
