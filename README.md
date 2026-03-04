@@ -1,8 +1,8 @@
-# OpenCC
+# DongCC
 
 <div align="center">
 
-**OpenCC - Claude Code 代理服务管理工具**
+**DongCC - Claude Code 代理服务管理工具**
 
 一个专为 macOS 设计的桌面应用，用于管理和监控 Claude Code 代理服务
 
@@ -16,7 +16,7 @@
 
 ## 📖 项目简介
 
-OpenCC 是一个功能强大的 macOS 桌面应用，旨在简化 Claude Code 代理服务的管理和监控。通过图形化界面，用户可以轻松配置代理服务、查看运行日志、监控 Token 消耗、管理对话历史等。
+DongCC 是一个功能强大的 macOS 桌面应用，旨在简化 Claude Code 代理服务的管理和监控。通过图形化界面，用户可以轻松配置代理服务、查看运行日志、监控 Token 消耗、管理对话历史等。
 
 ### ✨ 核心特性
 
@@ -41,8 +41,8 @@ OpenCC 是一个功能强大的 macOS 桌面应用，旨在简化 Claude Code �
 
 #### 方式一：下载安装包（推荐）
 
-1. 访问 [Releases](https://github.com/your-repo/OpenCC/releases) 页面
-2. 下载最新版本的 `OpenCC-x.x.x.dmg`
+1. 访问 [Releases](https://github.com/your-repo/DongCC/releases) 页面
+2. 下载最新版本的 `DongCC-x.x.x.dmg`
 3. 双击打开 DMG 文件
 4. 将应用拖拽到 Applications 文件夹
 5. 打开 Applications 文件夹，双击启动应用
@@ -51,8 +51,8 @@ OpenCC 是一个功能强大的 macOS 桌面应用，旨在简化 Claude Code �
 
 ```bash
 # 1. 克隆仓库
-git clone https://github.com/your-repo/OpenCC.git
-cd OpenCC
+git clone https://github.com/your-repo/DongCC.git
+cd DongCC
 
 # 2. 安装依赖
 npm install
@@ -122,7 +122,7 @@ npm run electron:build
 ### 项目结构
 
 ```
-opencc/
+dongcc/
 ├── src/
 │   ├── main/                 # Electron 主进程
 │   │   ├── index.ts         # 主进程入口
@@ -247,14 +247,14 @@ npm run format              # 格式化代码
 
 ## 📞 联系方式
 
-- **问题反馈**: [GitHub Issues](https://github.com/jiashuaiLu/opencc/issues)
-- **功能建议**: [GitHub Discussions](https://github.com/jiashuaiLu/opencc/discussions)
+- **问题反馈**: [GitHub Issues](https://github.com/jiashuaiLu/dongcc/issues)
+- **功能建议**: [GitHub Discussions](https://github.com/jiashuaiLu/dongcc/discussions)
 - **邮件**: lujiashuai777@163.com
 
 ---
 
 <div align="center">
 
-**Made with ❤️ by OpenCC Team**
+**Made with ❤️ by DongCC Team**
 
 </div>

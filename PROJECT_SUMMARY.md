@@ -1,4 +1,4 @@
-# OpenCC 项目开发总结
+# DongCC 项目开发总结
 
 ## 🎉 项目完成情况
 
@@ -71,7 +71,7 @@
 ### 🏗️ 项目结构
 
 ```
-opencc/
+dongcc/
 ├── src/
 │   ├── main/                    # 主进程 ✅
 │   │   ├── index.ts            # 主进程入口
@@ -118,7 +118,7 @@ opencc/
 
 #### 1. 安装依赖
 ```bash
-cd opencc
+cd dongcc
 npm install
 ```
 
@@ -297,4 +297,4 @@ npm run electron:build
 **下一阶段**: 🚧 功能优化和测试
 **预计完成时间**: 2-3周后
 
-**OpenCC 项目开发完成！** 🎉
+**DongCC 项目开发完成！** 🎉
