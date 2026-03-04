@@ -67,14 +67,18 @@
     "appId": "com.dongcc.app",
     "productName": "DongCC",
     "directories": {
-      "output": "dist"
+      "output": "release"
     },
     "mac": {
       "category": "public.app-category.developer-tools"
     },
     "files": [
-      "dist/**/*",
+      "dist/main/**/*",
+      "dist/renderer/**/*",
       "package.json"
+    ],
+    "asarUnpack": [
+      "**/*.node"
     ]
   }
 }
