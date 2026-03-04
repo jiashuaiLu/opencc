@@ -2,10 +2,15 @@ import { ipcMain } from 'electron';
 import { ProxyServer } from '../proxy/server';
 import { DatabaseManager } from '../database';
 import { logger } from '../logger';
-import { SystemChecker } from '../system/checker';
+import { SystemChecker, EnvironmentStatus } from '../system/checker';
 
-export function setupIPC(proxyServer: ProxyServer, database: DatabaseManager): void {
-  const systemChecker = new SystemChecker();
+export function setupIPC(
+  proxyServer: ProxyServer, 
+  database: DatabaseManager,
+  systemChecker: SystemChecker,
+  initialEnvironmentStatus: EnvironmentStatus | null
+): void {
+  let environmentStatus = initialEnvironmentStatus;
   // 配置相关
   ipcMain.handle('config:get', async (event, id) => {
     try {
@@ -182,6 +187,43 @@ export function setupIPC(proxyServer: ProxyServer, database: DatabaseManager): v
       return { success: true };
     } catch (error) {
       logger.error('Failed to save settings', error);
+      throw error;
+    }
+  });
+
+  // 环境检查相关
+  ipcMain.handle('environment:check', async (event, port?: number) => {
+    try {
+      environmentStatus = await systemChecker.checkEnvironment(port || 8787);
+      const report = systemChecker.generateReport(environmentStatus);
+      logger.info('Environment check completed\n' + report);
+      return environmentStatus;
+    } catch (error) {
+      logger.error('Failed to check environment', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('environment:getStatus', async () => {
+    try {
+      if (!environmentStatus) {
+        environmentStatus = await systemChecker.checkEnvironment(8787);
+      }
+      return environmentStatus;
+    } catch (error) {
+      logger.error('Failed to get environment status', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('environment:getReport', async () => {
+    try {
+      if (!environmentStatus) {
+        environmentStatus = await systemChecker.checkEnvironment(8787);
+      }
+      return systemChecker.generateReport(environmentStatus);
+    } catch (error) {
+      logger.error('Failed to generate environment report', error);
       throw error;
     }
   });

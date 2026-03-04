@@ -1,16 +1,31 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, dialog } from 'electron';
 import * as path from 'path';
 import { ProxyServer } from './proxy/server';
 import { DatabaseManager } from './database';
 import { setupIPC } from './ipc/handlers';
 import { logger } from './logger';
+import { SystemChecker, EnvironmentStatus } from './system/checker';
+
 
 let mainWindow: BrowserWindow | null = null;
 let proxyServer: ProxyServer;
 let database: DatabaseManager;
+let systemChecker: SystemChecker;
+let environmentStatus: EnvironmentStatus | null = null;
+
 
 async function initialize() {
   try {
+    systemChecker = new SystemChecker();
+    
+    environmentStatus = await systemChecker.checkEnvironment(8787);
+    const report = systemChecker.generateReport(environmentStatus);
+    logger.info('Environment check completed\n' + report);
+    
+    if (!environmentStatus.nodejs.installed || !environmentStatus.nodejs.valid) {
+      logger.error('Node.js version check failed', environmentStatus.nodejs);
+    }
+    
     database = new DatabaseManager();
     await database.initialize();
     logger.info('Database initialized');
@@ -70,7 +85,7 @@ async function initialize() {
       }
     });
 
-    setupIPC(proxyServer, database);
+    setupIPC(proxyServer, database, systemChecker, environmentStatus);
     logger.info('IPC handlers setup complete');
   } catch (error) {
     logger.error('Failed to initialize', error);

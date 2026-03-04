@@ -1,10 +1,34 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import * as fs from 'fs-extra';
+import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 
 const execAsync = promisify(exec);
+const readFile = promisify(fs.readFile);
+const writeFile = promisify(fs.writeFile);
+const access = promisify(fs.access);
+const mkdir = promisify(fs.mkdir);
+
+function getShellEnv(): { env: NodeJS.ProcessEnv; shell: string } {
+  const shell = process.env.SHELL || '/bin/zsh';
+  
+  const env = {
+    ...process.env,
+    PATH: [
+      '/usr/local/bin',
+      '/usr/bin',
+      '/bin',
+      '/usr/sbin',
+      '/sbin',
+      '/opt/homebrew/bin',
+      path.join(os.homedir(), '.nvm/versions/node'),
+      process.env.PATH || ''
+    ].filter(Boolean).join(':'),
+  };
+  
+  return { env, shell };
+}
 
 export interface CheckResult {
   installed: boolean;
@@ -25,7 +49,12 @@ export class SystemChecker {
   // 检查 Claude Code 是否安装
   async checkClaudeCode(): Promise<CheckResult> {
     try {
-      const { stdout } = await execAsync('which claude');
+      const { env, shell } = getShellEnv();
+      
+      const { stdout } = await execAsync('which claude', { 
+        env,
+        shell 
+      });
       const claudePath = stdout.trim();
 
       if (!claudePath) {
@@ -36,7 +65,10 @@ export class SystemChecker {
       }
 
       try {
-        const { stdout: versionOutput } = await execAsync('claude --version');
+        const { stdout: versionOutput } = await execAsync('claude --version', { 
+          env,
+          shell 
+        });
         const version = versionOutput.trim();
 
         return {
@@ -64,7 +96,12 @@ export class SystemChecker {
   // 检查 Node.js 版本
   async checkNodeJS(): Promise<CheckResult> {
     try {
-      const { stdout } = await execAsync('node --version');
+      const { env, shell } = getShellEnv();
+      
+      const { stdout } = await execAsync('node --version', { 
+        env,
+        shell 
+      });
       const version = stdout.trim();
       const majorVersion = parseInt(version.replace('v', '').split('.')[0]);
 
@@ -85,7 +122,8 @@ export class SystemChecker {
   // 检查端口占用
   async checkPort(port: number): Promise<{ available: boolean; usedBy?: string }> {
     try {
-      const { stdout } = await execAsync(`lsof -i :${port}`);
+      const { env, shell } = getShellEnv();
+      const { stdout } = await execAsync(`lsof -i :${port}`, { env, shell });
       return {
         available: false,
         usedBy: stdout.trim(),
@@ -102,7 +140,7 @@ export class SystemChecker {
     const configPath = path.join(os.homedir(), '.claude', 'settings.json');
 
     try {
-      const exists = await fs.pathExists(configPath);
+      const exists = await this.fileExists(configPath);
 
       if (!exists) {
         return {
@@ -112,7 +150,8 @@ export class SystemChecker {
         };
       }
 
-      const config = await fs.readJson(configPath);
+      const content = await readFile(configPath, 'utf-8');
+      const config = JSON.parse(content);
       const valid = this.validateClaudeConfig(config);
 
       return {
@@ -156,7 +195,7 @@ export class SystemChecker {
     const configPath = path.join(os.homedir(), '.claude', 'settings.json');
     const configDir = path.dirname(configPath);
 
-    await fs.ensureDir(configDir);
+    await this.ensureDir(configDir);
 
     const settings: any = {
       env: {
@@ -183,7 +222,7 @@ export class SystemChecker {
       };
     }
 
-    await fs.writeJson(configPath, settings, { spaces: 2 });
+    await writeFile(configPath, JSON.stringify(settings, null, 2), 'utf-8');
   }
 
   // 还原 Claude 配置
@@ -191,10 +230,11 @@ export class SystemChecker {
     const configPath = path.join(os.homedir(), '.claude', 'settings.json');
     
     try {
-      const exists = await fs.pathExists(configPath);
+      const exists = await this.fileExists(configPath);
       
       if (exists) {
-        const config = await fs.readJson(configPath);
+        const content = await readFile(configPath, 'utf-8');
+        const config = JSON.parse(content);
         
         if (config.env) {
           // 只删除代理相关的配置，保留模型配置
@@ -205,7 +245,7 @@ export class SystemChecker {
         
         // 保留 llm 配置（模型列表和默认模型）
         
-        await fs.writeJson(configPath, config, { spaces: 2 });
+        await writeFile(configPath, JSON.stringify(config, null, 2), 'utf-8');
       }
     } catch (error) {
       console.error('Failed to restore Claude config:', error);
@@ -285,5 +325,24 @@ export class SystemChecker {
     }
 
     return lines.join('\n');
+  }
+
+  private async fileExists(filePath: string): Promise<boolean> {
+    try {
+      await access(filePath, fs.constants.F_OK);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  private async ensureDir(dirPath: string): Promise<void> {
+    try {
+      await mkdir(dirPath, { recursive: true });
+    } catch (error: any) {
+      if (error.code !== 'EEXIST') {
+        throw error;
+      }
+    }
   }
 }
