@@ -26,4 +26,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // 设置相关
   getSettings: () => ipcRenderer.invoke('settings:get'),
   saveSettings: (settings: any) => ipcRenderer.invoke('settings:save', settings),
+  
+  // 环境检查相关
+  checkEnvironment: (port?: number) => ipcRenderer.invoke('environment:check', port),
+  getEnvironmentStatus: () => ipcRenderer.invoke('environment:getStatus'),
+  getEnvironmentReport: () => ipcRenderer.invoke('environment:getReport'),
 });

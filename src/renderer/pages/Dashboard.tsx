@@ -1,12 +1,39 @@
-import { Card, Row, Col, Statistic, Button, Space, message, Modal, List, Tag } from 'antd';
+import { Card, Row, Col, Statistic, Button, Space, message, Modal, List, Tag, Alert, Descriptions } from 'antd';
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   PlayCircleOutlined,
   PauseCircleOutlined,
+  WarningOutlined,
+  InfoCircleOutlined,
 } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+interface EnvironmentStatus {
+  claudeCode: {
+    installed: boolean;
+    version?: string;
+    path?: string;
+    valid?: boolean;
+    message?: string;
+  };
+  nodejs: {
+    installed: boolean;
+    version?: string;
+    valid?: boolean;
+    message?: string;
+  };
+  port: {
+    available: boolean;
+    usedBy?: string;
+  };
+  config: {
+    exists: boolean;
+    valid: boolean;
+    path?: string;
+  };
+}
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -21,11 +48,26 @@ export default function Dashboard() {
   });
   const [logsModalVisible, setLogsModalVisible] = useState(false);
   const [recentLogs, setRecentLogs] = useState<any[]>([]);
+  const [environmentStatus, setEnvironmentStatus] = useState<EnvironmentStatus | null>(null);
+  const [envLoading, setEnvLoading] = useState(false);
 
   useEffect(() => {
     loadStats();
     checkServiceStatus();
+    loadEnvironmentStatus();
   }, []);
+
+  const loadEnvironmentStatus = async () => {
+    setEnvLoading(true);
+    try {
+      const status = await window.electronAPI.getEnvironmentStatus();
+      setEnvironmentStatus(status);
+    } catch (error) {
+      console.error('Failed to load environment status:', error);
+    } finally {
+      setEnvLoading(false);
+    }
+  };
 
   const loadStats = async () => {
     try {
@@ -92,9 +134,160 @@ export default function Dashboard() {
     }
   };
 
+  const renderEnvironmentStatus = () => {
+    if (!environmentStatus) return null;
+
+    const hasIssues = 
+      !environmentStatus.nodejs.installed || 
+      !environmentStatus.nodejs.valid ||
+      !environmentStatus.claudeCode.installed ||
+      !environmentStatus.port.available;
+
+    return (
+      <Card 
+        title={
+          <Space>
+            <span>环境状态</span>
+            {hasIssues ? (
+              <WarningOutlined style={{ color: '#faad14' }} />
+            ) : (
+              <CheckCircleOutlined style={{ color: '#52c41a' }} />
+            )}
+          </Space>
+        }
+        extra={
+          <Button size="small" onClick={loadEnvironmentStatus} loading={envLoading}>
+            刷新
+          </Button>
+        }
+        style={{ marginBottom: 16 }}
+      >
+        {hasIssues && (
+          <Alert
+            message="环境检查发现问题"
+            description="部分环境配置不符合要求，可能影响服务正常运行"
+            type="warning"
+            showIcon
+            style={{ marginBottom: 16 }}
+          />
+        )}
+        
+        <Descriptions column={2} size="small">
+          <Descriptions.Item 
+            label={
+              <Space>
+                Node.js
+                {environmentStatus.nodejs.installed && environmentStatus.nodejs.valid ? (
+                  <CheckCircleOutlined style={{ color: '#52c41a' }} />
+                ) : (
+                  <CloseCircleOutlined style={{ color: '#ff4d4f' }} />
+                )}
+              </Space>
+            }
+          >
+            {environmentStatus.nodejs.installed ? (
+              <Space direction="vertical" size={0}>
+                <span>{environmentStatus.nodejs.version}</span>
+                {!environmentStatus.nodejs.valid && (
+                  <span style={{ color: '#ff4d4f', fontSize: 12 }}>
+                    {environmentStatus.nodejs.message}
+                  </span>
+                )}
+              </Space>
+            ) : (
+              <span style={{ color: '#ff4d4f' }}>未安装</span>
+            )}
+          </Descriptions.Item>
+
+          <Descriptions.Item 
+            label={
+              <Space>
+                Claude Code
+                {environmentStatus.claudeCode.installed ? (
+                  <CheckCircleOutlined style={{ color: '#52c41a' }} />
+                ) : (
+                  <CloseCircleOutlined style={{ color: '#ff4d4f' }} />
+                )}
+              </Space>
+            }
+          >
+            {environmentStatus.claudeCode.installed ? (
+              <Space direction="vertical" size={0}>
+                <span>{environmentStatus.claudeCode.version || '已安装'}</span>
+                {environmentStatus.claudeCode.path && (
+                  <span style={{ color: '#999', fontSize: 12 }}>
+                    {environmentStatus.claudeCode.path}
+                  </span>
+                )}
+              </Space>
+            ) : (
+              <span style={{ color: '#ff4d4f' }}>
+                {environmentStatus.claudeCode.message || '未安装'}
+              </span>
+            )}
+          </Descriptions.Item>
+
+          <Descriptions.Item 
+            label={
+              <Space>
+                端口状态
+                {environmentStatus.port.available ? (
+                  <CheckCircleOutlined style={{ color: '#52c41a' }} />
+                ) : (
+                  <WarningOutlined style={{ color: '#faad14' }} />
+                )}
+              </Space>
+            }
+          >
+            {environmentStatus.port.available ? (
+              <span style={{ color: '#52c41a' }}>可用</span>
+            ) : (
+              <Space direction="vertical" size={0}>
+                <span style={{ color: '#faad14' }}>已被占用</span>
+                {environmentStatus.port.usedBy && (
+                  <span style={{ color: '#999', fontSize: 12 }}>
+                    {environmentStatus.port.usedBy}
+                  </span>
+                )}
+              </Space>
+            )}
+          </Descriptions.Item>
+
+          <Descriptions.Item 
+            label={
+              <Space>
+                Claude 配置
+                {environmentStatus.config.exists && environmentStatus.config.valid ? (
+                  <CheckCircleOutlined style={{ color: '#52c41a' }} />
+                ) : (
+                  <WarningOutlined style={{ color: '#faad14' }} />
+                )}
+              </Space>
+            }
+          >
+            {environmentStatus.config.exists ? (
+              <Space direction="vertical" size={0}>
+                <span>{environmentStatus.config.valid ? '配置正确' : '配置有误'}</span>
+                {environmentStatus.config.path && (
+                  <span style={{ color: '#999', fontSize: 12 }}>
+                    {environmentStatus.config.path}
+                  </span>
+                )}
+              </Space>
+            ) : (
+              <span style={{ color: '#faad14' }}>配置文件不存在</span>
+            )}
+          </Descriptions.Item>
+        </Descriptions>
+      </Card>
+    );
+  };
+
   return (
     <div>
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
+        {renderEnvironmentStatus()}
+        
         <Card>
           <Row gutter={16} align="middle">
             <Col span={12}>

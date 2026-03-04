@@ -26,6 +26,9 @@
     "claude",
     "proxy"
   ],
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "devDependencies": {
     "@types/express": "^4.17.25",
     "@types/node": "^22.0.0",

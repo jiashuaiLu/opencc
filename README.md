@@ -41,7 +41,7 @@ DongCC 是一个功能强大的 macOS 桌面应用，旨在简化 Claude Code �
 
 #### 方式一：下载安装包（推荐）
 
-1. 访问 [Releases](https://github.com/your-repo/DongCC/releases) 页面
+1. 下载链接 [Releases]() 页面
 2. 下载最新版本的 `DongCC-x.x.x.dmg`
 3. 双击打开 DMG 文件
 4. 将应用拖拽到 Applications 文件夹
@@ -51,7 +51,7 @@ DongCC 是一个功能强大的 macOS 桌面应用，旨在简化 Claude Code �
 
 ```bash
 # 1. 克隆仓库
-git clone https://github.com/your-repo/DongCC.git
+git clone https://coding.jd.com/atop-qa/dongcc.git
 cd DongCC
 
 # 2. 安装依赖

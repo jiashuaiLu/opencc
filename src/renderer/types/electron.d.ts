@@ -1,5 +1,30 @@
 import { Config, Log, Request, Conversation, Stats, Settings, ServiceStatus } from './shared/types';
 
+interface EnvironmentStatus {
+  claudeCode: {
+    installed: boolean;
+    version?: string;
+    path?: string;
+    valid?: boolean;
+    message?: string;
+  };
+  nodejs: {
+    installed: boolean;
+    version?: string;
+    valid?: boolean;
+    message?: string;
+  };
+  port: {
+    available: boolean;
+    usedBy?: string;
+  };
+  config: {
+    exists: boolean;
+    valid: boolean;
+    path?: string;
+  };
+}
+
 declare global {
   interface Window {
     electronAPI: {
@@ -35,6 +60,11 @@ declare global {
       // 设置相关
       getSettings: () => Promise<Settings>;
       saveSettings: (settings: Settings) => Promise<{ success: boolean }>;
+      
+      // 环境检查相关
+      checkEnvironment: (port?: number) => Promise<EnvironmentStatus>;
+      getEnvironmentStatus: () => Promise<EnvironmentStatus>;
+      getEnvironmentReport: () => Promise<string>;
     };
   }
 }
