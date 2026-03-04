@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 Starting DongCC Development Environment..."
+echo "🚀 Starting OpenCC Development Environment..."
 
 # 检查 Node.js
 if ! command -v node &> /dev/null; then
@@ -19,8 +19,8 @@ fi
 
 # 创建必要的目录
 echo "📁 Creating necessary directories..."
-mkdir -p ~/.dongcc/data
-mkdir -p ~/.dongcc/logs
+mkdir -p ~/.opencc/data
+mkdir -p ~/.opencc/logs
 
 # 启动开发服务器
 echo "🎉 Starting development server..."

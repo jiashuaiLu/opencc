@@ -15,11 +15,11 @@ export class DatabaseManager {
   private data: DatabaseSchema;
 
   constructor() {
-    const dataDir = path.join(os.homedir(), '.dongcc', 'data');
+    const dataDir = path.join(os.homedir(), '.opencc', 'data');
     if (!fs.existsSync(dataDir)) {
       fs.mkdirSync(dataDir, { recursive: true });
     }
-    this.dbPath = path.join(dataDir, 'dongcc.json');
+    this.dbPath = path.join(dataDir, 'opencc.json');
     
     this.data = {
       configs: [],

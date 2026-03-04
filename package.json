@@ -1,9 +1,9 @@
 {
-  "name": "dongcc",
+  "name": "opencc",
   "version": "1.0.0",
-  "description": "DongCC - Claude Code 代理服务管理工具",
+  "description": "OpenCC - Claude Code 代理服务管理工具",
   "main": "dist/main/index.js",
-  "author": "DongCC Team",
+  "author": "OpenCC Team",
   "license": "MIT",
   "type": "commonjs",
   "scripts": {
@@ -61,8 +61,8 @@
     "zustand": "^4.5.0"
   },
   "build": {
-    "appId": "com.dongcc.app",
-    "productName": "DongCC",
+    "appId": "com.opencc.app",
+    "productName": "OpenCC",
     "directories": {
       "output": "dist"
     },

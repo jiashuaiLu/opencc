@@ -44,14 +44,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         >
           <img 
             src={logo} 
-            alt="DongCC Logo" 
+            alt="OpenCC Logo" 
             style={{ 
               width: 32, 
               height: 32, 
               objectFit: 'contain' 
             }} 
           />
-          DongCC
+          OpenCC
         </div>
         <Menu
           mode="inline"

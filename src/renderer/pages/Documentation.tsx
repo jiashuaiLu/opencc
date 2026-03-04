@@ -18,10 +18,10 @@ export default function Documentation() {
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto' }}>
       <Title level={2}>
-        <RocketOutlined /> DongCC 使用文档
+        <RocketOutlined /> OpenCC 使用文档
       </Title>
       <Paragraph type="secondary">
-        DongCC 是一个功能强大的 Claude Code 代理服务管理工具，帮助您轻松管理和监控代理服务。
+        OpenCC 是一个功能强大的 Claude Code 代理服务管理工具，帮助您轻松管理和监控代理服务。
       </Paragraph>
 
       <Divider />
@@ -38,7 +38,7 @@ export default function Documentation() {
       >
         <Alert
           message="5分钟快速上手"
-          description="按照以下步骤，快速配置并使用 DongCC"
+          description="按照以下步骤，快速配置并使用 OpenCC"
           type="info"
           showIcon
           style={{ marginBottom: 16 }}
@@ -48,7 +48,7 @@ export default function Documentation() {
           <Panel header="步骤 1: 配置代理服务" key="1">
             <Paragraph>
               <ul>
-                <li>打开 DongCC 应用，进入"配置管理"页面</li>
+                <li>打开 OpenCC 应用，进入"配置管理"页面</li>
                 <li>填写配置信息：
                   <ul>
                     <li><Text code>配置名称</Text>: 例如 JoyBuilder-Production</li>
@@ -68,7 +68,7 @@ export default function Documentation() {
                 <li>回到"仪表盘"页面</li>
                 <li>点击"启动服务"按钮</li>
                 <li>等待服务启动完成（状态变为"运行中"）</li>
-                <li>DongCC 会自动配置 Claude Code</li>
+                <li>OpenCC 会自动配置 Claude Code</li>
               </ul>
             </Paragraph>
           </Panel>
@@ -109,7 +109,7 @@ export default function Documentation() {
       >
         <Title level={4}>架构设计</Title>
         <Paragraph>
-          DongCC 采用 Electron + React + TypeScript 架构，实现了完整的桌面应用解决方案。
+          OpenCC 采用 Electron + React + TypeScript 架构，实现了完整的桌面应用解决方案。
         </Paragraph>
 
         <Divider />
@@ -167,8 +167,8 @@ Claude Code 客户端`}
           <Panel header="数据存储" key="storage">
             <Paragraph>
               <ul>
-                <li><Text strong>配置数据</Text>: ~/.dongcc/data/dongcc.json</li>
-                <li><Text strong>日志文件</Text>: ~/.dongcc/logs/</li>
+                <li><Text strong>配置数据</Text>: ~/.opencc/data/opencc.json</li>
+                <li><Text strong>日志文件</Text>: ~/.opencc/logs/</li>
                 <li><Text strong>Claude 配置</Text>: ~/.claude/settings.json</li>
               </ul>
             </Paragraph>
@@ -297,7 +297,7 @@ Claude Code 客户端`}
           <Panel header="Q: 如何检查代理服务是否正常运行？" key="q1">
             <Paragraph>
               <ul>
-                <li>在 DongCC 仪表盘查看服务状态</li>
+                <li>在 OpenCC 仪表盘查看服务状态</li>
                 <li>访问 <Text code>http://localhost:8787/health</Text></li>
                 <li>预期返回：<Text code>{'{"status":"ok","running":true}'}</Text></li>
               </ul>
@@ -309,7 +309,7 @@ Claude Code 客户端`}
               <ul>
                 <li>检查端口占用：<Text code>lsof -i :8787</Text></li>
                 <li>关闭占用进程：<Text code>kill -9 {'<PID>'}</Text></li>
-                <li>或在 DongCC 配置页面修改端口</li>
+                <li>或在 OpenCC 配置页面修改端口</li>
               </ul>
             </Paragraph>
           </Panel>
@@ -319,7 +319,7 @@ Claude Code 客户端`}
               <ul>
                 <li>配置文件路径：<Text code>~/.claude/settings.json</Text></li>
                 <li>查看命令：<Text code>cat ~/.claude/settings.json</Text></li>
-                <li>DongCC 会自动配置此文件</li>
+                <li>OpenCC 会自动配置此文件</li>
               </ul>
             </Paragraph>
           </Panel>

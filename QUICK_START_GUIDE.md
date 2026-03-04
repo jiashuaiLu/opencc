@@ -1,11 +1,11 @@
-# DongCC 快速启动指南
+# OpenCC 快速启动指南
 
 ## 🚀 5分钟快速上手
 
 ### 第一步：安装依赖（约2分钟）
 
 ```bash
-cd dongcc
+cd opencc
 npm install
 ```
 

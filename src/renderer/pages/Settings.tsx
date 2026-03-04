@@ -121,11 +121,11 @@ export default function Settings() {
 
       <Card title="关于" style={{ marginTop: 16 }}>
         <p>
-          <strong>DongCC</strong> v1.0.0
+          <strong>OpenCC</strong> v1.0.0
         </p>
         <p>Claude Code 代理服务管理工具</p>
         <p style={{ color: '#8c8c8c', marginTop: 8, fontSize: 12 }}>
-          © 2026 DongCC Team. All rights reserved.
+          © 2026 OpenCC Team. All rights reserved.
         </p>
       </Card>
     </div>
