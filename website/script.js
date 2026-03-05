@@ -72,11 +72,16 @@ let countUpInstance = null;
 
 function updateDownloadCount(count) {
     const countElement = document.getElementById('downloadCount');
+    console.log('updateDownloadCount called with count:', count);
+    console.log('countElement:', countElement);
+    
     if (countElement) {
         const numCount = Number(count);
+        console.log('numCount:', numCount);
         
         // 如果是第一次加载，直接显示当前值，不使用动画
         if (!countUpInstance) {
+            console.log('First load, setting text directly');
             countElement.textContent = numCount.toLocaleString();
             lastCount = numCount;
             
@@ -88,13 +93,17 @@ function updateDownloadCount(count) {
                 separator: ',',
                 decimal: '.'
             });
+            console.log('CountUp instance created:', countUpInstance);
         } else {
             // 如果数量发生变化，使用动画更新
             if (numCount !== lastCount) {
+                console.log('Updating count from', lastCount, 'to', numCount);
                 countUpInstance.update(numCount);
                 lastCount = numCount;
             }
         }
+    } else {
+        console.error('countElement not found!');
     }
 }
 
