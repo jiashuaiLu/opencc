@@ -56,10 +56,7 @@ async function fetchDownloadCount() {
     try {
         const response = await fetch(`${API_BASE_URL}/get?key=${DOWNLOAD_COUNT_KEY}`);
         const data = await response.json();
-        console.log('API Response:', data);
-        console.log('data.data:', data.data, 'type:', typeof data.data);
         const count = Number(data.data) || 0;
-        console.log('Converted count:', count, 'type:', typeof count);
         updateDownloadCount(count);
     } catch (error) {
         console.error('Failed to fetch download count:', error);
@@ -68,59 +65,13 @@ async function fetchDownloadCount() {
 
 // 更新下载计数显示
 let lastCount = 0;
-let countUpInstance = null;
 
 function updateDownloadCount(count) {
     const countElement = document.getElementById('downloadCount');
-    console.log('updateDownloadCount called with count:', count);
-    console.log('countElement:', countElement);
-    
     if (countElement) {
         const numCount = Number(count);
-        console.log('numCount:', numCount);
-        
-        // 如果是第一次加载，直接显示当前值，不使用动画
-        if (!countUpInstance) {
-            console.log('First load, setting text directly');
-            countElement.textContent = numCount.toLocaleString();
-            lastCount = numCount;
-            
-            // 创建 CountUp 实例，用于后续更新
-            // 使用 startVal 参数设置初始值，避免重置为 0
-            countUpInstance = new countUp.CountUp(countElement, numCount, {
-                startVal: numCount,  // 设置初始值为当前值
-                duration: 0.8,
-                useEasing: true,
-                useGrouping: true,
-                separator: ',',
-                decimal: '.'
-            });
-            console.log('CountUp instance created:', countUpInstance);
-        } else {
-            // 如果数量发生变化，使用动画更新
-            if (numCount !== lastCount) {
-                console.log('Updating count from', lastCount, 'to', numCount);
-                
-                // 创建一个新的 CountUp 实例，从 lastCount 到 numCount
-                countUpInstance = new countUp.CountUp(countElement, numCount, {
-                    startVal: lastCount,  // 从上一个值开始
-                    duration: 0.8,
-                    useEasing: true,
-                    useGrouping: true,
-                    separator: ',',
-                    decimal: '.'
-                });
-                
-                // 启动动画
-                if (!countUpInstance.error) {
-                    countUpInstance.start();
-                }
-                
-                lastCount = numCount;
-            }
-        }
-    } else {
-        console.error('countElement not found!');
+        countElement.textContent = numCount.toLocaleString();
+        lastCount = numCount;
     }
 }
 
@@ -130,7 +81,6 @@ async function incrementDownloadCount() {
         // 先获取当前计数
         const currentCount = lastCount || 0;
         const newCount = Number(currentCount) + 1;
-        console.log('Incrementing count from', currentCount, 'to', newCount);
         
         // 使用 POST 方法调用 /set 接口，确保传递 number 类型
         const response = await fetch(`${API_BASE_URL}/set?key=${DOWNLOAD_COUNT_KEY}&value=${newCount}`, {
@@ -140,9 +90,7 @@ async function incrementDownloadCount() {
             }
         });
         const data = await response.json();
-        console.log('Set API response:', data);
         const count = Number(data.data) || newCount;
-        console.log('Updating display with count:', count);
         updateDownloadCount(count);
     } catch (error) {
         console.error('Failed to increment download count:', error);
