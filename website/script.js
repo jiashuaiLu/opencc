@@ -56,7 +56,10 @@ async function fetchDownloadCount() {
     try {
         const response = await fetch(`${API_BASE_URL}/get?key=${DOWNLOAD_COUNT_KEY}`);
         const data = await response.json();
+        console.log('API Response:', data);
+        console.log('data.data:', data.data, 'type:', typeof data.data);
         const count = Number(data.data) || 0;
+        console.log('Converted count:', count, 'type:', typeof count);
         updateDownloadCount(count);
     } catch (error) {
         console.error('Failed to fetch download count:', error);
