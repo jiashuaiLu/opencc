@@ -103,6 +103,8 @@ body {
 .nav-links a svg {
     transition: transform 0.3s;
     display: block;
+    position: relative;
+    top: 2px;
 }
 
 .nav-links a:hover svg {
