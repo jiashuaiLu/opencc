@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchDownloadCount();
     
     // 每秒获取下载计数
-    setInterval(fetchDownloadCount, 1000);
+    setInterval(fetchDownloadCount, 3000);
     
     // 启动轮播图自动播放
     startAutoPlay();
