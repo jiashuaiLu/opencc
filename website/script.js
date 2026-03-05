@@ -72,8 +72,12 @@ function updateDownloadCount(count) {
     if (countElement) {
         const numCount = Number(count);
         
-        // 如果是第一次或者 CountUp 实例不存在，创建新实例
+        // 如果是第一次加载，直接显示当前值，不使用动画
         if (!countUpInstance) {
+            countElement.textContent = numCount.toLocaleString();
+            lastCount = numCount;
+            
+            // 创建 CountUp 实例，用于后续更新
             countUpInstance = new countUp.CountUp(countElement, numCount, {
                 duration: 0.8,
                 useEasing: true,
@@ -81,21 +85,13 @@ function updateDownloadCount(count) {
                 separator: ',',
                 decimal: '.'
             });
-            
-            if (!countUpInstance.error) {
-                countUpInstance.start();
-            } else {
-                console.error(countUpInstance.error);
-                countElement.textContent = numCount.toLocaleString();
-            }
         } else {
-            // 如果数量发生变化，更新目标值
+            // 如果数量发生变化，使用动画更新
             if (numCount !== lastCount) {
                 countUpInstance.update(numCount);
+                lastCount = numCount;
             }
         }
-        
-        lastCount = numCount;
     }
 }
 
