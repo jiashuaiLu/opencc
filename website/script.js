@@ -100,6 +100,9 @@ function updateDownloadCount(count) {
             // 如果数量发生变化，使用动画更新
             if (numCount !== lastCount) {
                 console.log('Updating count from', lastCount, 'to', numCount);
+                // 先设置当前值，避免从 0 开始
+                countElement.textContent = lastCount.toLocaleString();
+                // 然后更新到新值
                 countUpInstance.update(numCount);
                 lastCount = numCount;
             }
@@ -115,6 +118,7 @@ async function incrementDownloadCount() {
         // 先获取当前计数
         const currentCount = lastCount || 0;
         const newCount = Number(currentCount) + 1;
+        console.log('Incrementing count from', currentCount, 'to', newCount);
         
         // 使用 POST 方法调用 /set 接口，确保传递 number 类型
         const response = await fetch(`${API_BASE_URL}/set?key=${DOWNLOAD_COUNT_KEY}&value=${newCount}`, {
@@ -124,7 +128,9 @@ async function incrementDownloadCount() {
             }
         });
         const data = await response.json();
+        console.log('Set API response:', data);
         const count = Number(data.data) || newCount;
+        console.log('Updating display with count:', count);
         updateDownloadCount(count);
     } catch (error) {
         console.error('Failed to increment download count:', error);
