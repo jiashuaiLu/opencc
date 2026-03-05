@@ -26,40 +26,42 @@
 
     <!-- Hero 区域 -->
     <section class="hero">
-        <!-- 轮播图背景 -->
-        <div class="carousel-background">
-            <div class="carousel-slides">
-                <div class="carousel-slide active" style="background-image: url('claude效果.png')"></div>
-                <div class="carousel-slide" style="background-image: url('配置管理.png')"></div>
-                <div class="carousel-slide" style="background-image: url('运行日志.png')"></div>
-                <div class="carousel-slide" style="background-image: url('对话历史.png')"></div>
-                <div class="carousel-slide" style="background-image: url('度量看板.png')"></div>
-            </div>
-            <!-- 轮播控制 -->
-            <button class="carousel-control carousel-prev" onclick="changeSlide(-1)">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="15 18 9 12 15 6"></polyline>
-                </svg>
-            </button>
-            <button class="carousel-control carousel-next" onclick="changeSlide(1)">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="9 18 15 12 9 6"></polyline>
-                </svg>
-            </button>
-            <!-- 轮播指示器 -->
-            <div class="carousel-indicators">
-                <button class="carousel-indicator active" onclick="goToSlide(0)"></button>
-                <button class="carousel-indicator" onclick="goToSlide(1)"></button>
-                <button class="carousel-indicator" onclick="goToSlide(2)"></button>
-                <button class="carousel-indicator" onclick="goToSlide(3)"></button>
-                <button class="carousel-indicator" onclick="goToSlide(4)"></button>
-            </div>
-        </div>
-        
-        <!-- Hero 内容 -->
-        <div class="hero-overlay"></div>
         <div class="container">
-            <div class="hero-content">
+            <div class="hero-layout">
+                <!-- 左侧：轮播图 -->
+                <div class="hero-carousel">
+                    <div class="carousel-container">
+                        <div class="carousel-slides">
+                            <div class="carousel-slide active" style="background-image: url('claude效果.png')"></div>
+                            <div class="carousel-slide" style="background-image: url('配置管理.png')"></div>
+                            <div class="carousel-slide" style="background-image: url('运行日志.png')"></div>
+                            <div class="carousel-slide" style="background-image: url('对话历史.png')"></div>
+                            <div class="carousel-slide" style="background-image: url('度量看板.png')"></div>
+                        </div>
+                        <!-- 轮播控制 -->
+                        <button class="carousel-control carousel-prev" onclick="changeSlide(-1)">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="15 18 9 12 15 6"></polyline>
+                            </svg>
+                        </button>
+                        <button class="carousel-control carousel-next" onclick="changeSlide(1)">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </button>
+                        <!-- 轮播指示器 -->
+                        <div class="carousel-indicators">
+                            <button class="carousel-indicator active" onclick="goToSlide(0)"></button>
+                            <button class="carousel-indicator" onclick="goToSlide(1)"></button>
+                            <button class="carousel-indicator" onclick="goToSlide(2)"></button>
+                            <button class="carousel-indicator" onclick="goToSlide(3)"></button>
+                            <button class="carousel-indicator" onclick="goToSlide(4)"></button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 右侧：文本内容 -->
+                <div class="hero-content">
                 <img src="logo.png" alt="DongCC Logo" class="hero-logo">
                 <h1 class="hero-title">DongCC</h1>
                 <p class="hero-subtitle">Claude Code 本地代理服务管理工具</p>
@@ -75,6 +77,13 @@
                         </svg>
                         下载最新版本
                     </a>
+                    <div class="download-counter-inline">
+                        <span class="counter-icon">📥</span>
+                        <span class="counter-label">累计下载：</span>
+                        <span class="counter-value" id="downloadCount">0</span>
+                    </div>
+                </div>
+                <div class="hero-secondary-buttons">
                     <a href="#features" class="btn btn-secondary btn-large">了解更多</a>
                 </div>
                 <div class="hero-meta">
@@ -82,14 +91,10 @@
                     <span>🍎 macOS (Apple Silicon)</span>
                     <span>📅 2026-03-05</span>
                 </div>
-                <div class="download-counter">
-                    <span class="counter-icon">📥</span>
-                    <span class="counter-label">累计下载：</span>
-                    <span class="counter-value" id="downloadCount">0</span>
-                </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
     <!-- 功能特性 -->
     <section id="features" class="features">

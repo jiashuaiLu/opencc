@@ -100,18 +100,31 @@ body {
     position: relative;
     padding: 140px 0 80px;
     background: linear-gradient(135deg, #f0f5ff 0%, #ffffff 100%);
-    text-align: center;
     overflow: hidden;
 }
 
-/* 轮播图背景 */
-.carousel-background {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 0;
+/* Hero 布局 */
+.hero-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* 左侧轮播图 */
+.hero-carousel {
+    position: relative;
+}
+
+.carousel-container {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
 .carousel-slides {
@@ -163,17 +176,17 @@ body {
 }
 
 .carousel-prev {
-    left: 24px;
+    left: 16px;
 }
 
 .carousel-next {
-    right: 24px;
+    right: 16px;
 }
 
 /* 轮播指示器 */
 .carousel-indicators {
     position: absolute;
-    bottom: 24px;
+    bottom: 16px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -201,99 +214,89 @@ body {
     transform: scale(1.2);
 }
 
-/* Hero 遮罩层 */
-.hero-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(240, 245, 255, 0.85) 0%, rgba(255, 255, 255, 0.85) 100%);
-    z-index: 1;
-}
-
+/* 右侧内容 */
 .hero-content {
-    max-width: 800px;
-    margin: 0 auto;
-    position: relative;
-    z-index: 2;
+    text-align: left;
 }
 
 .hero-logo {
-    width: 120px;
-    height: 120px;
-    border-radius: 24px;
-    margin-bottom: 24px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    width: 80px;
+    height: 80px;
+    border-radius: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
 .hero-title {
-    font-size: 64px;
+    font-size: 48px;
     font-weight: 700;
     color: var(--primary-color);
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     letter-spacing: -1px;
 }
 
 .hero-subtitle {
-    font-size: 28px;
+    font-size: 20px;
     color: var(--text-primary);
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     font-weight: 500;
 }
 
 .hero-description {
-    font-size: 18px;
+    font-size: 16px;
     color: var(--text-secondary);
-    margin-bottom: 40px;
+    margin-bottom: 32px;
+    line-height: 1.7;
 }
 
 .hero-buttons {
     display: flex;
     gap: 16px;
-    justify-content: center;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.hero-secondary-buttons {
     margin-bottom: 24px;
 }
 
 .hero-meta {
     display: flex;
-    gap: 24px;
-    justify-content: center;
+    gap: 16px;
     color: var(--text-tertiary);
     font-size: 14px;
-    margin-bottom: 24px;
+    margin-bottom: 0;
 }
 
-/* 下载计数 */
-.download-counter {
+/* 下载计数内联样式 */
+.download-counter-inline {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    padding: 12px 24px;
-    border-radius: 50px;
-    font-size: 16px;
+    padding: 8px 16px;
+    border-radius: 24px;
+    font-size: 14px;
     font-weight: 500;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-    margin-top: 16px;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
-.counter-icon {
-    font-size: 20px;
+.download-counter-inline .counter-icon {
+    font-size: 16px;
 }
 
-.counter-label {
+.download-counter-inline .counter-label {
     opacity: 0.9;
 }
 
-.counter-value {
-    font-size: 20px;
+.download-counter-inline .counter-value {
+    font-size: 16px;
     font-weight: 700;
     background: rgba(255, 255, 255, 0.2);
-    padding: 4px 16px;
-    border-radius: 20px;
-    min-width: 60px;
+    padding: 2px 12px;
+    border-radius: 12px;
+    min-width: 50px;
 }
 
 /* 按钮样式 */
@@ -611,12 +614,17 @@ body {
         display: none;
     }
 
-    .hero-title {
-        font-size: 48px;
+    .hero-layout {
+        grid-template-columns: 1fr;
+        gap: 32px;
     }
 
-    .hero-subtitle {
-        font-size: 24px;
+    .carousel-container {
+        height: 400px;
+    }
+
+    .hero-content {
+        text-align: center;
     }
 
     .hero-buttons {
@@ -627,6 +635,15 @@ body {
     .hero-meta {
         flex-direction: column;
         gap: 8px;
+        align-items: center;
+    }
+
+    .hero-title {
+        font-size: 36px;
+    }
+
+    .hero-subtitle {
+        font-size: 18px;
     }
 
     .section-title {
