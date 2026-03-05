@@ -123,7 +123,7 @@ export default function Settings() {
         <p>
           <strong>DongCC</strong> v1.0.0
         </p>
-        <p>Claude Code 代理服务管理工具</p>
+        <p>Claude Code 本地代理服务管理工具</p>
         <p style={{ color: '#8c8c8c', marginTop: 8, fontSize: 12 }}>
           © 2026 DongCC Team. All rights reserved.
         </p>

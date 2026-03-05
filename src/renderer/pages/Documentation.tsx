@@ -21,7 +21,7 @@ export default function Documentation() {
         <RocketOutlined /> DongCC 使用文档
       </Title>
       <Paragraph type="secondary">
-        DongCC 是一个功能强大的 Claude Code 代理服务管理工具，帮助您轻松管理和监控代理服务。
+        DongCC 是一个功能强大的 Claude Code 本地代理服务管理工具，让你可以用内部模型，几乎满血体验Cloude Code。
       </Paragraph>
 
       <Divider />
@@ -344,7 +344,7 @@ Claude Code 客户端`}
                     <li>API 端点: http://ai-api.jdcloud.com/v1</li>
                   </ul>
                 </li>
-                <li>优势：国内访问速度快，稳定可靠</li>
+                <li>优势：公司内网访问，稳定可靠安全</li>
               </ul>
             </Paragraph>
           </Panel>

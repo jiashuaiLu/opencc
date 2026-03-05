@@ -6,6 +6,7 @@ import {
   HistoryOutlined,
   ToolOutlined,
   BookOutlined,
+  InfoCircleOutlined,
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logo from '../assets/logo.png';
@@ -23,6 +24,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { key: '/history', icon: <HistoryOutlined />, label: '对话历史' },
     { key: '/settings', icon: <ToolOutlined />, label: '系统设置' },
     { key: '/documentation', icon: <BookOutlined />, label: '使用文档' },
+    { key: '/info', icon: <InfoCircleOutlined />, label: '应用资讯' },
   ];
 
   return (
