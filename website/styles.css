@@ -487,9 +487,8 @@ body {
 .download-requirements {
     background: white;
     padding: 24px;
-    border-radius: 8px;
-    max-width: 600px;
-    margin: 0 auto;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
 }
 
 .download-requirements h3 {
@@ -500,6 +499,84 @@ body {
 
 .download-requirements ul {
     list-style: none;
+}
+
+.download-requirements li {
+    padding: 6px 0;
+    color: var(--text-secondary);
+}
+
+.download-requirements li::before {
+    content: "•";
+    color: var(--primary-color);
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+/* 下载信息网格布局 */
+.download-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* 安装教程样式 */
+.download-install-guide {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+}
+
+.download-install-guide h3 {
+    font-size: 18px;
+    margin-bottom: 16px;
+    color: var(--text-primary);
+}
+
+.install-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.install-step {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    font-size: 14px;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.step-content {
+    flex: 1;
+}
+
+.step-content p {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.step-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
 }
 
 .download-requirements li {
@@ -677,6 +754,10 @@ body {
     }
 
     .download-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .download-info-grid {
         grid-template-columns: 1fr;
     }
 }
