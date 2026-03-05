@@ -1,4 +1,4 @@
-import { Card, Form, Switch, Button, message, Divider, Space, Popconfirm } from 'antd';
+import { Card, Form, Switch, Button, message, Divider, Space, Popconfirm, Select, InputNumber } from 'antd';
 import { useState, useEffect } from 'react';
 
 export default function Settings() {
@@ -131,5 +131,3 @@ export default function Settings() {
     </div>
   );
 }
-
-import { Select, InputNumber } from 'antd';

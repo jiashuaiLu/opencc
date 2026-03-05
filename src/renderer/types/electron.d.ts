@@ -35,6 +35,8 @@ declare global {
       // 设置相关
       getSettings: () => Promise<Settings>;
       saveSettings: (settings: Settings) => Promise<{ success: boolean }>;
+      resetSettings: () => Promise<{ success: boolean }>;
+      clearCache: () => Promise<{ success: boolean }>;
     };
   }
 }

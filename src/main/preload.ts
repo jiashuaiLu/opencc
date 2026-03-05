@@ -26,4 +26,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // 设置相关
   getSettings: () => ipcRenderer.invoke('settings:get'),
   saveSettings: (settings: any) => ipcRenderer.invoke('settings:save', settings),
+  resetSettings: () => ipcRenderer.invoke('settings:reset'),
+  clearCache: () => ipcRenderer.invoke('cache:clear'),
 });

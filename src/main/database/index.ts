@@ -278,4 +278,21 @@ export class DatabaseManager {
     this.data.settings = { ...this.data.settings, ...settings };
     await this.write();
   }
+
+  async resetSettings(): Promise<void> {
+    this.data.settings = {
+      autoStart: false,
+      minimizeToTray: true,
+      showNotification: true,
+      logLevel: 'info',
+      logRetentionDays: 7,
+    };
+    await this.write();
+  }
+
+  async clearCache(): Promise<void> {
+    this.data.logs = [];
+    this.data.requests = [];
+    await this.write();
+  }
 }

@@ -189,5 +189,27 @@ export function setupIPC(
     }
   });
 
+  ipcMain.handle('settings:reset', async () => {
+    try {
+      await database.resetSettings();
+      logger.info('Settings reset to default');
+      return { success: true };
+    } catch (error) {
+      logger.error('Failed to reset settings', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('cache:clear', async () => {
+    try {
+      await database.clearCache();
+      logger.info('Cache cleared');
+      return { success: true };
+    } catch (error) {
+      logger.error('Failed to clear cache', error);
+      throw error;
+    }
+  });
+
   logger.info('IPC handlers setup complete');
 }
