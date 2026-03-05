@@ -89,10 +89,21 @@ body {
     color: var(--text-secondary);
     font-weight: 500;
     transition: color 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .nav-links a:hover {
     color: var(--primary-color);
+}
+
+.nav-links a svg {
+    transition: transform 0.3s;
+}
+
+.nav-links a:hover svg {
+    transform: scale(1.1);
 }
 
 /* Hero 区域 */
