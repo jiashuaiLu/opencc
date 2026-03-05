@@ -65,23 +65,37 @@ async function fetchDownloadCount() {
 
 // 更新下载计数显示
 let lastCount = 0;
+let countUpInstance = null;
+
 function updateDownloadCount(count) {
     const countElement = document.getElementById('downloadCount');
     if (countElement) {
-        const formattedCount = count.toLocaleString();
+        const numCount = Number(count);
         
-        // 如果数量发生变化，添加动画效果
-        if (count !== lastCount && lastCount !== 0) {
-            countElement.classList.add('count-changed');
+        // 如果是第一次或者 CountUp 实例不存在，创建新实例
+        if (!countUpInstance) {
+            countUpInstance = new countUp.CountUp(countElement, numCount, {
+                duration: 0.8,
+                useEasing: true,
+                useGrouping: true,
+                separator: ',',
+                decimal: '.'
+            });
             
-            // 动画结束后移除类
-            setTimeout(() => {
-                countElement.classList.remove('count-changed');
-            }, 600);
+            if (!countUpInstance.error) {
+                countUpInstance.start();
+            } else {
+                console.error(countUpInstance.error);
+                countElement.textContent = numCount.toLocaleString();
+            }
+        } else {
+            // 如果数量发生变化，更新目标值
+            if (numCount !== lastCount) {
+                countUpInstance.update(numCount);
+            }
         }
         
-        countElement.textContent = formattedCount;
-        lastCount = count;
+        lastCount = numCount;
     }
 }
 

@@ -319,12 +319,6 @@ body {
     padding: 2px 12px;
     border-radius: 12px;
     min-width: 50px;
-    transition: transform 0.3s ease, background-color 0.3s ease;
-}
-
-.download-counter-inline .counter-value.count-changed {
-    transform: scale(1.2);
-    background: rgba(255, 255, 255, 0.4);
 }
 
 /* 按钮样式 */
