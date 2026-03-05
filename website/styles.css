@@ -513,6 +513,63 @@ body {
     margin-right: 8px;
 }
 
+/* 安装教程区域 */
+.install-guide {
+    padding: 80px 0;
+    background: var(--background);
+}
+
+.install-steps-large {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.install-step-card {
+    background: white;
+    padding: 32px 24px;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    text-align: center;
+    flex: 1;
+    min-width: 200px;
+    max-width: 280px;
+    transition: all 0.3s;
+}
+
+.install-step-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-large);
+}
+
+.step-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.step-info h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.step-info p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.install-step-arrow {
+    font-size: 32px;
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
 /* 下载信息网格布局 */
 .download-info-grid {
     display: grid;
@@ -759,6 +816,18 @@ body {
 
     .download-info-grid {
         grid-template-columns: 1fr;
+    }
+
+    .install-steps-large {
+        flex-direction: column;
+    }
+
+    .install-step-arrow {
+        transform: rotate(90deg);
+    }
+
+    .install-step-card {
+        max-width: 100%;
     }
 }
 
