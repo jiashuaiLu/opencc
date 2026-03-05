@@ -515,15 +515,15 @@ body {
 
 /* 安装教程区域 */
 .install-guide {
-    padding: 80px 0;
-    background: var(--background);
+    padding: 100px 0;
+    background: linear-gradient(135deg, #f0f5ff 0%, #ffffff 100%);
 }
 
 .install-steps-large {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 16px;
+    gap: 24px;
     flex-wrap: wrap;
     max-width: 1400px;
     margin: 0 auto;
@@ -531,43 +531,79 @@ body {
 
 .install-step-card {
     background: white;
-    padding: 32px 24px;
-    border-radius: 16px;
-    box-shadow: var(--shadow);
+    padding: 40px 32px;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     text-align: center;
     flex: 1;
-    min-width: 200px;
-    max-width: 280px;
-    transition: all 0.3s;
+    min-width: 220px;
+    max-width: 300px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.install-step-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    opacity: 0;
+    transition: opacity 0.3s;
 }
 
 .install-step-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-large);
+    transform: translateY(-8px);
+    box-shadow: 0 12px 40px rgba(24, 144, 255, 0.15);
+}
+
+.install-step-card:hover::before {
+    opacity: 1;
 }
 
 .step-icon {
-    font-size: 48px;
-    margin-bottom: 16px;
+    font-size: 56px;
+    margin-bottom: 20px;
+    display: block;
+    animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
 }
 
 .step-info h3 {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 8px;
+    margin-bottom: 12px;
 }
 
 .step-info p {
     font-size: 14px;
     color: var(--text-secondary);
-    line-height: 1.6;
+    line-height: 1.7;
 }
 
 .install-step-arrow {
-    font-size: 32px;
+    font-size: 36px;
     color: var(--primary-color);
     font-weight: bold;
+    opacity: 0.6;
+    transition: all 0.3s;
+}
+
+.install-step-arrow:hover {
+    opacity: 1;
+    transform: scale(1.2);
 }
 
 /* 下载信息网格布局 */
@@ -650,65 +686,90 @@ body {
 
 /* 版本历史 */
 .history {
-    padding: 80px 0;
-    background: var(--background);
+    padding: 100px 0;
+    background: var(--background-secondary);
 }
 
 .timeline {
-    max-width: 800px;
+    max-width: 900px;
     margin: 0 auto;
 }
 
 .timeline-item {
     position: relative;
-    padding-left: 48px;
-    padding-bottom: 48px;
-    border-left: 2px solid var(--border-color);
+    padding-left: 60px;
+    padding-bottom: 60px;
+    border-left: 3px solid var(--border-color);
 }
 
 .timeline-item:last-child {
-    border-left: 2px solid transparent;
+    border-left: 3px solid transparent;
 }
 
 .timeline-badge {
     position: absolute;
-    left: -12px;
+    left: -16px;
     top: 0;
-    background: var(--primary-color);
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
     color: white;
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 12px;
+    padding: 6px 16px;
+    border-radius: 16px;
+    font-size: 13px;
     font-weight: 600;
+    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
 }
 
 .timeline-badge.current {
-    background: var(--secondary-color);
+    background: linear-gradient(135deg, var(--secondary-color), #389e0d);
+    box-shadow: 0 2px 8px rgba(82, 196, 26, 0.3);
 }
 
 .timeline-content {
     background: white;
-    padding: 24px;
-    border-radius: 12px;
-    box-shadow: var(--shadow);
+    padding: 32px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s;
+}
+
+.timeline-content:hover {
+    transform: translateX(8px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
 .timeline-content h3 {
-    font-size: 24px;
-    font-weight: 600;
+    font-size: 28px;
+    font-weight: 700;
     margin-bottom: 8px;
     color: var(--text-primary);
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .timeline-date {
     color: var(--text-tertiary);
-    font-size: 14px;
-    margin-bottom: 16px;
+    font-size: 15px;
+    margin-bottom: 20px;
+    font-weight: 500;
 }
 
 .timeline-changes {
     list-style: none;
-    margin-bottom: 16px;
+    margin-bottom: 24px;
+}
+
+.timeline-changes li {
+    padding: 10px 0;
+    color: var(--text-secondary);
+    font-size: 15px;
+    line-height: 1.6;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.timeline-changes li:last-child {
+    border-bottom: none;
 }
 
 .timeline-changes li {
