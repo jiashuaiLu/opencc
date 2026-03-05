@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DongCC - Claude Code 本地代理服务管理工具</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="https://claude.ai/favicon.ico">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>DongCC</h1>
+                <span class="version-badge">v1.0.0</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#features">功能特性</a></li>
+                <li><a href="#download">下载</a></li>
+                <li><a href="#history">版本历史</a></li>
+                <li><a href="https://coding.jd.com/atop-qa/dongcc" target="_blank">GitHub</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero 区域 -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">DongCC</h1>
+                <p class="hero-subtitle">Claude Code 本地代理服务管理工具</p>
+                <p class="hero-description">
+                    简单、高效、安全的 Claude Code 代理服务管理解决方案
+                </p>
+                <div class="hero-buttons">
+                    <a href="https://joy-ai-test.s3-internal.cn-north-1.jdcloud-oss.com/DongCC-1.0.0-arm64.dmg" class="btn btn-primary btn-large">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        下载最新版本
+                    </a>
+                    <a href="#features" class="btn btn-secondary btn-large">了解更多</a>
+                </div>
+                <div class="hero-meta">
+                    <span>📦 114 MB</span>
+                    <span>🍎 macOS (Apple Silicon)</span>
+                    <span>📅 2026-03-05</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 功能特性 -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2 class="section-title">功能特性</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🚀</div>
+                    <h3>代理服务管理</h3>
+                    <p>一键启动/停止代理服务，支持多种 API 服务提供商，包括 JoyBuilder、OpenAI、DeepSeek 等</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚙️</div>
+                    <h3>配置管理</h3>
+                    <p>图形化配置界面，支持多个配置方案，配置导入/导出，轻松管理不同环境</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>监控统计</h3>
+                    <p>Token 消耗统计，请求耗时分析，成功率统计，全面掌握服务运行状态</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📝</div>
+                    <h3>日志系统</h3>
+                    <p>实时运行日志，多级别日志过滤，日志搜索和导出，快速定位问题</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💬</div>
+                    <h3>对话历史</h3>
+                    <p>查看和管理所有对话历史，支持搜索和导出，方便回溯和分析</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>安全可靠</h3>
+                    <p>本地运行，数据安全可控，支持多种认证方式，保护您的 API Key</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 下载区域 -->
+    <section id="download" class="download">
+        <div class="container">
+            <h2 class="section-title">下载 DongCC</h2>
+            <div class="download-cards">
+                <div class="download-card featured">
+                    <div class="download-badge">最新版本</div>
+                    <h3>macOS (Apple Silicon)</h3>
+                    <p class="download-version">v1.0.0</p>
+                    <ul class="download-details">
+                        <li>✅ 支持 M1/M2/M3 芯片</li>
+                        <li>✅ 原生 ARM64 性能</li>
+                        <li>✅ 文件大小: 114 MB</li>
+                        <li>✅ 发布日期: 2026-03-05</li>
+                    </ul>
+                    <a href="https://joy-ai-test.s3-internal.cn-north-1.jdcloud-oss.com/DongCC-1.0.0-arm64.dmg" class="btn btn-primary btn-block">
+                        下载 DMG 安装包
+                    </a>
+                </div>
+            </div>
+            <div class="download-requirements">
+                <h3>系统要求</h3>
+                <ul>
+                    <li>macOS 10.15 (Catalina) 或更高版本</li>
+                    <li>Node.js v16.0.0 或更高版本</li>
+                    <li>Claude Code CLI 已安装</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- 版本历史 -->
+    <section id="history" class="history">
+        <div class="container">
+            <h2 class="section-title">版本历史</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-badge current">当前</div>
+                    <div class="timeline-content">
+                        <h3>v1.0.0</h3>
+                        <p class="timeline-date">2026-03-05</p>
+                        <ul class="timeline-changes">
+                            <li>🎉 首次发布</li>
+                            <li>✨ 代理服务管理功能</li>
+                            <li>✨ 配置管理功能</li>
+                            <li>✨ 日志系统</li>
+                            <li>✨ 监控统计</li>
+                            <li>✨ 对话历史管理</li>
+                            <li>✨ 使用文档</li>
+                            <li>✨ 应用资讯页面</li>
+                        </ul>
+                        <a href="https://joy-ai-test.s3-internal.cn-north-1.jdcloud-oss.com/DongCC-1.0.0-arm64.dmg" class="btn btn-small">下载此版本</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>DongCC</h3>
+                    <p>Claude Code 本地代理服务管理工具</p>
+                    <p class="footer-copyright">© 2026 DongCC Team. All rights reserved.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>快速链接</h3>
+                    <ul>
+                        <li><a href="#features">功能特性</a></li>
+                        <li><a href="#download">下载</a></li>
+                        <li><a href="#history">版本历史</a></li>
+                        <li><a href="https://coding.jd.com/atop-qa/dongcc" target="_blank">源代码</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>联系我们</h3>
+                    <ul>
+                        <li>ERP: lujiashuai.1</li>
+                        <li>邮箱: lujiashuai.1@jd.com</li>
+                        <li>部门: 京东科技 - 测试开发部</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
