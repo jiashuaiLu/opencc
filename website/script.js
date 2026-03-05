@@ -1,5 +1,5 @@
 // API 配置
-const API_BASE_URL = 'https://joy-ai-test/cache';
+const API_BASE_URL = 'https://joy-ai-test.jd.com/cache';
 const DOWNLOAD_COUNT_KEY = 'dongcc_download_count';
 
 // 轮播图配置
@@ -64,10 +64,24 @@ async function fetchDownloadCount() {
 }
 
 // 更新下载计数显示
+let lastCount = 0;
 function updateDownloadCount(count) {
     const countElement = document.getElementById('downloadCount');
     if (countElement) {
-        countElement.textContent = count.toLocaleString();
+        const formattedCount = count.toLocaleString();
+        
+        // 如果数量发生变化，添加动画效果
+        if (count !== lastCount && lastCount !== 0) {
+            countElement.classList.add('count-changed');
+            
+            // 动画结束后移除类
+            setTimeout(() => {
+                countElement.classList.remove('count-changed');
+            }, 600);
+        }
+        
+        countElement.textContent = formattedCount;
+        lastCount = count;
     }
 }
 
