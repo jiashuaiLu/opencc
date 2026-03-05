@@ -1,3 +1,41 @@
+// API 配置
+const API_BASE_URL = 'https://joy-ai-test/cache';
+const DOWNLOAD_COUNT_KEY = 'dongcc_download_count';
+
+// 获取下载计数
+async function fetchDownloadCount() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/get?key=${DOWNLOAD_COUNT_KEY}`);
+        const data = await response.json();
+        const count = data.data || 0;
+        updateDownloadCount(count);
+    } catch (error) {
+        console.error('Failed to fetch download count:', error);
+    }
+}
+
+// 更新下载计数显示
+function updateDownloadCount(count) {
+    const countElement = document.getElementById('downloadCount');
+    if (countElement) {
+        countElement.textContent = count.toLocaleString();
+    }
+}
+
+// 递增下载计数
+async function incrementDownloadCount() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/incr?key=${DOWNLOAD_COUNT_KEY}`, {
+            method: 'POST'
+        });
+        const data = await response.json();
+        const count = data.data || 0;
+        updateDownloadCount(count);
+    } catch (error) {
+        console.error('Failed to increment download count:', error);
+    }
+}
+
 // 平滑滚动到锚点
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
@@ -33,12 +71,20 @@ document.querySelectorAll('a[href$=".dmg"]').forEach(link => {
     link.addEventListener('click', function() {
         const version = this.textContent.includes('v1.0.0') ? 'v1.0.0' : 'latest';
         console.log(`Download clicked: ${version}`);
-        // 这里可以添加统计代码
+        
+        // 递增下载计数
+        incrementDownloadCount();
     });
 });
 
 // 页面加载完成后的动画
 document.addEventListener('DOMContentLoaded', () => {
+    // 初始获取下载计数
+    fetchDownloadCount();
+    
+    // 每秒获取下载计数
+    setInterval(fetchDownloadCount, 1000);
+    
     // 淡入动画
     document.body.style.opacity = '0';
     document.body.style.transition = 'opacity 0.5s';

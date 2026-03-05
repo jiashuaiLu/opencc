@@ -25,6 +25,36 @@ body {
     background-color: var(--background);
 }
 
+/* 下载计数横幅 */
+.download-counter-banner {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 12px 0;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 500;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1001;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.counter-label {
+    margin-right: 8px;
+}
+
+.counter-value {
+    font-size: 20px;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 4px 16px;
+    border-radius: 20px;
+    min-width: 60px;
+    display: inline-block;
+}
+
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -34,7 +64,7 @@ body {
 /* 导航栏 */
 .navbar {
     position: fixed;
-    top: 0;
+    top: 48px;
     left: 0;
     right: 0;
     background: rgba(255, 255, 255, 0.95);
@@ -97,7 +127,7 @@ body {
 
 /* Hero 区域 */
 .hero {
-    padding: 140px 0 80px;
+    padding: 188px 0 80px;
     background: linear-gradient(135deg, #f0f5ff 0%, #ffffff 100%);
     text-align: center;
 }
