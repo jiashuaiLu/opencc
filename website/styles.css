@@ -57,6 +57,12 @@ body {
     gap: 12px;
 }
 
+.nav-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+}
+
 .nav-brand h1 {
     font-size: 24px;
     font-weight: 600;
@@ -99,6 +105,14 @@ body {
 .hero-content {
     max-width: 800px;
     margin: 0 auto;
+}
+
+.hero-logo {
+    width: 120px;
+    height: 120px;
+    border-radius: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .hero-title {

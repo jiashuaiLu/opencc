@@ -212,7 +212,7 @@ npm run format              # 格式化代码
 
 ### 如何贡献
 
-1. Fork 本仓库
+1. clone 本仓库
 2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
 3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
 4. 推送到分支 (`git push origin feature/AmazingFeature`)
@@ -247,9 +247,7 @@ npm run format              # 格式化代码
 
 ## 📞 联系方式
 
-- **问题反馈**: [GitHub Issues](https://github.com/jiashuaiLu/dongcc/issues)
-- **功能建议**: [GitHub Discussions](https://github.com/jiashuaiLu/dongcc/discussions)
-- **邮件**: lujiashuai777@163.com
+- **erp**: lujiashuai.1
 
 ---
 
