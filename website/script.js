@@ -78,25 +78,18 @@ function updateDownloadCount(count) {
 // 递增下载计数
 async function incrementDownloadCount() {
     try {
-        // 如果 lastCount 还没有被设置，先获取当前计数
-        if (lastCount === 0) {
-            await fetchDownloadCount();
-        }
-        
         // 使用当前的 lastCount 值
         const currentCount = lastCount;
         const newCount = Number(currentCount) + 1;
         
         // 使用 POST 方法调用 /set 接口，确保传递 number 类型
+        // 不更新显示，由定时器每秒自动获取更新
         const response = await fetch(`${API_BASE_URL}/set?key=${DOWNLOAD_COUNT_KEY}&value=${newCount}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             }
         });
-        const data = await response.json();
-        const count = Number(data.data) || newCount;
-        updateDownloadCount(count);
     } catch (error) {
         console.error('Failed to increment download count:', error);
     }
