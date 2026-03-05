@@ -78,8 +78,13 @@ function updateDownloadCount(count) {
 // 递增下载计数
 async function incrementDownloadCount() {
     try {
-        // 先获取当前计数
-        const currentCount = lastCount || 0;
+        // 如果 lastCount 还没有被设置，先获取当前计数
+        if (lastCount === 0) {
+            await fetchDownloadCount();
+        }
+        
+        // 使用当前的 lastCount 值
+        const currentCount = lastCount;
         const newCount = Number(currentCount) + 1;
         
         // 使用 POST 方法调用 /set 接口，确保传递 number 类型
