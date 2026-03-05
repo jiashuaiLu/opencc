@@ -1,23 +1,9 @@
-import { Card, Typography, Divider, Space, Tag, List, Avatar } from 'antd';
-import {
-  InfoCircleOutlined,
-  UserOutlined,
-  MailOutlined,
-  PhoneOutlined,
-  EnvironmentOutlined,
-  ClockCircleOutlined,
-} from '@ant-design/icons';
+import { Card, Typography, Divider, Space, Tag, List } from 'antd';
+import { InfoCircleOutlined } from '@ant-design/icons';
 
 const { Title, Paragraph, Text } = Typography;
 
 export default function Info() {
-  const adminInfo = {
-    name: 'Lu JiaShuai',
-    erp: 'lujiashuai.1',
-    email: 'lujiashuai.1@jd.com',
-    department: '京东零售 - 技术质量部',
-  };
-
   const features = [
     {
       title: '代理服务管理',
@@ -71,42 +57,6 @@ export default function Info() {
       </Paragraph>
 
       <Divider />
-
-      {/* 管理员信息 */}
-      <Card
-        title={
-          <Space>
-            <UserOutlined />
-            <span>管理员信息</span>
-          </Space>
-        }
-        style={{ marginBottom: 24 }}
-      >
-        <Space direction="vertical" size="large" style={{ width: '100%' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <Avatar size={64} icon={<UserOutlined />} style={{ backgroundColor: '#1890ff' }} />
-            <div>
-              <Title level={4} style={{ margin: 0 }}>{adminInfo.name}</Title>
-              <Text type="secondary">ERP: {adminInfo.erp}</Text>
-            </div>
-          </div>
-
-          <Divider style={{ margin: '12px 0' }} />
-
-          <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-            <div>
-              <MailOutlined style={{ marginRight: 8, color: '#1890ff' }} />
-              <Text strong>邮箱：</Text>
-              <Text copyable>{adminInfo.email}</Text>
-            </div>
-            <div>
-              <EnvironmentOutlined style={{ marginRight: 8, color: '#1890ff' }} />
-              <Text strong>部门：</Text>
-              <Text>{adminInfo.department}</Text>
-            </div>
-          </Space>
-        </Space>
-      </Card>
 
       {/* 功能特性 */}
       <Card
