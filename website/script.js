@@ -90,14 +90,17 @@ async function incrementDownloadCount() {
     try {
         // 先获取当前计数
         const currentCount = lastCount || 0;
-        const newCount = currentCount + 1;
+        const newCount = Number(currentCount) + 1;
         
-        // 使用 /set 接口设置新值
+        // 使用 POST 方法调用 /set 接口，确保传递 number 类型
         const response = await fetch(`${API_BASE_URL}/set?key=${DOWNLOAD_COUNT_KEY}&value=${newCount}`, {
-            method: 'GET'
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
         });
         const data = await response.json();
-        const count = data.data || newCount;
+        const count = Number(data.data) || newCount;
         updateDownloadCount(count);
     } catch (error) {
         console.error('Failed to increment download count:', error);
