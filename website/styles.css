@@ -82,6 +82,7 @@ body {
     display: flex;
     list-style: none;
     gap: 32px;
+    align-items: center;
 }
 
 .nav-links a {
@@ -89,9 +90,10 @@ body {
     color: var(--text-secondary);
     font-weight: 500;
     transition: color 0.3s;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 4px;
+    height: 100%;
 }
 
 .nav-links a:hover {
@@ -100,6 +102,7 @@ body {
 
 .nav-links a svg {
     transition: transform 0.3s;
+    display: block;
 }
 
 .nav-links a:hover svg {
