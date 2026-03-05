@@ -2,6 +2,55 @@
 const API_BASE_URL = 'https://joy-ai-test/cache';
 const DOWNLOAD_COUNT_KEY = 'dongcc_download_count';
 
+// 轮播图配置
+let currentSlide = 0;
+const totalSlides = 5;
+let autoPlayInterval;
+
+// 轮播图控制
+function changeSlide(direction) {
+    const slides = document.querySelectorAll('.carousel-slide');
+    const indicators = document.querySelectorAll('.carousel-indicator');
+    
+    slides[currentSlide].classList.remove('active');
+    indicators[currentSlide].classList.remove('active');
+    
+    currentSlide += direction;
+    if (currentSlide >= totalSlides) currentSlide = 0;
+    if (currentSlide < 0) currentSlide = totalSlides - 1;
+    
+    slides[currentSlide].classList.add('active');
+    indicators[currentSlide].classList.add('active');
+    
+    resetAutoPlay();
+}
+
+function goToSlide(index) {
+    const slides = document.querySelectorAll('.carousel-slide');
+    const indicators = document.querySelectorAll('.carousel-indicator');
+    
+    slides[currentSlide].classList.remove('active');
+    indicators[currentSlide].classList.remove('active');
+    
+    currentSlide = index;
+    
+    slides[currentSlide].classList.add('active');
+    indicators[currentSlide].classList.add('active');
+    
+    resetAutoPlay();
+}
+
+function startAutoPlay() {
+    autoPlayInterval = setInterval(() => {
+        changeSlide(1);
+    }, 5000);
+}
+
+function resetAutoPlay() {
+    clearInterval(autoPlayInterval);
+    startAutoPlay();
+}
+
 // 获取下载计数
 async function fetchDownloadCount() {
     try {
@@ -84,6 +133,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 每秒获取下载计数
     setInterval(fetchDownloadCount, 1000);
+    
+    // 启动轮播图自动播放
+    startAutoPlay();
     
     // 淡入动画
     document.body.style.opacity = '0';
