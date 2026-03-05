@@ -86,7 +86,9 @@ function updateDownloadCount(count) {
             lastCount = numCount;
             
             // 创建 CountUp 实例，用于后续更新
+            // 使用 startVal 参数设置初始值，避免重置为 0
             countUpInstance = new countUp.CountUp(countElement, numCount, {
+                startVal: numCount,  // 设置初始值为当前值
                 duration: 0.8,
                 useEasing: true,
                 useGrouping: true,
