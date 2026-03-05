@@ -88,11 +88,16 @@ function updateDownloadCount(count) {
 // 递增下载计数
 async function incrementDownloadCount() {
     try {
-        const response = await fetch(`${API_BASE_URL}/incr?key=${DOWNLOAD_COUNT_KEY}`, {
-            method: 'POST'
+        // 先获取当前计数
+        const currentCount = lastCount || 0;
+        const newCount = currentCount + 1;
+        
+        // 使用 /set 接口设置新值
+        const response = await fetch(`${API_BASE_URL}/set?key=${DOWNLOAD_COUNT_KEY}&value=${newCount}`, {
+            method: 'GET'
         });
         const data = await response.json();
-        const count = data.data || 0;
+        const count = data.data || newCount;
         updateDownloadCount(count);
     } catch (error) {
         console.error('Failed to increment download count:', error);
