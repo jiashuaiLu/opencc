@@ -100,10 +100,22 @@ function updateDownloadCount(count) {
             // 如果数量发生变化，使用动画更新
             if (numCount !== lastCount) {
                 console.log('Updating count from', lastCount, 'to', numCount);
-                // 先设置当前值，避免从 0 开始
-                countElement.textContent = lastCount.toLocaleString();
-                // 然后更新到新值
-                countUpInstance.update(numCount);
+                
+                // 创建一个新的 CountUp 实例，从 lastCount 到 numCount
+                countUpInstance = new countUp.CountUp(countElement, numCount, {
+                    startVal: lastCount,  // 从上一个值开始
+                    duration: 0.8,
+                    useEasing: true,
+                    useGrouping: true,
+                    separator: ',',
+                    decimal: '.'
+                });
+                
+                // 启动动画
+                if (!countUpInstance.error) {
+                    countUpInstance.start();
+                }
+                
                 lastCount = numCount;
             }
         }
