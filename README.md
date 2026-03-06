@@ -44,7 +44,7 @@
 
 ### Claude Code 实际运行效果
 
-<img src="public/claude效果.png" alt="Claude Code 运行效果" width="100%">
+![Claude Code 运行效果](public/claude 效果.png)
 
 *接入 DeepSeek 模型，Claude Code 完美运行代码生成任务*
 
