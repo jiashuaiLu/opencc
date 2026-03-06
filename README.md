@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="public/icon.png" alt="OpenCC Logo" width="120" height="120">
+![OpenCC Logo](public/icon.png)
 
 # OpenCC
 
@@ -53,19 +53,19 @@
 <table>
 <tr>
 <td width="50%">
-<img src="public/度量看板.png" alt="度量看板">
+![度量看板](public/度量看板.png)
 <p align="center"><b>📊 度量看板</b></p>
 <p align="center">实时监控 Token 消耗、请求统计</p>
 </td>
 <td width="50%">
-<img src="public/配置管理.png" alt="配置管理">
+![配置管理](public/配置管理.png)
 <p align="center"><b>⚙️ 配置管理</b></p>
 <p align="center">轻松配置多个模型服务</p>
 </td>
 </tr>
 <tr>
 <td width="50%">
-<img src="public/对话历史.png" alt="对话历史">
+![对话历史](public/对话历史.png)
 <p align="center"><b>💬 对话历史</b></p>
 <p align="center">完整的对话记录管理</p>
 </td>
