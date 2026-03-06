@@ -45,7 +45,7 @@
 ### Claude Code 实际运行效果
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/jiashuaiLu/opencc/main/public/claude 效果.png" alt="Claude Code 运行效果" width="100%">
+<img src="./public/claude 效果.png" alt="Claude Code 运行效果" width="100%">
 </p>
 
 *接入 DeepSeek 模型，Claude Code 完美运行代码生成任务*
@@ -55,19 +55,19 @@
 <table>
 <tr>
 <td width="50%" align="center">
-<img src="https://raw.githubusercontent.com/jiashuaiLu/opencc/main/public/度量看板.png" alt="度量看板" width="100%">
+<img src="./public/度量看板.png" alt="度量看板" width="100%">
 <p align="center"><b>📊 度量看板</b></p>
 <p align="center">实时监控 Token 消耗、请求统计</p>
 </td>
 <td width="50%" align="center">
-<img src="https://raw.githubusercontent.com/jiashuaiLu/opencc/main/public/配置管理.png" alt="配置管理" width="100%">
+<img src="./public/配置管理.png" alt="配置管理" width="100%">
 <p align="center"><b>⚙️ 配置管理</b></p>
 <p align="center">轻松配置多个模型服务</p>
 </td>
 </tr>
 <tr>
 <td width="50%" align="center">
-<img src="https://raw.githubusercontent.com/jiashuaiLu/opencc/main/public/对话历史.png" alt="对话历史" width="100%">
+<img src="./public/对话历史.png" alt="对话历史" width="100%">
 <p align="center"><b>💬 对话历史</b></p>
 <p align="center">完整的对话记录管理</p>
 </td>
