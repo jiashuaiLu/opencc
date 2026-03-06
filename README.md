@@ -79,7 +79,70 @@
 
 ---
 
-## 🚀 快速开始
+## 🚀 下载 OpenCC
+
+### 最新版本：v1.0.0
+
+<div align="center">
+
+**🎉 macOS (Apple Silicon) - 原生 ARM64 版本**
+
+| 项目 | 详情 |
+|------|------|
+| 芯片支持 | ✅ M1/M2/M3 芯片 |
+| 架构 | ✅ 原生 ARM64 性能 |
+| 文件大小 | 📦 209 MB |
+| 发布日期 | 📅 2026-03-05 |
+| 下载链接 | [GitHub Releases](https://github.com/jiashuaiLu/opencc/releases) |
+
+[**👉 点击下载 DMG 安装包**](https://github.com/jiashuaiLu/opencc/releases)
+
+</div>
+
+---
+
+## 🔧 安装教程
+
+### 四步完成安装
+
+<table>
+<tr>
+<td width="25%" align="center">
+<div style="background:#f0f9ff;padding:20px;border-radius:10px;">
+<span style="font-size:48px;">📥</span>
+<h4>第一步：下载安装</h4>
+<p>下载 DMG 文件，打开后将<br><strong>OpenCC.app</strong> 拖入<br>Applications 文件夹</p>
+</div>
+</td>
+<td width="25%" align="center" style="font-size:32px;color:#999;">→</td>
+<td width="25%" align="center">
+<div style="background:#fff7ed;padding:20px;border-radius:10px;">
+<span style="font-size:48px;">⚠️</span>
+<h4>第二步：首次运行</h4>
+<p>首次打开时如果提示<br>「无法打开」，点击<br>「取消」</p>
+</div>
+</td>
+<td width="25%" align="center" style="font-size:32px;color:#999;">→</td>
+</tr>
+<tr>
+<td width="25%" align="center">
+<div style="background:#f0fdf4;padding:20px;border-radius:10px;">
+<span style="font-size:48px;">🔧</span>
+<h4>第三步：系统设置</h4>
+<p>打开「系统设置」→<br>「隐私与安全性」</p>
+</div>
+</td>
+<td width="25%" align="center" style="font-size:32px;color:#999;">→</td>
+<td width="25%" align="center">
+<div style="background:#faf5ff;padding:20px;border-radius:10px;">
+<span style="font-size:48px;">✅</span>
+<h4>第四步：仍要打开</h4>
+<p>在安全性设置中找到<br>OpenCC，点击<br>「仍要打开」即可</p>
+</div>
+</td>
+<td width="25%"></td>
+</tr>
+</table>
 
 ### 系统要求
 
@@ -87,31 +150,28 @@
 - **Node.js**: v16.0.0 或更高版本（仅源码构建需要）
 - **Claude Code**: 已安装并配置
 
-### 安装方式
+---
 
-#### 方式一：下载安装包（推荐 ⭐）
+## 💻 源码构建
 
-1. 访问 [Releases](https://github.com/jiashuaiLu/opencc/releases) 页面
-2. 下载最新版本的 `OpenCC-x.x.x-arm64.dmg`
-3. 双击打开 DMG 文件，将应用拖拽到 Applications 文件夹
-4. 打开应用，开始配置！
-
-#### 方式二：从源码构建
+如果你更喜欢从源码构建：
 
 ```bash
-# 克隆仓库
+# 1. 克隆仓库
 git clone https://github.com/jiashuaiLu/opencc.git
 cd opencc
 
-# 安装依赖
+# 2. 安装依赖
 npm install
 
-# 开发模式运行
+# 3. 开发模式运行
 npm run electron:dev
 
-# 构建生产版本
+# 4. 构建生产版本
 npm run electron:build
 ```
+
+构建完成后，安装包位于 `release/` 目录
 
 ---
 
