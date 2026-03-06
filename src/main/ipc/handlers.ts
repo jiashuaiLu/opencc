@@ -2,15 +2,13 @@ import { ipcMain } from 'electron';
 import { ProxyServer } from '../proxy/server';
 import { DatabaseManager } from '../database';
 import { logger } from '../logger';
-import { SystemChecker, EnvironmentStatus } from '../system/checker';
+import { SystemChecker } from '../system/checker';
 
 export function setupIPC(
   proxyServer: ProxyServer, 
-  database: DatabaseManager,
-  systemChecker: SystemChecker,
-  initialEnvironmentStatus: EnvironmentStatus | null
+  database: DatabaseManager
 ): void {
-  let environmentStatus = initialEnvironmentStatus;
+  const systemChecker = new SystemChecker();
   // 配置相关
   ipcMain.handle('config:get', async (event, id) => {
     try {
@@ -191,39 +189,24 @@ export function setupIPC(
     }
   });
 
-  // 环境检查相关
-  ipcMain.handle('environment:check', async (event, port?: number) => {
+  ipcMain.handle('settings:reset', async () => {
     try {
-      environmentStatus = await systemChecker.checkEnvironment(port || 8787);
-      const report = systemChecker.generateReport(environmentStatus);
-      logger.info('Environment check completed\n' + report);
-      return environmentStatus;
+      await database.resetSettings();
+      logger.info('Settings reset to default');
+      return { success: true };
     } catch (error) {
-      logger.error('Failed to check environment', error);
+      logger.error('Failed to reset settings', error);
       throw error;
     }
   });
 
-  ipcMain.handle('environment:getStatus', async () => {
+  ipcMain.handle('cache:clear', async () => {
     try {
-      if (!environmentStatus) {
-        environmentStatus = await systemChecker.checkEnvironment(8787);
-      }
-      return environmentStatus;
+      await database.clearCache();
+      logger.info('Cache cleared');
+      return { success: true };
     } catch (error) {
-      logger.error('Failed to get environment status', error);
-      throw error;
-    }
-  });
-
-  ipcMain.handle('environment:getReport', async () => {
-    try {
-      if (!environmentStatus) {
-        environmentStatus = await systemChecker.checkEnvironment(8787);
-      }
-      return systemChecker.generateReport(environmentStatus);
-    } catch (error) {
-      logger.error('Failed to generate environment report', error);
+      logger.error('Failed to clear cache', error);
       throw error;
     }
   });

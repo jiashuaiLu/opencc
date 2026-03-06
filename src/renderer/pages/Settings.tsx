@@ -1,4 +1,4 @@
-import { Card, Form, Switch, Button, message, Divider, Space, Popconfirm } from 'antd';
+import { Card, Form, Switch, Button, message, Divider, Space, Popconfirm, Select, InputNumber } from 'antd';
 import { useState, useEffect } from 'react';
 
 export default function Settings() {
@@ -123,7 +123,7 @@ export default function Settings() {
         <p>
           <strong>OpenCC</strong> v1.0.0
         </p>
-        <p>Claude Code 代理服务管理工具</p>
+        <p>Claude Code 本地代理服务管理工具</p>
         <p style={{ color: '#8c8c8c', marginTop: 8, fontSize: 12 }}>
           © 2026 OpenCC Team. All rights reserved.
         </p>
@@ -131,5 +131,3 @@ export default function Settings() {
     </div>
   );
 }
-
-import { Select, InputNumber } from 'antd';

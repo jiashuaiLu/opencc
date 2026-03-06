@@ -6,6 +6,7 @@ import Logs from './pages/Logs';
 import History from './pages/History';
 import Settings from './pages/Settings';
 import Documentation from './pages/Documentation';
+import Info from './pages/Info';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/history" element={<History />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/documentation" element={<Documentation />} />
+        <Route path="/info" element={<Info />} />
       </Routes>
     </Layout>
   );

@@ -21,10 +21,108 @@ export default function Documentation() {
         <RocketOutlined /> OpenCC 使用文档
       </Title>
       <Paragraph type="secondary">
-        OpenCC 是一个功能强大的 Claude Code 代理服务管理工具，帮助您轻松管理和监控代理服务。
+        OpenCC 是一个功能强大的 Claude Code 本地代理服务管理工具，让你可以用内部模型，几乎满血体验Cloude Code。
       </Paragraph>
 
       <Divider />
+
+      {/* 环境要求 */}
+      <Card
+        title={
+          <Space>
+            <ToolOutlined />
+            <span>环境要求</span>
+          </Space>
+        }
+        style={{ marginBottom: 24 }}
+      >
+        <Alert
+          message="使用 OpenCC 前需要安装以下依赖"
+          description="请确保您的系统已安装 Node.js 和 Claude Code"
+          type="warning"
+          showIcon
+          style={{ marginBottom: 16 }}
+        />
+
+        <Collapse accordion>
+          <Panel header="安装 Node.js" key="nodejs">
+            <Paragraph>
+              <Title level={5}>方式一：使用 NVM 安装（推荐）</Title>
+              <pre style={{ background: '#f5f5f5', padding: 12, borderRadius: 4, marginBottom: 16 }}>
+{`# 安装 NVM
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+
+# 安装 Node.js
+nvm install 16
+
+# 使用 Node.js 16
+nvm use 16
+
+# 验证安装
+node --version  # 应显示 v16.x.x
+npm --version   # 应显示 8.x.x`}</pre>
+              
+              <Title level={5}>方式二：使用 Homebrew 安装</Title>
+              <pre style={{ background: '#f5f5f5', padding: 12, borderRadius: 4, marginBottom: 16 }}>
+{`# 安装 Node.js
+brew install node@16
+
+# 验证安装
+node --version  # 应显示 v16.x.x
+npm --version   # 应显示 8.x.x`}</pre>
+              
+              <Title level={5}>方式三：官网下载安装</Title>
+              <Paragraph>
+                访问 <a href="https://nodejs.org/" target="_blank">Node.js 官网</a> 下载安装包并安装。
+              </Paragraph>
+            </Paragraph>
+          </Panel>
+
+          <Panel header="安装 Claude Code" key="claude">
+            <Paragraph>
+              <Title level={5}>使用 npm 全局安装</Title>
+              <pre style={{ background: '#f5f5f5', padding: 12, borderRadius: 4, marginBottom: 16 }}>
+{`# 安装 Claude Code
+npm install -g @anthropic-ai/claude-code
+
+# 验证安装
+claude --version  # 应显示版本号`}</pre>
+              
+              <Title level={5}>配置 Claude Code</Title>
+              <Paragraph>
+                安装完成后，需要进行基础配置：
+                <pre style={{ background: '#f5f5f5', padding: 12, borderRadius: 4 }}>
+{`# 首次运行会提示输入 API Key
+claude
+
+# 或手动配置
+export ANTHROPIC_API_KEY=your-api-key-here`}</pre>
+              </Paragraph>
+            </Paragraph>
+          </Panel>
+
+          <Panel header="验证环境" key="verify">
+            <Paragraph>
+              <pre style={{ background: '#f5f5f5', padding: 12, borderRadius: 4 }}>
+{`# 检查 Node.js 版本
+node --version
+
+# 检查 Claude Code 版本
+claude --version
+
+# 检查 npm 版本
+npm --version`}</pre>
+              
+              <Alert
+                message="提示"
+                description="如果命令无法识别，请确保已将 Node.js 和 Claude Code 添加到系统 PATH 中，或重启终端后再试。"
+                type="info"
+                showIcon
+              />
+            </Paragraph>
+          </Panel>
+        </Collapse>
+      </Card>
 
       {/* 快速开始 */}
       <Card
@@ -246,7 +344,7 @@ Claude Code 客户端`}
                     <li>API 端点: http://ai-api.jdcloud.com/v1</li>
                   </ul>
                 </li>
-                <li>优势：国内访问速度快，稳定可靠</li>
+                <li>优势：公司内网访问，稳定可靠安全</li>
               </ul>
             </Paragraph>
           </Panel>
@@ -335,6 +433,14 @@ Claude Code 客户端`}
           </Panel>
         </Collapse>
       </Card>
+
+      {/* 联系管理员 */}
+      <Divider />
+      <div style={{ textAlign: 'center', padding: '16px 0' }}>
+        <Text type="secondary" style={{ fontSize: 12 }}>
+          如有问题或建议，请联系管理员：ERP: lujiashuai.1 | 邮箱: lujiashuai.1@jd.com
+        </Text>
+      </div>
     </div>
   );
 }

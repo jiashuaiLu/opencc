@@ -67,14 +67,18 @@
     "appId": "com.opencc.app",
     "productName": "OpenCC",
     "directories": {
-      "output": "dist"
+      "output": "release"
     },
     "mac": {
       "category": "public.app-category.developer-tools"
     },
     "files": [
-      "dist/**/*",
+      "dist/main/**/*",
+      "dist/renderer/**/*",
       "package.json"
+    ],
+    "asarUnpack": [
+      "**/*.node"
     ]
   }
 }

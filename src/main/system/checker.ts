@@ -1,4 +1,4 @@
-import { exec } from 'child_process';
+import { exec, execSync } from 'child_process';
 import { promisify } from 'util';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -13,9 +13,26 @@ const mkdir = promisify(fs.mkdir);
 function getShellEnv(): { env: NodeJS.ProcessEnv; shell: string } {
   const shell = process.env.SHELL || '/bin/zsh';
   
-  const env = {
-    ...process.env,
-    PATH: [
+  try {
+    console.log('[Environment] Attempting to get PATH via shell login mode...');
+    const pathOutput = execSync(
+      `${shell} -l -c 'echo $PATH'`,
+      { encoding: 'utf-8', timeout: 5000 }
+    ).trim();
+    
+    console.log('[Environment] PATH obtained:', pathOutput);
+    
+    const env = {
+      ...process.env,
+      PATH: pathOutput,
+      HOME: os.homedir(),
+    };
+    
+    return { env, shell };
+  } catch (error: any) {
+    console.error('[Environment] Failed to get PATH via shell login:', error.message);
+    
+    const fallbackPaths = [
       '/usr/local/bin',
       '/usr/bin',
       '/bin',
@@ -23,11 +40,40 @@ function getShellEnv(): { env: NodeJS.ProcessEnv; shell: string } {
       '/sbin',
       '/opt/homebrew/bin',
       path.join(os.homedir(), '.nvm/versions/node'),
+      path.join(os.homedir(), '.local/bin'),
       process.env.PATH || ''
-    ].filter(Boolean).join(':'),
-  };
+    ].filter(Boolean);
+    
+    const env = {
+      ...process.env,
+      PATH: fallbackPaths.join(':'),
+      HOME: os.homedir(),
+    };
+    
+    console.log('[Environment] Using fallback PATH:', env.PATH);
+    
+    return { env, shell };
+  }
+}
+
+function findExecutableInPath(executable: string, env: NodeJS.ProcessEnv): string | null {
+  const pathEnv = env.PATH || '';
+  const paths = pathEnv.split(':');
   
-  return { env, shell };
+  for (const dir of paths) {
+    const fullPath = path.join(dir, executable);
+    try {
+      if (fs.existsSync(fullPath)) {
+        console.log(`[FindExecutable] Found ${executable} at: ${fullPath}`);
+        return fullPath;
+      }
+    } catch (error) {
+      // Ignore errors
+    }
+  }
+  
+  console.log(`[FindExecutable] ${executable} not found in PATH`);
+  return null;
 }
 
 export interface CheckResult {
@@ -48,44 +94,68 @@ export interface EnvironmentStatus {
 export class SystemChecker {
   // 检查 Claude Code 是否安装
   async checkClaudeCode(): Promise<CheckResult> {
+    console.log('[CheckClaudeCode] Starting check...');
+    
     try {
       const { env, shell } = getShellEnv();
       
-      const { stdout } = await execAsync('which claude', { 
-        env,
-        shell 
-      });
-      const claudePath = stdout.trim();
-
-      if (!claudePath) {
-        return {
-          installed: false,
-          message: 'Claude Code 未安装',
-        };
-      }
-
+      // 方法1: 使用 which 命令
       try {
-        const { stdout: versionOutput } = await execAsync('claude --version', { 
+        const { stdout } = await execAsync('which claude', { 
           env,
           shell 
         });
-        const version = versionOutput.trim();
+        const claudePath = stdout.trim();
 
+        if (claudePath) {
+          console.log('[CheckClaudeCode] Found via which:', claudePath);
+          
+          try {
+            const { stdout: versionOutput } = await execAsync('claude --version', { 
+              env,
+              shell 
+            });
+            const version = versionOutput.trim();
+
+            return {
+              installed: true,
+              version,
+              path: claudePath,
+              valid: true,
+            };
+          } catch (versionError: any) {
+            console.error('[CheckClaudeCode] Failed to get version:', versionError.message);
+            return {
+              installed: true,
+              path: claudePath,
+              valid: false,
+              message: 'Claude Code 已安装，但无法获取版本信息',
+            };
+          }
+        }
+      } catch (whichError: any) {
+        console.error('[CheckClaudeCode] which command failed:', whichError.message);
+      }
+      
+      // 方法2: 直接在 PATH 中查找
+      const claudePath = findExecutableInPath('claude', env);
+      if (claudePath) {
+        console.log('[CheckClaudeCode] Found via direct search:', claudePath);
         return {
           installed: true,
-          version,
           path: claudePath,
           valid: true,
-        };
-      } catch {
-        return {
-          installed: true,
-          path: claudePath,
-          valid: false,
-          message: 'Claude Code 已安装，但无法获取版本信息',
+          message: 'Claude Code 已安装',
         };
       }
-    } catch {
+      
+      console.log('[CheckClaudeCode] Claude Code not found');
+      return {
+        installed: false,
+        message: 'Claude Code 未安装',
+      };
+    } catch (error: any) {
+      console.error('[CheckClaudeCode] Check failed:', error.message);
       return {
         installed: false,
         message: 'Claude Code 未安装',
@@ -95,23 +165,50 @@ export class SystemChecker {
 
   // 检查 Node.js 版本
   async checkNodeJS(): Promise<CheckResult> {
+    console.log('[CheckNodeJS] Starting check...');
+    
     try {
       const { env, shell } = getShellEnv();
       
-      const { stdout } = await execAsync('node --version', { 
-        env,
-        shell 
-      });
-      const version = stdout.trim();
-      const majorVersion = parseInt(version.replace('v', '').split('.')[0]);
+      // 方法1: 使用 node --version 命令
+      try {
+        const { stdout } = await execAsync('node --version', { 
+          env,
+          shell 
+        });
+        const version = stdout.trim();
+        const majorVersion = parseInt(version.replace('v', '').split('.')[0]);
 
+        console.log('[CheckNodeJS] Found via command:', version);
+        return {
+          installed: true,
+          version,
+          valid: majorVersion >= 16,
+          message: majorVersion >= 16 ? undefined : 'Node.js 版本过低，建议升级到 v16 或更高版本',
+        };
+      } catch (cmdError: any) {
+        console.error('[CheckNodeJS] node command failed:', cmdError.message);
+      }
+      
+      // 方法2: 直接在 PATH 中查找
+      const nodePath = findExecutableInPath('node', env);
+      if (nodePath) {
+        console.log('[CheckNodeJS] Found via direct search:', nodePath);
+        return {
+          installed: true,
+          path: nodePath,
+          valid: true,
+          message: 'Node.js 已安装',
+        };
+      }
+      
+      console.log('[CheckNodeJS] Node.js not found');
       return {
-        installed: true,
-        version,
-        valid: majorVersion >= 16,
-        message: majorVersion >= 16 ? undefined : 'Node.js 版本过低，建议升级到 v16 或更高版本',
+        installed: false,
+        message: 'Node.js 未安装',
       };
-    } catch {
+    } catch (error: any) {
+      console.error('[CheckNodeJS] Check failed:', error.message);
       return {
         installed: false,
         message: 'Node.js 未安装',
