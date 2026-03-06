@@ -1,6 +1,6 @@
 <div align="center">
 
-![OpenCC Logo](public/icon.png)
+<img src="./public/icon.png" alt="OpenCC Logo" width="80" height="80">
 
 # OpenCC
 
