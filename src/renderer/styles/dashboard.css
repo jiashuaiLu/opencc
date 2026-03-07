@@ -1,0 +1,226 @@
+/* Dashboard Layout */
+.dashboard-container {
+  padding: 0;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.dashboard-title-group h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.dashboard-title-group p {
+  margin: 8px 0 0 0;
+  color: var(--text-secondary-color);
+  font-size: 14px;
+}
+
+.dashboard-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.refresh-btn {
+  font-size: 12px;
+}
+
+.dashboard-tabs-container {
+  background: var(--surface-color);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+body.dark-theme .dashboard-tabs-container {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Usage Summary Cards */
+.summary-cards-container {
+  margin-bottom: 24px;
+}
+
+.service-status-card {
+  margin-bottom: 16px;
+  background: var(--surface-color);
+}
+
+.service-status-value {
+  font-size: 24px;
+}
+
+.service-status-btn {
+  padding: 8px 24px;
+  font-size: 16px;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: opacity 0.2s;
+}
+
+.service-status-btn:hover {
+  opacity: 0.9;
+}
+
+.btn-stop {
+  background: var(--danger-color);
+}
+
+.btn-start {
+  background: var(--primary-color);
+}
+
+.stat-card {
+  border-radius: 12px;
+  height: 100%;
+  background: var(--surface-color);
+}
+
+.stat-card-title {
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+.stat-card-title .anticon {
+  margin-right: 8px;
+}
+
+.stat-value {
+  font-weight: 600;
+}
+
+.stat-subtext {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-secondary-color);
+}
+
+/* Usage Trend Chart */
+.trend-chart-card {
+  border-radius: 12px;
+  margin-bottom: 24px;
+  background: var(--surface-color);
+}
+
+.chart-wrapper {
+  height: 350px;
+  width: 100%;
+}
+
+.chart-tooltip {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+body.dark-theme .chart-tooltip {
+  background: rgba(31, 31, 31, 0.95);
+  border: 1px solid #434343;
+}
+
+.chart-tooltip p {
+  margin: 0 0 8px 0;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.chart-tooltip-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.chart-tooltip-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.chart-tooltip-label {
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.chart-tooltip-value {
+  color: var(--text-color);
+}
+
+.loading-container {
+  text-align: center;
+  padding: 40px;
+}
+
+.empty-container {
+  padding: 40px 0;
+}
+
+/* Filter Bar */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding: 16px;
+  background: var(--background-color);
+  border-radius: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-input {
+  width: 200px;
+}
+
+.filter-select {
+  width: 120px;
+}
+
+.filter-total {
+  margin-left: auto;
+  color: var(--text-secondary-color);
+}
+
+/* Tables */
+.logs-table {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.table-pagination {
+  text-align: right;
+  margin-top: 16px;
+}
+
+.model-name {
+  font-family: monospace;
+  font-size: 12px;
+  color: var(--primary-color);
+  background: rgba(0, 0, 0, 0.04);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+body.dark-theme .model-name {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.stats-card {
+  border-radius: 12px;
+  background: var(--surface-color);
+}

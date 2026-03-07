@@ -1,12 +1,12 @@
-import { Card, Table, Tag, Space, Button, Input, Select } from 'antd';
-import { ReloadOutlined, SearchOutlined, ClearOutlined } from '@ant-design/icons';
+import { Card, Table, Tag, Space, Button, Input, Select, message } from 'antd';
+import { ReloadOutlined, SearchOutlined, ClearOutlined, BugOutlined } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
 
 interface Log {
   id: string;
   level: 'info' | 'warn' | 'error';
   message: string;
-  timestamp: string;
+  timestamp: Date;
   method?: string;
   url?: string;
   statusCode?: number;
@@ -23,11 +23,16 @@ export default function Logs() {
 
   useEffect(() => {
     loadLogs();
-  }, []);
+  }, [levelFilter]);
 
   const loadLogs = async () => {
     setLoading(true);
     try {
+      // Note: The API signature in the original code seemed to expect an object, 
+      // but typical Electron bridges might vary. Assuming the structure is correct based on original file.
+      // If filtering happens on backend, we pass params. 
+      // If filtering is frontend, we might need to fetch all and filter here.
+      // Let's assume the API handles it as implied by the original code.
       const data = await window.electronAPI.getLogs({
         level: levelFilter === 'all' ? undefined : levelFilter,
         search: searchText,
@@ -56,16 +61,20 @@ export default function Logs() {
       title: '时间',
       dataIndex: 'timestamp',
       key: 'timestamp',
-      width: 160,
-      render: (text: string) => new Date(text).toLocaleString(),
+      width: 180,
+      render: (text: Date) => new Date(text).toLocaleString(),
     },
     {
       title: '级别',
       dataIndex: 'level',
       key: 'level',
-      width: 80,
+      width: 100,
       render: (level: string) => {
-        const color = level === 'error' ? 'red' : level === 'warn' ? 'orange' : 'blue';
+        let color = 'default';
+        if (level === 'error') color = 'error';
+        else if (level === 'warn') color = 'warning';
+        else if (level === 'info') color = 'processing';
+        
         return <Tag color={color}>{level.toUpperCase()}</Tag>;
       },
     },
@@ -73,76 +82,104 @@ export default function Logs() {
       title: '方法',
       dataIndex: 'method',
       key: 'method',
-      width: 80,
-      render: (method: string) => method || '-',
+      width: 100,
+      render: (method: string) => (
+        method ? <span className="code-block" style={{ padding: '2px 6px' }}>{method}</span> : '-'
+      ),
     },
     {
       title: 'URL',
       dataIndex: 'url',
       key: 'url',
       ellipsis: true,
+      render: (url: string) => (
+        url ? <span title={url}>{url}</span> : '-'
+      ),
     },
     {
       title: '状态码',
       dataIndex: 'statusCode',
       key: 'statusCode',
-      width: 80,
-      render: (statusCode: number) => statusCode || '-',
+      width: 100,
+      render: (statusCode: number) => (
+        statusCode ? (
+          <span className={`status-badge ${statusCode >= 400 ? 'status-badge-error' : 'status-badge-success'}`}>
+            {statusCode}
+          </span>
+        ) : '-'
+      ),
     },
     {
       title: '耗时(ms)',
       dataIndex: 'duration',
       key: 'duration',
       width: 120,
-      render: (duration: number) => duration || '-',
+      align: 'right' as const,
+      render: (duration: number) => duration ? `${duration}ms` : '-',
     },
   ];
 
   return (
-    <Card
-      title="运行日志"
-      extra={
-        <Space>
-          <Select
-            value={levelFilter}
-            onChange={setLevelFilter}
-            style={{ width: 120 }}
-            options={[
-              { label: '全部', value: 'all' },
-              { label: 'INFO', value: 'info' },
-              { label: 'WARN', value: 'warn' },
-              { label: 'ERROR', value: 'error' },
-            ]}
-          />
-          <Input
-            placeholder="搜索日志"
-            prefix={<SearchOutlined />}
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            style={{ width: 200 }}
-          />
+    <div className="page-container">
+      <div className="page-header">
+        <div className="page-title-group">
+          <h1>运行日志</h1>
+          <p>查看系统运行状态和错误信息</p>
+        </div>
+        <div className="page-actions">
           <Button icon={<ReloadOutlined />} onClick={loadLogs}>
             刷新
           </Button>
           <Button icon={<ClearOutlined />} danger onClick={handleClearLogs}>
             清空
           </Button>
-        </Space>
-      }
-    >
-      <Table
-        columns={columns}
-        dataSource={logs}
-        rowKey="id"
-        loading={loading}
-        pagination={{
-          pageSize: 20,
-          showSizeChanger: true,
-          showTotal: (total) => `共 ${total} 条日志`,
-        }}
-      />
-    </Card>
+        </div>
+      </div>
+
+      <div className="page-content">
+        <div className="filter-bar">
+          <Select
+            value={levelFilter}
+            onChange={setLevelFilter}
+            className="filter-select"
+            options={[
+              { label: '全部级别', value: 'all' },
+              { label: 'INFO', value: 'info' },
+              { label: 'WARN', value: 'warn' },
+              { label: 'ERROR', value: 'error' },
+            ]}
+          />
+          <Input
+            placeholder="搜索日志内容、URL..."
+            prefix={<SearchOutlined />}
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            className="filter-input"
+            onPressEnter={loadLogs}
+          />
+          <Button type="primary" icon={<SearchOutlined />} onClick={loadLogs}>
+            搜索
+          </Button>
+          <span className="filter-total">
+            共 {logs.length} 条记录
+          </span>
+        </div>
+
+        <Card className="content-card content-card-no-padding">
+          <Table
+            columns={columns}
+            dataSource={logs}
+            rowKey="id"
+            loading={loading}
+            pagination={{
+              pageSize: 20,
+              showSizeChanger: true,
+              showTotal: (total) => `共 ${total} 条日志`,
+            }}
+            size="middle"
+          />
+        </Card>
+      </div>
+    </div>
   );
 }
-
-import { message } from 'antd';

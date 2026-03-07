@@ -1,5 +1,5 @@
 import { Form, Input, Button, Card, message, Select, InputNumber, Space, Alert, Divider, Tag } from 'antd';
-import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import { PlusOutlined, DeleteOutlined, SaveOutlined, ApiOutlined } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
 
 interface ModelConfig {
@@ -72,7 +72,7 @@ export default function Config() {
 
   const handleTestConnection = async () => {
     try {
-      const values = await form.validateFields();
+      await form.validateFields();
       message.loading('正在测试连接...', 0);
       // 这里应该调用测试连接的 API
       setTimeout(() => {
@@ -99,7 +99,8 @@ export default function Config() {
   };
 
   const handleDeleteModel = (id: string) => {
-    setModels(models.filter(m => m.id !== id));
+    const newModels = models.filter(m => m.id !== id);
+    setModels(newModels);
     if (defaultModel === id) {
       setDefaultModel('');
     }
@@ -112,158 +113,170 @@ export default function Config() {
   };
 
   return (
-    <Card title="代理配置">
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={handleSubmit}
-        initialValues={{ port: 8787 }}
-        style={{ maxWidth: 600 }}
-      >
-        <Form.Item
-          label="配置名称"
-          name="name"
-          rules={[{ required: true, message: '请输入配置名称' }]}
-        >
-          <Input placeholder="例如：JoyBuilder-Production" />
-        </Form.Item>
-
-        <Form.Item
-          label="API Key"
-          name="apiKey"
-          rules={[{ required: true, message: '请输入 API Key' }]}
-        >
-          <Input.Password placeholder="sk-xxxxx" />
-        </Form.Item>
-
-        <Form.Item
-          label="服务提供商"
-          name="baseUrl"
-          rules={[{ required: true, message: '请选择服务提供商' }]}
-        >
-          <Select
-            placeholder="选择服务提供商"
-            options={presetUrls}
-            showSearch
-            allowClear
-            onChange={handleUrlChange}
-            filterOption={(input, option) =>
-              (option?.label ?? '').toLowerCase().includes(input.toLowerCase()) ||
-              (option?.value ?? '').toLowerCase().includes(input.toLowerCase())
-            }
-          />
-        </Form.Item>
-
-        {selectedUrl && selectedUrl !== 'custom' && (
-          <Alert
-            message={`API 端点: ${selectedUrl}`}
-            type="info"
-            showIcon
-            style={{ marginBottom: 24 }}
-          />
-        )}
-
-        {selectedUrl === 'custom' && (
-          <Form.Item
-            label="自定义 Base URL"
-            name="baseUrl"
-            rules={[{ required: true, message: '请输入自定义 Base URL' }]}
-          >
-            <Input placeholder="https://your-api-endpoint.com/v1" />
-          </Form.Item>
-        )}
-
-        <Form.Item
-          label="代理端口"
-          name="port"
-          rules={[{ required: true, message: '请输入端口号' }]}
-        >
-          <InputNumber min={1024} max={65535} style={{ width: '100%' }} />
-        </Form.Item>
-
-        <Divider>模型配置</Divider>
-
-        <div style={{ marginBottom: 16 }}>
-          <Alert
-            message="配置模型列表后，启动服务时会自动将模型配置写入 Claude Code 配置文件"
-            type="info"
-            showIcon
-            style={{ marginBottom: 16 }}
-          />
-          
-          <Button
-            type="dashed"
-            onClick={handleAddModel}
-            icon={<PlusOutlined />}
-            style={{ width: '100%', marginBottom: 16 }}
-          >
-            添加模型
-          </Button>
-
-          {models.length > 0 && (
-            <div style={{ marginBottom: 16 }}>
-              <Form.Item label="默认模型">
-                <Select
-                  placeholder="选择默认模型"
-                  value={defaultModel || undefined}
-                  onChange={setDefaultModel}
-                  allowClear
-                >
-                  {models.map(model => (
-                    <Select.Option key={model.id} value={model.id}>
-                      {model.name || model.modelId || '未命名模型'}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </div>
-          )}
-
-          {models.map((model, index) => (
-            <Card
-              key={model.id}
-              size="small"
-              style={{ marginBottom: 16 }}
-              title={
-                <Space>
-                  <Tag color="blue">模型 {index + 1}</Tag>
-                  {defaultModel === model.id && <Tag color="green">默认</Tag>}
-                </Space>
-              }
-              extra={
-                <Button
-                  type="text"
-                  danger
-                  icon={<DeleteOutlined />}
-                  onClick={() => handleDeleteModel(model.id)}
-                />
-              }
-            >
-              <Space direction="vertical" style={{ width: '100%' }}>
-                <Input
-                  placeholder="模型名称（例如：Claude 3.5 Sonnet）"
-                  value={model.name}
-                  onChange={(e) => handleModelChange(model.id, 'name', e.target.value)}
-                />
-                <Input
-                  placeholder="模型ID（例如：claude-3-5-sonnet-20241022）"
-                  value={model.modelId}
-                  onChange={(e) => handleModelChange(model.id, 'modelId', e.target.value)}
-                />
-              </Space>
-            </Card>
-          ))}
+    <div className="page-container">
+      <div className="page-header">
+        <div className="page-title-group">
+          <h1>配置管理</h1>
+          <p>设置代理服务的基本参数和模型信息</p>
         </div>
+        <div className="page-actions">
+          <Button onClick={handleTestConnection} icon={<ApiOutlined />}>测试连接</Button>
+          <Button type="primary" onClick={() => form.submit()} loading={loading} icon={<SaveOutlined />}>
+            保存配置
+          </Button>
+        </div>
+      </div>
 
-        <Form.Item>
-          <Space>
-            <Button type="primary" htmlType="submit" loading={loading}>
-              保存配置
+      <div className="page-content">
+        <Card className="content-card">
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={handleSubmit}
+            initialValues={{ port: 8787 }}
+            style={{ maxWidth: 800 }}
+          >
+            <div className="form-section-title">基本设置</div>
+            
+            <Form.Item
+              label="配置名称"
+              name="name"
+              rules={[{ required: true, message: '请输入配置名称' }]}
+            >
+              <Input placeholder="例如：JoyBuilder-Production" />
+            </Form.Item>
+
+            <Form.Item
+              label="API Key"
+              name="apiKey"
+              rules={[{ required: true, message: '请输入 API Key' }]}
+            >
+              <Input.Password placeholder="sk-xxxxx" />
+            </Form.Item>
+
+            <Form.Item
+              label="服务提供商"
+              name="baseUrl"
+              rules={[{ required: true, message: '请选择服务提供商' }]}
+            >
+              <Select
+                placeholder="选择服务提供商"
+                options={presetUrls}
+                showSearch
+                allowClear
+                onChange={handleUrlChange}
+                filterOption={(input, option) =>
+                  (option?.label ?? '').toLowerCase().includes(input.toLowerCase()) ||
+                  (option?.value ?? '').toLowerCase().includes(input.toLowerCase())
+                }
+              />
+            </Form.Item>
+
+            {selectedUrl && selectedUrl !== 'custom' && (
+              <Alert
+                message={`API 端点: ${selectedUrl}`}
+                type="info"
+                showIcon
+                style={{ marginBottom: 24 }}
+              />
+            )}
+
+            {selectedUrl === 'custom' && (
+              <Form.Item
+                label="自定义 Base URL"
+                name="baseUrl"
+                rules={[{ required: true, message: '请输入自定义 Base URL' }]}
+              >
+                <Input placeholder="https://your-api-endpoint.com/v1" />
+              </Form.Item>
+            )}
+
+            <Form.Item
+              label="代理端口"
+              name="port"
+              rules={[{ required: true, message: '请输入端口号' }]}
+            >
+              <InputNumber min={1024} max={65535} style={{ width: '100%' }} />
+            </Form.Item>
+
+            <Divider />
+            
+            <div className="form-section-title">模型配置</div>
+
+            <Alert
+              message="配置模型列表后，启动服务时会自动将模型配置写入 Claude Code 配置文件"
+              type="info"
+              showIcon
+              style={{ marginBottom: 24 }}
+            />
+            
+            <Button
+              type="dashed"
+              onClick={handleAddModel}
+              icon={<PlusOutlined />}
+              style={{ width: '100%', marginBottom: 24 }}
+            >
+              添加模型
             </Button>
-            <Button onClick={handleTestConnection}>测试连接</Button>
-          </Space>
-        </Form.Item>
-      </Form>
-    </Card>
+
+            {models.length > 0 && (
+              <div style={{ marginBottom: 24 }}>
+                <Form.Item label="默认模型" style={{ marginBottom: 0 }}>
+                  <Select
+                    placeholder="选择默认模型"
+                    value={defaultModel || undefined}
+                    onChange={setDefaultModel}
+                    allowClear
+                  >
+                    {models.map(model => (
+                      <Select.Option key={model.id} value={model.id}>
+                        {model.name || model.modelId || '未命名模型'}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </div>
+            )}
+
+            {models.map((model, index) => (
+              <Card
+                key={model.id}
+                size="small"
+                style={{ marginBottom: 16, background: 'var(--background-color)' }}
+                title={
+                  <Space>
+                    <Tag color="blue">模型 {index + 1}</Tag>
+                    {defaultModel === model.id && <Tag color="green">默认</Tag>}
+                  </Space>
+                }
+                extra={
+                  <Button
+                    type="text"
+                    danger
+                    icon={<DeleteOutlined />}
+                    onClick={() => handleDeleteModel(model.id)}
+                  />
+                }
+              >
+                <Space direction="vertical" style={{ width: '100%' }}>
+                  <Input
+                    placeholder="模型名称（例如：Claude 3.5 Sonnet）"
+                    value={model.name}
+                    onChange={(e) => handleModelChange(model.id, 'name', e.target.value)}
+                    addonBefore="名称"
+                  />
+                  <Input
+                    placeholder="模型ID（例如：claude-3-5-sonnet-20241022）"
+                    value={model.modelId}
+                    onChange={(e) => handleModelChange(model.id, 'modelId', e.target.value)}
+                    addonBefore="ID"
+                  />
+                </Space>
+              </Card>
+            ))}
+          </Form>
+        </Card>
+      </div>
+    </div>
   );
 }

@@ -1,4 +1,5 @@
 import { Card, Form, Switch, Button, message, Divider, Space, Popconfirm, Select, InputNumber } from 'antd';
+import { SaveOutlined, ReloadOutlined, DeleteOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
 
 export default function Settings() {
@@ -52,82 +53,100 @@ export default function Settings() {
   };
 
   return (
-    <div>
-      <Card title="应用设置" style={{ marginBottom: 16 }}>
-        <Form form={form} layout="vertical" onFinish={handleSubmit} style={{ maxWidth: 600 }}>
-          <Form.Item name="autoStart" label="开机自启动" valuePropName="checked">
-            <Switch />
-          </Form.Item>
+    <div className="page-container">
+      <div className="page-header">
+        <div className="page-title-group">
+          <h1>系统设置</h1>
+          <p>管理应用程序的通用设置和数据</p>
+        </div>
+      </div>
 
-          <Form.Item name="minimizeToTray" label="最小化到托盘" valuePropName="checked">
-            <Switch />
-          </Form.Item>
+      <div className="page-content">
+        <Card className="content-card" title="通用设置">
+          <Form form={form} layout="vertical" onFinish={handleSubmit} style={{ maxWidth: 800 }}>
+            <div className="form-section-title">启动与行为</div>
+            <Form.Item name="autoStart" label="开机自启动" valuePropName="checked">
+              <Switch />
+            </Form.Item>
 
-          <Form.Item name="showNotification" label="显示通知" valuePropName="checked">
-            <Switch />
-          </Form.Item>
+            <Form.Item name="minimizeToTray" label="最小化到托盘" valuePropName="checked">
+              <Switch />
+            </Form.Item>
 
-          <Form.Item name="logLevel" label="日志级别">
-            <Select
-              options={[
-                { label: 'INFO', value: 'info' },
-                { label: 'WARN', value: 'warn' },
-                { label: 'ERROR', value: 'error' },
-              ]}
-            />
-          </Form.Item>
+            <Form.Item name="showNotification" label="显示通知" valuePropName="checked">
+              <Switch />
+            </Form.Item>
 
-          <Form.Item name="logRetentionDays" label="日志保留天数">
-            <InputNumber min={1} max={30} style={{ width: '100%' }} />
-          </Form.Item>
+            <Divider />
 
-          <Form.Item>
-            <Space>
-              <Button type="primary" htmlType="submit" loading={loading}>
-                保存设置
-              </Button>
-              <Popconfirm
-                title="确定要重置设置吗？"
-                onConfirm={handleReset}
-                okText="确定"
-                cancelText="取消"
-              >
-                <Button>重置设置</Button>
-              </Popconfirm>
-            </Space>
-          </Form.Item>
-        </Form>
-      </Card>
+            <div className="form-section-title">日志设置</div>
+            <Form.Item name="logLevel" label="日志级别">
+              <Select
+                options={[
+                  { label: 'INFO', value: 'info' },
+                  { label: 'WARN', value: 'warn' },
+                  { label: 'ERROR', value: 'error' },
+                ]}
+              />
+            </Form.Item>
 
-      <Card title="数据管理">
-        <Space direction="vertical" style={{ width: '100%' }}>
-          <div>
-            <Button onClick={handleClearCache}>清除缓存</Button>
-            <p style={{ color: '#8c8c8c', marginTop: 8, fontSize: 12 }}>
-              清除应用缓存数据，不会影响配置和历史记录
-            </p>
-          </div>
+            <Form.Item name="logRetentionDays" label="日志保留天数">
+              <InputNumber min={1} max={30} style={{ width: '100%' }} />
+            </Form.Item>
 
-          <Divider />
+            <Form.Item style={{ marginTop: 24 }}>
+              <Space>
+                <Button type="primary" htmlType="submit" loading={loading} icon={<SaveOutlined />}>
+                  保存设置
+                </Button>
+                <Popconfirm
+                  title="确定要重置设置吗？"
+                  onConfirm={handleReset}
+                  okText="确定"
+                  cancelText="取消"
+                >
+                  <Button icon={<ReloadOutlined />}>重置设置</Button>
+                </Popconfirm>
+              </Space>
+            </Form.Item>
+          </Form>
+        </Card>
 
-          <div>
-            <Button danger>重置应用</Button>
-            <p style={{ color: '#8c8c8c', marginTop: 8, fontSize: 12 }}>
-              重置应用到初始状态，所有数据将被清除
-            </p>
-          </div>
-        </Space>
-      </Card>
+        <Card className="content-card" title="数据管理">
+          <Space direction="vertical" style={{ width: '100%' }} size="large">
+            <div>
+              <div style={{ marginBottom: 8, fontWeight: 500 }}>应用缓存</div>
+              <div style={{ color: 'var(--text-secondary-color)', marginBottom: 16, fontSize: 13 }}>
+                清除应用缓存数据，不会影响配置和历史记录
+              </div>
+              <Button onClick={handleClearCache} icon={<DeleteOutlined />}>清除缓存</Button>
+            </div>
 
-      <Card title="关于" style={{ marginTop: 16 }}>
-        <p>
-          <strong>DongCC</strong> v1.0.0
-        </p>
-        <p>Claude Code 本地代理服务管理工具</p>
-        <p style={{ color: '#8c8c8c', marginTop: 8, fontSize: 12 }}>
-          © 2026 DongCC Team. All rights reserved.
-        </p>
-      </Card>
+            <Divider style={{ margin: '0' }} />
+
+            <div>
+              <div style={{ marginBottom: 8, fontWeight: 500 }}>重置应用</div>
+              <div style={{ color: 'var(--text-secondary-color)', marginBottom: 16, fontSize: 13 }}>
+                重置应用到初始状态，所有数据将被清除
+              </div>
+              <Button danger icon={<DeleteOutlined />}>重置应用</Button>
+            </div>
+          </Space>
+        </Card>
+
+        <Card className="content-card" title="关于">
+          <Space align="start">
+            <InfoCircleOutlined style={{ fontSize: 24, color: 'var(--primary-color)' }} />
+            <div>
+              <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 4 }}>DongCC v1.0.0</div>
+              <div style={{ marginBottom: 8 }}>Claude Code 本地代理服务管理工具</div>
+              <div style={{ color: 'var(--text-secondary-color)', fontSize: 12 }}>
+                © 2026 DongCC Team. All rights reserved.
+              </div>
+            </div>
+          </Space>
+        </Card>
+      </div>
     </div>
   );
 }

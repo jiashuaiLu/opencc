@@ -25,7 +25,9 @@ DongCC 是一个功能强大的 macOS 桌面应用，旨在简化 Claude Code �
 - 💬 **对话历史** - 查看和管理所有对话历史，支持搜索和导出
 - 🔧 **环境检查** - 自动检测本地环境，确保依赖完整
 - 📈 **数据统计** - 可视化展示 Token 消耗、请求耗时、成功率等数据
-- 🎨 **清新界面** - 采用 Ant Design 设计语言，界面简洁美观
+- 🎨 **极简设计** - 采用全新的极简主义设计系统，提供清晰的视觉层次和信息架构
+- 🌓 **暗黑模式** - 原生支持深色模式，可跟随系统自动切换或手动设置
+- 🔌 **插件管理** - 完善的 MCP (Model Context Protocol) 和 Skills 管理功能
 
 ---
 
@@ -115,6 +117,11 @@ npm run electron:build
 - 查看对话详情
 - 删除历史记录
 
+### 6. 插件管理
+
+- **MCP 管理**: 配置和管理 Model Context Protocol 服务器
+- **Skills 管理**: 管理和发现 Claude Code 技能插件，支持从 ZIP 安装、扫描本地目录或从仓库安装
+
 ---
 
 ## 🛠️ 开发指南
@@ -136,7 +143,9 @@ dongcc/
 │   │   ├── App.tsx          # 应用根组件
 │   │   ├── pages/           # 页面组件
 │   │   ├── components/      # 通用组件
-│   │   └── styles/          # 样式文件
+│   │   ├── styles/          # 样式文件 (common.css, global.css 等)
+│   │   ├── theme/           # 主题配置
+│   │   └── context/         # React Context (ThemeContext 等)
 │   └── shared/              # 共享代码
 │       └── types.ts         # 类型定义
 ├── resources/               # 资源文件
@@ -145,6 +154,7 @@ dongcc/
 ├── package.json           # 项目配置
 ├── tsconfig.json          # TypeScript 配置
 ├── vite.config.ts         # Vite 配置
+├── DESIGN_SYSTEM.md       # 设计规范文档
 └── README.md              # 项目文档
 ```
 
@@ -152,11 +162,12 @@ dongcc/
 
 - **前端框架**: React 18 + TypeScript
 - **桌面框架**: Electron
-- **UI 组件**: Ant Design
-- **状态管理**: Zustand
+- **UI 组件**: Ant Design 5
+- **样式方案**: CSS Variables + Ant Design Token
+- **状态管理**: Zustand + React Context
 - **路由**: React Router
-- **图表**: Chart.js
-- **数据库**: SQLite
+- **图表**: Recharts
+- **数据库**: LowDB
 - **日志**: Winston
 - **构建工具**: Vite + Electron Builder
 
@@ -189,6 +200,9 @@ npm run format              # 格式化代码
 - [x] 日志查看
 - [x] 基础统计
 - [x] 对话历史
+- [x] MCP & Skills 管理
+- [x] 全新 UI/UX 设计
+- [x] 暗黑模式支持
 
 ### v1.1.0 (计划中)
 
@@ -199,10 +213,9 @@ npm run format              # 格式化代码
 
 ### v1.2.0 (计划中)
 
-- [ ] UI/UX 优化
 - [ ] 性能优化
-- [ ] 插件系统
-- [ ] 主题定制
+- [ ] 插件系统增强
+- [ ] 主题定制增强
 
 ---
 
@@ -242,6 +255,7 @@ npm run format              # 格式化代码
 - [Ant Design](https://ant.design/)
 - [Vite](https://vitejs.dev/)
 - [TypeScript](https://www.typescriptlang.org/)
+- [Recharts](https://recharts.org/)
 
 ---
 

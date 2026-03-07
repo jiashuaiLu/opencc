@@ -1,3 +1,6 @@
+/* Global Styles */
+
+/* Reset & Base */
 * {
   margin: 0;
   padding: 0;
@@ -6,31 +9,179 @@
 
 html, body, #root {
   height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 
-               'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  width: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
 }
 
 body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: var(--background-color, #f0f2f5);
+  color: var(--text-color, rgba(0, 0, 0, 0.88));
+  transition: background 0.3s, color 0.3s;
 }
 
-/* 滚动条样式 */
+/* Scrollbar Customization */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+body.dark-theme ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+body.dark-theme ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Ant Design Overrides & Enhancements */
+
+/* Card */
+.ant-card {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px 0 rgba(0, 0, 0, 0.02);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--surface-color);
+}
+
+body.dark-theme .ant-card {
+  border: 1px solid var(--border-color);
+}
+
+.ant-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+}
+
+/* Button */
+.ant-btn {
+  box-shadow: none;
+  font-weight: 500;
+}
+
+.ant-btn-primary {
+  box-shadow: 0 2px 0 rgba(5, 145, 255, 0.1);
+}
+
+.ant-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(5, 145, 255, 0.3);
+}
+
+/* Table */
+.ant-table-wrapper .ant-table-thead > tr > th {
+  background: transparent;
+  border-bottom: 1px solid var(--border-color, #f0f0f0);
+  font-weight: 600;
+}
+
+/* Modal */
+.ant-modal-content {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  padding: 0;
+  overflow: hidden;
+}
+
+.ant-modal-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border-color, #f0f0f0);
+  margin-bottom: 0;
+}
+
+.ant-modal-body {
+  padding: 24px;
+}
+
+.ant-modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-color, #f0f0f0);
+  margin-top: 0;
+}
+
+/* Input & Select */
+.ant-input,
+.ant-input-number,
+.ant-select-selector,
+.ant-picker {
+  transition: all 0.2s;
+}
+
+.ant-input:hover,
+.ant-input-number:hover,
+.ant-select-selector:hover,
+.ant-picker:hover {
+  border-color: var(--primary-color, #1677ff);
+}
+
+.ant-input:focus,
+.ant-input-focused,
+.ant-input-number:focus,
+.ant-input-number-focused,
+.ant-select-focused .ant-select-selector,
+.ant-picker-focused {
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Utilities */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+body.dark-theme .glass-effect {
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Gradient Backgrounds */
+.gradient-primary { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+.gradient-success { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
+.gradient-warning { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+.gradient-danger { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+
+/* Code Block */
+code {
+  background: rgba(0, 0, 0, 0.06);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.9em;
+  color: #eb5757;
+}
+
+body.dark-theme code {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ff7875;
+}
+
+/* Tag */
+.ant-tag {
+  border-radius: 4px;
+  border: none;
+  font-weight: 500;
+  padding: 1px 8px;
 }

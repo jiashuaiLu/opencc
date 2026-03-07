@@ -4,6 +4,12 @@ export interface Config {
   apiKey: string;
   baseUrl: string;
   port: number;
+  models?: Array<{
+    id: string;
+    name: string;
+    modelId: string;
+  }>;
+  defaultModel?: string;
   isDefault?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
@@ -56,6 +62,10 @@ export interface Settings {
   showNotification: boolean;
   logLevel: 'info' | 'warn' | 'error';
   logRetentionDays: number;
+  theme?: {
+    mode: 'light' | 'dark' | 'auto';
+    customColors?: any;
+  };
 }
 
 export interface ServiceStatus {

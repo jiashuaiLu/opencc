@@ -7,6 +7,10 @@ import History from './pages/History';
 import Settings from './pages/Settings';
 import Documentation from './pages/Documentation';
 import Info from './pages/Info';
+import McpManagement from './pages/McpManagement';
+import SkillManagement from './pages/SkillManagement';
+import ThemeSettings from './pages/ThemeSettings';
+import './styles/common.css';
 
 function App() {
   return (
@@ -16,6 +20,9 @@ function App() {
         <Route path="/config" element={<Config />} />
         <Route path="/logs" element={<Logs />} />
         <Route path="/history" element={<History />} />
+        <Route path="/mcp" element={<McpManagement />} />
+        <Route path="/skills" element={<SkillManagement />} />
+        <Route path="/theme" element={<ThemeSettings />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/documentation" element={<Documentation />} />
         <Route path="/info" element={<Info />} />

@@ -1,0 +1,904 @@
+import { Card, Button, Space, Tag, Modal, Form, Input, message, Empty, Tooltip, Badge, Divider, Typography, Tabs } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, LinkOutlined, StarOutlined, BookOutlined, EyeOutlined, DownOutlined, UpOutlined, ImportOutlined, GithubOutlined, ExclamationCircleOutlined, GlobalOutlined, FolderOutlined, FolderOpenOutlined, SearchOutlined } from '@ant-design/icons';
+import { useState, useEffect, useMemo } from 'react';
+
+interface SkillApps {
+  claude: boolean;
+}
+
+interface InstalledSkill {
+  id: string;
+  name: string;
+  description?: string;
+  directory: string;
+  repoOwner?: string;
+  repoName?: string;
+  repoBranch?: string;
+  readmeUrl?: string;
+  apps: SkillApps;
+  installedAt: number;
+  sourceType: 'global' | 'project';
+  sourceProject?: string;
+}
+
+interface SkillRepo {
+  owner: string;
+  name: string;
+  branch: string;
+  enabled: boolean;
+}
+
+interface UnmanagedSkill {
+  directory: string;
+  name: string;
+  description?: string;
+  path: string;
+  sourceType: 'global' | 'project';
+  sourceProject?: string;
+  foundIn: string[];
+}
+
+interface ProjectInfo {
+  path: string;
+  name: string;
+  hasSkills: boolean;
+}
+
+const APP_CONFIG = {
+  claude: {
+    label: 'Claude',
+    color: '#f97316',
+    bgColor: 'rgba(249, 115, 22, 0.1)',
+    activeColor: 'rgba(249, 115, 22, 0.2)',
+  },
+};
+
+type AppId = keyof typeof APP_CONFIG;
+
+function AppCountBar({ totalLabel, counts }: { totalLabel: string; counts: Record<AppId, number> }) {
+  return (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: '12px 24px',
+      marginBottom: 16,
+      background: 'linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.4) 100%)',
+      borderRadius: 12,
+      border: '1px solid rgba(0,0,0,0.06)',
+    }}>
+      <Badge count={totalLabel} style={{ backgroundColor: 'rgba(0,0,0,0.04)', color: '#666', fontWeight: 500 }} />
+      <div style={{ display: 'flex', gap: 8 }}>
+        {Object.entries(APP_CONFIG).map(([app, config]) => (
+          <Tag
+            key={app}
+            style={{
+              margin: 0,
+              background: config.bgColor,
+              border: 'none',
+              borderRadius: 6,
+              padding: '2px 10px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+            }}
+          >
+            <span style={{ opacity: 0.75 }}>{config.label}:</span>
+            <span style={{ fontWeight: 700 }}>{counts[app as AppId]}</span>
+          </Tag>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AppToggleGroup({
+  apps,
+  onToggle,
+}: {
+  apps: Record<AppId, boolean>;
+  onToggle: (app: AppId, enabled: boolean) => void;
+}) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+      {Object.entries(APP_CONFIG).map(([app, config]) => {
+        const enabled = apps[app as AppId];
+        return (
+          <Tooltip key={app} title={`${config.label}${enabled ? ' ✓' : ''}`}>
+            <button
+              type="button"
+              onClick={() => onToggle(app as AppId, !enabled)}
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: 8,
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s',
+                background: enabled ? config.activeColor : 'transparent',
+                opacity: enabled ? 1 : 0.35,
+              }}
+            >
+              <span style={{ fontSize: 12, fontWeight: 600, color: config.color }}>C</span>
+            </button>
+          </Tooltip>
+        );
+      })}
+    </div>
+  );
+}
+
+function ListItemRow({
+  isLast,
+  children,
+}: {
+  isLast?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className="list-item-row"
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        padding: '10px 16px',
+        borderBottom: isLast ? 'none' : '1px solid rgba(0,0,0,0.06)',
+        transition: 'background 0.2s',
+      }}
+    >
+      {children}
+      <style>{`
+        .list-item-row:hover {
+          background: rgba(0,0,0,0.02);
+        }
+        .list-item-row:hover .action-buttons {
+          opacity: 1;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+export default function SkillManagement() {
+  const [skills, setSkills] = useState<InstalledSkill[]>([]);
+  const [repos, setRepos] = useState<SkillRepo[]>([]);
+  const [projects, setProjects] = useState<ProjectInfo[]>([]);
+  const [unmanaged, setUnmanaged] = useState<UnmanagedSkill[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [detailModalVisible, setDetailModalVisible] = useState(false);
+  const [repoModalVisible, setRepoModalVisible] = useState(false);
+  const [importModalVisible, setImportModalVisible] = useState(false);
+  const [selectedSkill, setSelectedSkill] = useState<InstalledSkill | null>(null);
+  const [selectedImport, setSelectedImport] = useState<Set<string>>(new Set());
+  const [customProjectPath, setCustomProjectPath] = useState('');
+  const [scanningCustom, setScanningCustom] = useState(false);
+  const [repoForm] = Form.useForm();
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [skillData, repoData, projectData] = await Promise.all([
+        window.electronAPI.getSkills(),
+        window.electronAPI.getSkillRepos(),
+        window.electronAPI.listProjectsWithSkills()
+      ]);
+      setSkills(skillData || []);
+      setRepos(repoData || []);
+      setProjects(projectData || []);
+    } catch (error) {
+      console.error('Failed to load skills:', error);
+      message.error('加载 Skills 失败');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadUnmanaged = async () => {
+    try {
+      const data = await window.electronAPI.scanUnmanagedSkills();
+      setUnmanaged(data || []);
+      setSelectedImport(new Set((data || []).map((s: UnmanagedSkill) => s.path)));
+    } catch (error) {
+      console.error('Failed to scan unmanaged skills:', error);
+    }
+  };
+
+  const handleScanCustomProject = async () => {
+    if (!customProjectPath.trim()) {
+      message.warning('请输入项目路径');
+      return;
+    }
+
+    setScanningCustom(true);
+    try {
+      const customSkills = await window.electronAPI.scanCustomProject(customProjectPath.trim());
+      if (customSkills.length === 0) {
+        message.info('该项目中没有发现 Skills');
+        return;
+      }
+
+      const existingPaths = new Set(unmanaged.map(s => s.path));
+      const newSkills = customSkills.filter(s => !existingPaths.has(s.path));
+
+      if (newSkills.length === 0) {
+        message.info('该项目中的 Skills 已在列表中');
+        return;
+      }
+
+      setUnmanaged(prev => [...prev, ...newSkills]);
+      setSelectedImport(prev => {
+        const newSet = new Set(prev);
+        newSkills.forEach(s => newSet.add(s.path));
+        return newSet;
+      });
+
+      message.success(`发现 ${newSkills.length} 个新 Skills`);
+      setCustomProjectPath('');
+    } catch (error) {
+      message.error('扫描项目失败');
+    } finally {
+      setScanningCustom(false);
+    }
+  };
+
+  const handleDelete = (skill: InstalledSkill) => {
+    Modal.confirm({
+      title: '卸载确认',
+      icon: <ExclamationCircleOutlined />,
+      content: `确定要卸载 Skill "${skill.name}" 吗？这将删除本地文件。`,
+      okText: '确定',
+      cancelText: '取消',
+      okButtonProps: { danger: true },
+      onOk: async () => {
+        try {
+          await window.electronAPI.deleteSkill(skill.id);
+          message.success('卸载成功');
+          loadData();
+        } catch (error) {
+          message.error('卸载失败');
+        }
+      },
+    });
+  };
+
+  const handleToggleApp = async (id: string, app: 'claude', enabled: boolean) => {
+    try {
+      await window.electronAPI.toggleSkillApp(id, app, enabled);
+      loadData();
+    } catch (error) {
+      message.error('操作失败');
+    }
+  };
+
+  const handleViewDetail = (skill: InstalledSkill) => {
+    setSelectedSkill(skill);
+    setDetailModalVisible(true);
+  };
+
+  const handleOpenInFinder = async (skill: InstalledSkill) => {
+    try {
+      const result = await window.electronAPI.getSkillDirectory(skill.id);
+      
+      if (!result.exists) {
+        message.warning(`Skill 目录不存在，可能需要重新导入。路径: ${result.dir}`);
+        return;
+      }
+      
+      await window.electronAPI.openInFinder(result.dir);
+    } catch (error) {
+      console.error('handleOpenInFinder error:', error);
+      message.error(`打开目录失败: ${error}`);
+    }
+  };
+
+  const handleOpenReadme = async (url: string) => {
+    try {
+      await window.electronAPI.openExternal(url);
+    } catch (error) {
+      console.error('Failed to open URL:', error);
+    }
+  };
+
+  const handleOpenImport = async () => {
+    setImportModalVisible(true);
+    setScanningCustom(true);
+    try {
+      const data = await window.electronAPI.scanUnmanagedSkills();
+      setUnmanaged(data || []);
+      setSelectedImport(new Set((data || []).map((s: UnmanagedSkill) => s.path)));
+    } catch (error) {
+      console.error('Failed to scan unmanaged skills:', error);
+    } finally {
+      setScanningCustom(false);
+    }
+  };
+
+  const handleImport = async () => {
+    try {
+      const paths = Array.from(selectedImport);
+      if (paths.length === 0) {
+        message.warning('请选择要导入的 Skills');
+        return;
+      }
+
+      let importedCount = 0;
+      for (const path of paths) {
+        const skill = unmanaged.find(s => s.path === path);
+        if (skill) {
+          await window.electronAPI.importSkillFromPath(path, skill.sourceType, skill.sourceProject);
+          importedCount++;
+        }
+      }
+
+      message.success(`成功导入 ${importedCount} 个 Skills`);
+      setImportModalVisible(false);
+      loadData();
+    } catch (error) {
+      message.error('导入失败');
+    }
+  };
+
+  const handleAddRepo = async () => {
+    try {
+      const values = await repoForm.validateFields();
+      const repo: SkillRepo = {
+        owner: values.owner.trim(),
+        name: values.name.trim(),
+        branch: values.branch?.trim() || 'main',
+        enabled: true,
+      };
+      await window.electronAPI.saveSkillRepo(repo);
+      message.success('仓库添加成功');
+      repoForm.resetFields();
+      loadData();
+    } catch (error) {
+      message.error('添加失败');
+    }
+  };
+
+  const handleDeleteRepo = (owner: string, name: string) => {
+    Modal.confirm({
+      title: '删除确认',
+      icon: <ExclamationCircleOutlined />,
+      content: `确定要删除仓库 "${owner}/${name}" 吗？`,
+      okText: '确定',
+      cancelText: '取消',
+      okButtonProps: { danger: true },
+      onOk: async () => {
+        try {
+          await window.electronAPI.deleteSkillRepo(owner, name);
+          message.success('仓库删除成功');
+          loadData();
+        } catch (error) {
+          message.error('删除失败');
+        }
+      },
+    });
+  };
+
+  const handleOpenRepo = async (owner: string, name: string) => {
+    try {
+      await window.electronAPI.openExternal(`https://github.com/${owner}/${name}`);
+    } catch (error) {
+      console.error('Failed to open URL:', error);
+    }
+  };
+
+  const enabledCounts = useMemo(() => {
+    const counts = { claude: 0 };
+    skills.forEach((skill) => {
+      if (skill.apps.claude) counts.claude++;
+    });
+    return counts;
+  }, [skills]);
+
+  const globalSkills = useMemo(() => skills.filter(s => s.sourceType === 'global'), [skills]);
+  const projectSkills = useMemo(() => skills.filter(s => s.sourceType === 'project'), [skills]);
+
+  const getSkillCount = (repo: SkillRepo) =>
+    skills.filter(
+      (skill) =>
+        skill.repoOwner === repo.owner &&
+        skill.repoName === repo.name &&
+        (skill.repoBranch || 'main') === (repo.branch || 'main')
+    ).length;
+
+  const renderSkillList = (skillList: InstalledSkill[]) => {
+    if (skillList.length === 0) return null;
+
+    return skillList.map((skill, index) => {
+      const sourceLabel = skill.repoOwner && skill.repoName
+        ? `${skill.repoOwner}/${skill.repoName}`
+        : skill.sourceType === 'project' && skill.sourceProject
+          ? path.basename(skill.sourceProject)
+          : '本地';
+
+      return (
+        <ListItemRow key={skill.id} isLast={index === skillList.length - 1}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ fontWeight: 500, fontSize: 14, color: '#333' }}>
+                {skill.name}
+              </span>
+              {skill.readmeUrl && (
+                <button
+                  type="button"
+                  onClick={() => handleOpenReadme(skill.readmeUrl!)}
+                  style={{
+                    border: 'none',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    padding: 0,
+                    color: '#999',
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                  title="查看文档"
+                >
+                  <LinkOutlined style={{ fontSize: 12 }} />
+                </button>
+              )}
+              <Tag
+                style={{
+                  fontSize: 10,
+                  padding: '0 6px',
+                  lineHeight: '18px',
+                  borderRadius: 4,
+                  background: skill.sourceType === 'global' ? '#e6f7ff' : '#f6ffed',
+                  color: skill.sourceType === 'global' ? '#1890ff' : '#52c41a',
+                  border: 'none',
+                }}
+              >
+                {skill.sourceType === 'global' ? '全局' : '项目'}
+              </Tag>
+              <span style={{ fontSize: 12, color: '#bbb' }}>
+                {sourceLabel}
+              </span>
+            </div>
+            {skill.description && (
+              <p style={{ margin: '4px 0 0', fontSize: 12, color: '#999', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {skill.description}
+              </p>
+            )}
+            {skill.sourceType === 'project' && skill.sourceProject && (
+              <p style={{ margin: '2px 0 0', fontSize: 11, color: '#bbb' }}>
+                来源: {skill.sourceProject}
+              </p>
+            )}
+          </div>
+
+          <AppToggleGroup
+            apps={skill.apps}
+            onToggle={(app, enabled) => handleToggleApp(skill.id, app, enabled)}
+          />
+
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+            }}
+          >
+            <Tooltip title="打开目录">
+              <Button
+                type="text"
+                size="small"
+                icon={<FolderOpenOutlined style={{ fontSize: 14, color: '#1890ff' }} />}
+                onClick={() => handleOpenInFinder(skill)}
+                style={{ width: 28, height: 28, padding: 0 }}
+              />
+            </Tooltip>
+            <Tooltip title="卸载">
+              <Button
+                type="text"
+                size="small"
+                danger
+                icon={<DeleteOutlined style={{ fontSize: 14 }} />}
+                onClick={() => handleDelete(skill)}
+                style={{ width: 28, height: 28, padding: 0 }}
+              />
+            </Tooltip>
+          </div>
+        </ListItemRow>
+      );
+    });
+  };
+
+  const path = window.require ? window.require('path') : { basename: (p: string) => p.split('/').pop() || p };
+
+  return (
+    <div style={{ padding: '0 24px' }}>
+      <AppCountBar
+        totalLabel={`已安装 ${skills.length} 个 (全局 ${globalSkills.length}, 项目 ${projectSkills.length})`}
+        counts={enabledCounts}
+      />
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16, gap: 8 }}>
+        <Button icon={<ImportOutlined />} onClick={handleOpenImport}>
+          扫描并导入
+        </Button>
+        <Button icon={<GithubOutlined />} onClick={() => setRepoModalVisible(true)}>
+          添加仓库
+        </Button>
+      </div>
+
+      <div
+        style={{
+          borderRadius: 12,
+          border: '1px solid rgba(0,0,0,0.06)',
+          overflow: 'hidden',
+          background: '#fff',
+        }}
+      >
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: 48, color: '#999' }}>
+            加载中...
+          </div>
+        ) : skills.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: 48 }}>
+            <div
+              style={{
+                width: 64,
+                height: 64,
+                margin: '0 auto 16px',
+                background: 'rgba(0,0,0,0.04)',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <StarOutlined style={{ fontSize: 24, color: '#999' }} />
+            </div>
+            <h3 style={{ margin: '0 0 8px', fontSize: 16, fontWeight: 500 }}>
+              暂无 Skills
+            </h3>
+            <p style={{ margin: '0 0 16px', color: '#999', fontSize: 14 }}>
+              点击"导入本地"按钮扫描并导入已存在的 Claude Code Skills
+            </p>
+            <div style={{ marginTop: 16, padding: 16, background: '#f5f5f5', borderRadius: 8, textAlign: 'left' }}>
+              <Typography.Text style={{ fontSize: 13, fontWeight: 500, display: 'block', marginBottom: 8 }}>
+                Claude Code Skills 扫描规则：
+              </Typography.Text>
+              <ul style={{ margin: 0, paddingLeft: 20, color: '#666', fontSize: 12 }}>
+                <li>全局目录: ~/.config/claude-code/plugins/</li>
+                <li>项目极简模式: 项目根目录/skills/ (无需plugin.json)</li>
+                <li>项目插件模式: 项目根目录/.claude-plugin/skills/</li>
+                <li>项目配置目录: 项目根目录/.claude/skills/</li>
+              </ul>
+            </div>
+          </div>
+        ) : (
+          <>
+            {globalSkills.length > 0 && (
+              <>
+                <div style={{ padding: '8px 16px', background: '#fafafa', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                  <Space>
+                    <GlobalOutlined style={{ color: '#1890ff' }} />
+                    <span style={{ fontWeight: 500, fontSize: 13 }}>全局 Skills</span>
+                    <Tag style={{ marginLeft: 4 }} color="blue">{globalSkills.length}</Tag>
+                  </Space>
+                </div>
+                {renderSkillList(globalSkills)}
+              </>
+            )}
+            {projectSkills.length > 0 && (
+              <>
+                {globalSkills.length > 0 && (
+                  <div style={{ height: 1, background: 'rgba(0,0,0,0.06)' }} />
+                )}
+                <div style={{ padding: '8px 16px', background: '#fafafa', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                  <Space>
+                    <FolderOutlined style={{ color: '#52c41a' }} />
+                    <span style={{ fontWeight: 500, fontSize: 13 }}>项目 Skills</span>
+                    <Tag style={{ marginLeft: 4 }} color="green">{projectSkills.length}</Tag>
+                  </Space>
+                </div>
+                {renderSkillList(projectSkills)}
+              </>
+            )}
+          </>
+        )}
+      </div>
+
+      <Modal
+        title={
+          <Space>
+            <StarOutlined style={{ color: '#722ed1' }} />
+            <span>{selectedSkill?.name}</span>
+          </Space>
+        }
+        open={detailModalVisible}
+        onCancel={() => setDetailModalVisible(false)}
+        width={600}
+        footer={[
+          <Button key="finder" icon={<FolderOpenOutlined />} onClick={() => {
+            handleOpenInFinder(selectedSkill!);
+          }}>
+            打开目录
+          </Button>,
+          selectedSkill?.readmeUrl && (
+            <Button key="readme" icon={<BookOutlined />} onClick={() => handleOpenReadme(selectedSkill.readmeUrl!)}>
+              查看 README
+            </Button>
+          ),
+          <Button key="close" onClick={() => setDetailModalVisible(false)}>
+            关闭
+          </Button>,
+        ]}
+      >
+        {selectedSkill && (
+          <div>
+            <Space style={{ marginBottom: 16 }}>
+              <Tag color={selectedSkill.sourceType === 'global' ? 'blue' : 'green'}>
+                {selectedSkill.sourceType === 'global' ? '全局' : '项目'}
+              </Tag>
+              <Tag color="purple">{selectedSkill.directory}</Tag>
+              {selectedSkill.repoOwner && selectedSkill.repoName && (
+                <Tag icon={<GithubOutlined />} color="blue">
+                  {selectedSkill.repoOwner}/{selectedSkill.repoName}
+                </Tag>
+              )}
+            </Space>
+
+            {selectedSkill.description && (
+              <>
+                <Divider style={{ margin: '12px 0' }} />
+                <div style={{ marginBottom: 16 }}>
+                  <Typography.Text strong>描述</Typography.Text>
+                  <p style={{ margin: '8px 0', color: '#595959' }}>{selectedSkill.description}</p>
+                </div>
+              </>
+            )}
+
+            {selectedSkill.sourceType === 'project' && selectedSkill.sourceProject && (
+              <>
+                <Divider style={{ margin: '12px 0' }} />
+                <div style={{ marginBottom: 16 }}>
+                  <Typography.Text strong>来源项目</Typography.Text>
+                  <p style={{ margin: '8px 0', color: '#595959' }}>{selectedSkill.sourceProject}</p>
+                </div>
+              </>
+            )}
+
+            <Divider style={{ margin: '12px 0' }} />
+
+            <div>
+              <Typography.Text strong>安装信息</Typography.Text>
+              <div style={{ marginTop: 8 }}>
+                <p style={{ margin: '4px 0', color: '#8c8c8c' }}>
+                  安装时间: {new Date(selectedSkill.installedAt * 1000).toLocaleString()}
+                </p>
+                <p style={{ margin: '4px 0', color: '#8c8c8c' }}>
+                  Claude Code: {selectedSkill.apps.claude ? '已启用' : '未启用'}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      <Modal
+        title={
+          <Space>
+            <GithubOutlined style={{ color: '#1890ff' }} />
+            <span>管理 Skills 仓库</span>
+          </Space>
+        }
+        open={repoModalVisible}
+        onCancel={() => setRepoModalVisible(false)}
+        footer={null}
+        width={600}
+      >
+        <div style={{ marginTop: 16 }}>
+          <div style={{ padding: 12, background: '#e6f7ff', borderRadius: 6, marginBottom: 16 }}>
+            <Typography.Text style={{ fontSize: 12 }}>
+              💡 添加 GitHub 仓库后，可以从仓库中安装 Skills。例如：anthropics/skills
+            </Typography.Text>
+          </div>
+          <Form form={repoForm} layout="vertical">
+            <Form.Item label="仓库地址">
+              <Space.Compact style={{ width: '100%' }}>
+                <Form.Item name="owner" noStyle rules={[{ required: true, message: '请输入所有者' }]}>
+                  <Input placeholder="所有者，例如：anthropics" style={{ width: '40%' }} />
+                </Form.Item>
+                <span style={{ display: 'flex', alignItems: 'center', padding: '0 8px', background: '#f5f5f5', border: '1px solid #d9d9d9' }}>/</span>
+                <Form.Item name="name" noStyle rules={[{ required: true, message: '请输入仓库名' }]}>
+                  <Input placeholder="仓库名，例如：skills" style={{ width: '40%' }} />
+                </Form.Item>
+              </Space.Compact>
+            </Form.Item>
+            <Form.Item name="branch" label="分支">
+              <Input placeholder="默认：main" />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" onClick={handleAddRepo}>
+                添加仓库
+              </Button>
+            </Form.Item>
+          </Form>
+
+          <Divider style={{ margin: '16px 0' }} />
+
+          <h4 style={{ marginBottom: 12 }}>已添加的仓库</h4>
+          {repos.length === 0 ? (
+            <p style={{ color: '#999', fontSize: 14 }}>暂无仓库</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {repos.map((repo) => (
+                <div
+                  key={`${repo.owner}/${repo.name}`}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '12px 16px',
+                    borderRadius: 12,
+                    border: '1px solid rgba(0,0,0,0.06)',
+                    background: '#fafafa',
+                  }}
+                >
+                  <div>
+                    <div style={{ fontWeight: 500, fontSize: 14 }}>
+                      {repo.owner}/{repo.name}
+                    </div>
+                    <div style={{ marginTop: 4, fontSize: 12, color: '#999' }}>
+                      分支: {repo.branch || 'main'}
+                      <Tag style={{ marginLeft: 8, fontSize: 11 }} color="blue">
+                        {getSkillCount(repo)} 个 Skills
+                      </Tag>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<LinkOutlined />}
+                      onClick={() => handleOpenRepo(repo.owner, repo.name)}
+                      title="查看仓库"
+                    />
+                    <Button
+                      type="text"
+                      size="small"
+                      danger
+                      icon={<DeleteOutlined />}
+                      onClick={() => handleDeleteRepo(repo.owner, repo.name)}
+                      title="删除"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </Modal>
+
+      <Modal
+        title="导入本地 Skills"
+        open={importModalVisible}
+        onCancel={() => setImportModalVisible(false)}
+        onOk={handleImport}
+        okText="导入选中"
+        cancelText="取消"
+        width={700}
+      >
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+            <Input
+              placeholder="输入项目路径扫描 Skills，例如：/Users/xxx/projects/my-project"
+              value={customProjectPath}
+              onChange={(e) => setCustomProjectPath(e.target.value)}
+              onPressEnter={handleScanCustomProject}
+              prefix={<FolderOpenOutlined style={{ color: '#999' }} />}
+            />
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={handleScanCustomProject}
+              loading={scanningCustom}
+            >
+              扫描
+            </Button>
+          </div>
+          <div style={{ padding: 12, background: '#fafafa', borderRadius: 6, marginTop: 8 }}>
+            <Typography.Text style={{ fontSize: 12, fontWeight: 500, display: 'block', marginBottom: 6 }}>
+              自动扫描目录：
+            </Typography.Text>
+            <ul style={{ margin: 0, paddingLeft: 20, color: '#666', fontSize: 12, lineHeight: '20px' }}>
+              <li>全局: ~/.config/claude-code/plugins/</li>
+              <li>项目极简模式: 项目根目录/skills/</li>
+              <li>项目插件模式: 项目根目录/.claude-plugin/skills/</li>
+              <li>项目配置: 项目根目录/.claude/skills/</li>
+            </ul>
+          </div>
+        </div>
+
+        <Divider style={{ margin: '12px 0' }} />
+
+        {scanningCustom ? (
+          <div style={{ textAlign: 'center', padding: 40, color: '#999' }}>
+            正在扫描...
+          </div>
+        ) : unmanaged.length === 0 ? (
+          <Empty description="没有发现未管理的 Skills" />
+        ) : (
+          <>
+            <p style={{ marginBottom: 12, color: '#8c8c8c' }}>
+              发现 {unmanaged.length} 个未管理的 Skills，选择后点击导入即可纳入统一管理：
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 350, overflow: 'auto' }}>
+            {unmanaged.map((skill) => (
+              <label
+                key={skill.path}
+                style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: 12,
+                  padding: 12,
+                  borderRadius: 8,
+                  border: '1px solid rgba(0,0,0,0.06)',
+                  cursor: 'pointer',
+                  background: selectedImport.has(skill.path) ? '#f0f5ff' : '#fff',
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedImport.has(skill.path)}
+                  onChange={() => {
+                    const newSelected = new Set(selectedImport);
+                    if (newSelected.has(skill.path)) {
+                      newSelected.delete(skill.path);
+                    } else {
+                      newSelected.add(skill.path);
+                    }
+                    setSelectedImport(newSelected);
+                  }}
+                  style={{ marginTop: 4 }}
+                />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontWeight: 500 }}>{skill.name}</span>
+                    <Tag
+                      style={{
+                        fontSize: 10,
+                        padding: '0 6px',
+                        lineHeight: '18px',
+                        borderRadius: 4,
+                        background: skill.sourceType === 'global' ? '#e6f7ff' : '#f6ffed',
+                        color: skill.sourceType === 'global' ? '#1890ff' : '#52c41a',
+                        border: 'none',
+                      }}
+                    >
+                      {skill.sourceType === 'global' ? '全局' : '项目'}
+                    </Tag>
+                  </div>
+                  {skill.description && (
+                    <div style={{ fontSize: 12, color: '#999', marginTop: 4 }}>
+                      {skill.description}
+                    </div>
+                  )}
+                  <div style={{ fontSize: 11, color: '#bbb', marginTop: 4 }}>
+                    {skill.sourceType === 'project' && skill.sourceProject ? (
+                      <span>来源项目: {skill.sourceProject}</span>
+                    ) : (
+                      <span>{skill.path}</span>
+                    )}
+                  </div>
+                </div>
+              </label>
+            ))}
+            </div>
+          </>
+        )}
+      </Modal>
+    </div>
+  );
+}

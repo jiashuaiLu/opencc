@@ -1,236 +1,109 @@
-import { Card, Row, Col, Statistic, Button, Space, message, Modal, List, Tag } from 'antd';
+import { Tabs, Segmented, Button, Space, message } from 'antd';
 import {
-  CheckCircleOutlined,
-  CloseCircleOutlined,
-  PlayCircleOutlined,
-  PauseCircleOutlined,
+  ReloadOutlined,
+  LineChartOutlined,
+  UnorderedListOutlined,
+  BarChartOutlined,
 } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import UsageSummaryCards from '../components/dashboard/UsageSummaryCards';
+import UsageTrendChart from '../components/dashboard/UsageTrendChart';
+import RequestLogTable from '../components/dashboard/RequestLogTable';
+import ModelStatsTable from '../components/dashboard/ModelStatsTable';
+import '../styles/dashboard.css';
+
+type TimeRange = '1d' | '7d' | '30d';
 
 export default function Dashboard() {
-  const navigate = useNavigate();
-  const [serviceStatus, setServiceStatus] = useState<'running' | 'stopped'>('stopped');
-  const [stats, setStats] = useState({
-    totalRequests: 0,
-    successRate: 0,
-    totalInputTokens: 0,
-    totalOutputTokens: 0,
-    totalTokens: 0,
-    avgDuration: 0,
-  });
-  const [logsModalVisible, setLogsModalVisible] = useState(false);
-  const [recentLogs, setRecentLogs] = useState<any[]>([]);
+  const [timeRange, setTimeRange] = useState<TimeRange>('1d');
+  const [refreshInterval, setRefreshInterval] = useState(30000);
+  const [activeTab, setActiveTab] = useState('logs');
 
-  useEffect(() => {
-    loadStats();
-    checkServiceStatus();
-  }, []);
+  const days = timeRange === '1d' ? 1 : timeRange === '7d' ? 7 : 30;
 
-  const loadStats = async () => {
-    try {
-      const data = await window.electronAPI.getStats('today');
-      if (data) {
-        setStats(data);
-      }
-    } catch (error) {
-      console.error('Failed to load stats:', error);
-    }
+  const refreshIntervalOptions = [0, 5000, 10000, 30000, 60000];
+
+  const changeRefreshInterval = () => {
+    const currentIndex = refreshIntervalOptions.indexOf(refreshInterval);
+    const nextIndex = (currentIndex + 1) % refreshIntervalOptions.length;
+    setRefreshInterval(refreshIntervalOptions[nextIndex]);
   };
 
-  const formatTokens = (tokens: number): string => {
-    if (tokens >= 100000) {
-      return `${(tokens / 1000).toFixed(1)}k`;
-    } else if (tokens >= 1000) {
-      return `${(tokens / 1000).toFixed(1)}k`;
-    } else {
-      return tokens.toString();
-    }
-  };
-
-  const checkServiceStatus = async () => {
-    try {
-      const status = await window.electronAPI.getServiceStatus();
-      setServiceStatus(status.running ? 'running' : 'stopped');
-    } catch (error) {
-      console.error('Failed to check service status:', error);
-    }
-  };
-
-  const handleStartService = async () => {
-    try {
-      const config = await window.electronAPI.getConfig('default');
-      if (!config || !config.apiKey || !config.baseUrl) {
-        message.error('请先在配置页面设置 API Key 和 Base URL');
-        return;
-      }
-      await window.electronAPI.startService(config);
-      setServiceStatus('running');
-      message.success('代理服务已启动');
-    } catch (error) {
-      message.error('启动服务失败');
-    }
-  };
-
-  const handleStopService = async () => {
-    try {
-      await window.electronAPI.stopService();
-      setServiceStatus('stopped');
-      message.success('代理服务已停止');
-    } catch (error) {
-      message.error('停止服务失败');
-    }
-  };
-
-  const handleViewRecentLogs = async () => {
-    try {
-      const logs = await window.electronAPI.getLogs({ limit: 10 });
-      setRecentLogs(logs || []);
-      setLogsModalVisible(true);
-    } catch (error) {
-      message.error('加载日志失败');
-    }
+  const handleRefresh = () => {
+    message.success('数据已刷新');
   };
 
   return (
-    <div>
-      <Space direction="vertical" size="large" style={{ width: '100%' }}>
-        <Card>
-          <Row gutter={16} align="middle">
-            <Col span={12}>
-              <Statistic
-                title="服务状态"
-                value={serviceStatus === 'running' ? '运行中' : '已停止'}
-                prefix={
-                  serviceStatus === 'running' ? (
-                    <CheckCircleOutlined style={{ color: '#52c41a' }} />
-                  ) : (
-                    <CloseCircleOutlined style={{ color: '#ff4d4f' }} />
-                  )
-                }
-                valueStyle={{
-                  color: serviceStatus === 'running' ? '#52c41a' : '#ff4d4f',
-                }}
-              />
-            </Col>
-            <Col span={12} style={{ textAlign: 'right' }}>
-              <Space>
-                {serviceStatus === 'stopped' ? (
-                  <Button
-                    type="primary"
-                    size="large"
-                    icon={<PlayCircleOutlined />}
-                    onClick={handleStartService}
-                  >
-                    启动服务
-                  </Button>
-                ) : (
-                  <Button
-                    danger
-                    size="large"
-                    icon={<PauseCircleOutlined />}
-                    onClick={handleStopService}
-                  >
-                    停止服务
-                  </Button>
-                )}
-              </Space>
-            </Col>
-          </Row>
-        </Card>
-
-        <Row gutter={16}>
-          <Col span={4}>
-            <Card hoverable>
-              <Statistic title="总请求数" value={stats.totalRequests} />
-            </Card>
-          </Col>
-          <Col span={4}>
-            <Card hoverable>
-              <Statistic title="成功率" value={stats.successRate} suffix="%" />
-            </Card>
-          </Col>
-          <Col span={4}>
-            <Card hoverable>
-              <Statistic 
-                title="输入Token" 
-                value={formatTokens(stats.totalInputTokens)}
-              />
-            </Card>
-          </Col>
-          <Col span={4}>
-            <Card hoverable>
-              <Statistic 
-                title="输出Token" 
-                value={formatTokens(stats.totalOutputTokens)}
-              />
-            </Card>
-          </Col>
-          <Col span={4}>
-            <Card hoverable>
-              <Statistic 
-                title="总Token" 
-                value={formatTokens(stats.totalTokens)}
-              />
-            </Card>
-          </Col>
-          <Col span={4}>
-            <Card hoverable>
-              <Statistic 
-                title="平均耗时" 
-                value={(stats.avgDuration / 1000).toFixed(1)} 
-                suffix="秒" 
-              />
-            </Card>
-          </Col>
-        </Row>
-
-        <Card title="快速操作">
-          <Space>
-            <Button onClick={handleViewRecentLogs}>
-              查看最近日志
-            </Button>
-            <Button onClick={loadStats}>刷新统计</Button>
-          </Space>
-        </Card>
-      </Space>
-
-      <Modal
-        title="最近日志"
-        open={logsModalVisible}
-        onCancel={() => setLogsModalVisible(false)}
-        footer={
-          <Button type="primary" onClick={() => {
-            setLogsModalVisible(false);
-            navigate('/logs');
-          }}>
-            查看全部日志
+    <div className="dashboard-container">
+      {/* 页面标题和时间范围选择 */}
+      <div className="dashboard-header">
+        <div className="dashboard-title-group">
+          <h1>仪表盘</h1>
+          <p>监控代理服务的运行状态和使用情况</p>
+        </div>
+        <div className="dashboard-actions">
+          <Button
+            icon={<ReloadOutlined />}
+            onClick={changeRefreshInterval}
+            className="refresh-btn"
+          >
+            {refreshInterval > 0 ? `${refreshInterval / 1000}s` : '自动刷新'}
           </Button>
-        }
-        width={800}
-        bodyStyle={{ maxHeight: 400, overflowY: 'auto', padding: 0 }}
-      >
-        <List
-          dataSource={recentLogs}
-          renderItem={(log: any) => (
-            <List.Item style={{ padding: '12px 24px' }}>
-              <List.Item.Meta
-                title={
-                  <Space>
-                    <Tag color={log.level === 'error' ? 'red' : log.level === 'warn' ? 'orange' : 'blue'}>
-                      {log.level?.toUpperCase() || 'INFO'}
-                    </Tag>
-                    <span style={{ fontSize: 12, color: '#999' }}>
-                      {log.timestamp ? new Date(log.timestamp).toLocaleString() : ''}
-                    </span>
-                  </Space>
-                }
-                description={log.message || ''}
-              />
-            </List.Item>
-          )}
+          <Segmented
+            value={timeRange}
+            onChange={(value) => setTimeRange(value as TimeRange)}
+            options={[
+              { label: '今天', value: '1d' },
+              { label: '7 天', value: '7d' },
+              { label: '30 天', value: '30d' },
+            ]}
+          />
+        </div>
+      </div>
+
+      {/* 统计卡片 */}
+      <UsageSummaryCards days={days} />
+
+      {/* 趋势图表 */}
+      <UsageTrendChart days={days} />
+
+      {/* 标签页：请求日志 / 模型统计 */}
+      <div className="dashboard-tabs-container">
+        <Tabs
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          items={[
+            {
+              key: 'logs',
+              label: (
+                <span>
+                  <UnorderedListOutlined style={{ marginRight: 8 }} />
+                  请求日志
+                </span>
+              ),
+              children: (
+                <RequestLogTable
+                  refreshIntervalMs={refreshInterval > 0 ? refreshInterval : 0}
+                />
+              ),
+            },
+            {
+              key: 'models',
+              label: (
+                <span>
+                  <BarChartOutlined style={{ marginRight: 8 }} />
+                  模型统计
+                </span>
+              ),
+              children: (
+                <ModelStatsTable
+                  refreshIntervalMs={refreshInterval > 0 ? refreshInterval : 0}
+                />
+              ),
+            },
+          ]}
         />
-      </Modal>
+      </div>
     </div>
   );
 }

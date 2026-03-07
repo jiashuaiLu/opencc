@@ -48,73 +48,74 @@ export default function Info() {
   };
 
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-      <Title level={2}>
-        <InfoCircleOutlined /> 应用资讯
-      </Title>
-      <Paragraph type="secondary">
-        了解 DongCC 的最新动态和功能特性
-      </Paragraph>
+    <div className="page-container">
+      <div className="page-header">
+        <div className="page-title-group">
+          <h1>应用资讯</h1>
+          <p>了解 DongCC 的最新动态和功能特性</p>
+        </div>
+      </div>
 
-      <Divider />
-
-      {/* 功能特性 */}
-      <Card
-        title={
-          <Space>
-            <InfoCircleOutlined />
-            <span>功能特性</span>
-          </Space>
-        }
-        style={{ marginBottom: 24 }}
-      >
-        <List
-          dataSource={features}
-          renderItem={(item) => (
-            <List.Item>
-              <List.Item.Meta
-                title={
-                  <Space>
-                    <Text strong>{item.title}</Text>
-                    {getStatusTag(item.status)}
-                  </Space>
-                }
-                description={item.description}
-              />
-            </List.Item>
-          )}
-        />
-      </Card>
-
-      {/* 版本信息 */}
-      <Card
-        title={
-          <Space>
-            <InfoCircleOutlined />
-            <span>版本信息</span>
-          </Space>
-        }
-      >
-        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-          <div>
-            <Text strong>当前版本：</Text>
-            <Tag color="blue">v1.0.0</Tag>
-          </div>
-          <div>
-            <Text strong>技术栈：</Text>
-            <Space wrap>
-              <Tag color="geekblue">Electron 33</Tag>
-              <Tag color="cyan">React 18</Tag>
-              <Tag color="purple">TypeScript 5.5</Tag>
-              <Tag color="green">Ant Design 5</Tag>
+      <div className="page-content">
+        {/* 功能特性 */}
+        <Card
+          className="content-card"
+          title={
+            <Space>
+              <InfoCircleOutlined />
+              <span>功能特性</span>
             </Space>
-          </div>
-          <div>
-            <Text strong>支持平台：</Text>
-            <Tag color="orange">macOS (Apple Silicon)</Tag>
-          </div>
-        </Space>
-      </Card>
+          }
+        >
+          <List
+            dataSource={features}
+            renderItem={(item) => (
+              <List.Item className="list-item-hover">
+                <List.Item.Meta
+                  title={
+                    <Space>
+                      <Text strong>{item.title}</Text>
+                      {getStatusTag(item.status)}
+                    </Space>
+                  }
+                  description={item.description}
+                />
+              </List.Item>
+            )}
+          />
+        </Card>
+
+        {/* 版本信息 */}
+        <Card
+          className="content-card"
+          title={
+            <Space>
+              <InfoCircleOutlined />
+              <span>版本信息</span>
+            </Space>
+          }
+        >
+          <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+            <div>
+              <Text strong>当前版本：</Text>
+              <Tag color="blue">v1.0.0</Tag>
+            </div>
+            <div>
+              <Text strong>技术栈：</Text>
+              <Space wrap>
+                <Tag color="geekblue">Electron 33</Tag>
+                <Tag color="cyan">React 18</Tag>
+                <Tag color="purple">TypeScript 5.5</Tag>
+                <Tag color="green">Ant Design 5</Tag>
+              </Space>
+            </div>
+            <div>
+              <Text strong>支持平台：</Text>
+              <Tag color="orange">macOS (Apple Silicon)</Tag>
+            </div>
+          </Space>
+        </Card>
+      </div>
     </div>
   );
 }

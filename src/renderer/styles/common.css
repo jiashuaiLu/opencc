@@ -1,0 +1,144 @@
+/* Common Page Layout */
+.page-container {
+  padding: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-header {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.page-title-group h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-color);
+  line-height: 1.2;
+}
+
+.page-title-group p {
+  margin: 8px 0 0 0;
+  color: var(--text-secondary-color);
+  font-size: 14px;
+}
+
+.page-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.page-content {
+  flex: 1;
+  overflow: auto;
+  /* Add padding to content if needed, or keep it on container */
+}
+
+/* Card Enhancements */
+.content-card {
+  border-radius: 12px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  margin-bottom: 24px;
+  background: var(--surface-color);
+}
+
+.content-card-no-padding .ant-card-body {
+  padding: 0;
+}
+
+/* Status Badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-badge-success {
+  background: rgba(82, 196, 26, 0.1);
+  color: #52c41a;
+}
+
+.status-badge-error {
+  background: rgba(255, 77, 79, 0.1);
+  color: #ff4d4f;
+}
+
+.status-badge-warning {
+  background: rgba(250, 173, 20, 0.1);
+  color: #faad14;
+}
+
+.status-badge-default {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--text-secondary-color);
+}
+
+body.dark-theme .status-badge-default {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Code Snippets */
+.code-block {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  background: rgba(0, 0, 0, 0.04);
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  overflow-x: auto;
+}
+
+body.dark-theme .code-block {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Form Styles */
+.form-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--text-color);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-section-title::before {
+  content: '';
+  display: block;
+  width: 4px;
+  height: 16px;
+  background: var(--primary-color);
+  border-radius: 2px;
+}
+
+/* Empty States */
+.empty-state-container {
+  padding: 48px 0;
+  text-align: center;
+}
+
+/* List Items */
+.list-item-hover {
+  transition: background-color 0.2s;
+}
+
+.list-item-hover:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+body.dark-theme .list-item-hover:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+}
