@@ -120,6 +120,33 @@ export class DatabaseManager {
       this.writeSync();
       console.log('[DB] Added sourceType to skills');
     }
+
+    // Clean up unwanted default skills (legacy data)
+    const skillsToRemove = ['代码审查助手', '前端架构师'];
+    const unwantedSkills = this.data.skills.filter(s => skillsToRemove.includes(s.name));
+    
+    if (unwantedSkills.length > 0) {
+      this.data.skills = this.data.skills.filter(s => !skillsToRemove.includes(s.name));
+      this.writeSync();
+      
+      // Also try to remove the physical files to prevent them from reappearing as unmanaged
+      const skillsDir = path.join(os.homedir(), '.dongcc', 'skills');
+      unwantedSkills.forEach(skill => {
+        try {
+          if (skill.directory) {
+            const skillPath = path.join(skillsDir, skill.directory);
+            if (fs.existsSync(skillPath)) {
+              fs.rmSync(skillPath, { recursive: true, force: true });
+              console.log(`[DB] Removed skill directory: ${skillPath}`);
+            }
+          }
+        } catch (error) {
+          console.error(`[DB] Failed to remove skill directory for ${skill.name}:`, error);
+        }
+      });
+      
+      console.log('[DB] Removed unwanted default skills from database');
+    }
   }
 
   private async write(): Promise<void> {

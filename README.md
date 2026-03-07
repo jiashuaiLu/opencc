@@ -7,7 +7,7 @@
 一个专为 macOS 设计的桌面应用，用于管理和监控 Claude Code 代理服务
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](package.json)
+[![Version](https://img.shields.io/badge/version-1.1.0-green.svg)](package.json)
 [![Platform](https://img.shields.io/badge/platform-macOS-lightgrey.svg)](https://www.apple.com/macos)
 
 </div>
@@ -192,7 +192,14 @@ npm run format              # 格式化代码
 
 ## 🎯 功能路线图
 
-### v1.0.0 (当前版本)
+### v1.1.0 (当前版本)
+
+- [ ] 高级统计分析
+- [ ] 多配置管理
+- [ ] 配置导入/导出
+- [ ] 自动更新功能
+
+### v1.0.0 (已发布)
 
 - [x] 基础框架搭建
 - [x] 代理服务管理
@@ -203,13 +210,6 @@ npm run format              # 格式化代码
 - [x] MCP & Skills 管理
 - [x] 全新 UI/UX 设计
 - [x] 暗黑模式支持
-
-### v1.1.0 (计划中)
-
-- [ ] 高级统计分析
-- [ ] 多配置管理
-- [ ] 配置导入/导出
-- [ ] 自动更新功能
 
 ### v1.2.0 (计划中)
 

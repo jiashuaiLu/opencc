@@ -138,7 +138,7 @@ export default function Settings() {
           <Space align="start">
             <InfoCircleOutlined style={{ fontSize: 24, color: 'var(--primary-color)' }} />
             <div>
-              <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 4 }}>DongCC v1.0.0</div>
+              <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 4 }}>DongCC v1.1.0</div>
               <div style={{ marginBottom: 8 }}>Claude Code 本地代理服务管理工具</div>
               <div style={{ color: 'var(--text-secondary-color)', fontSize: 12 }}>
                 © 2026 DongCC Team. All rights reserved.

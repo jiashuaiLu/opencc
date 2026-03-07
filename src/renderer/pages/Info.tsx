@@ -98,7 +98,7 @@ export default function Info() {
           <Space direction="vertical" size="middle" style={{ width: '100%' }}>
             <div>
               <Text strong>当前版本：</Text>
-              <Tag color="blue">v1.0.0</Tag>
+              <Tag color="blue">v1.1.0</Tag>
             </div>
             <div>
               <Text strong>技术栈：</Text>

@@ -43,7 +43,7 @@ php -S localhost:8000
 在 `index.html` 中找到以下部分并修改：
 
 ```html
-<a href="https://joy-ai-test.s3-internal.cn-north-1.jdcloud-oss.com/DongCC-1.0.0-arm64.dmg" class="btn btn-primary btn-large">
+<a href="https://joy-ai-test.s3-internal.cn-north-1.jdcloud-oss.com/dongcc/DongCC-1.1.0-arm64.dmg" class="btn btn-primary btn-large">
     下载最新版本
 </a>
 ```
