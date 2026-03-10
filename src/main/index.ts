@@ -35,6 +35,12 @@ async function initialize() {
           statusCode: requestData.statusCode,
           duration: requestData.duration,
           success: requestData.statusCode < 400,
+          model: requestData.model,
+          inputTokens: requestData.inputTokens || 0,
+          outputTokens: requestData.outputTokens || 0,
+          cacheReadTokens: requestData.cacheReadTokens || 0,
+          cacheCreationTokens: requestData.cacheCreationTokens || 0,
+          isStreaming: requestData.isStreaming || false,
         });
 
         logger.info('Request logged', requestData);

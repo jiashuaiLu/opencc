@@ -52,7 +52,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           items={menuItems}
           onClick={({ key }) => navigate(key)}
           className="app-menu"
-          theme="dark"
         />
       </Sider>
       <AntLayout className="app-content-layout">

@@ -5,9 +5,14 @@
 }
 
 .app-sider {
+  background: #ffffff;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.08);
+  z-index: 10;
+}
+
+body.dark-theme .app-sider {
   background: linear-gradient(180deg, #001529 0%, #002140 100%);
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
-  z-index: 10;
 }
 
 .app-logo-container {
@@ -16,18 +21,30 @@
   align-items: center;
   font-size: 20px;
   font-weight: bold;
-  color: #fff;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: #262626;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   padding-left: 24px;
   gap: 12px;
+  background: transparent;
+}
+
+body.dark-theme .app-logo-container {
+  color: #fff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(0, 0, 0, 0.1);
 }
 
 .app-logo-text {
-  background: linear-gradient(to right, #fff, #a6c1ff);
+  background: linear-gradient(to right, #1890ff, #096dd9);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: 1px;
+}
+
+body.dark-theme .app-logo-text {
+  background: linear-gradient(to right, #fff, #a6c1ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .app-menu {
@@ -41,15 +58,37 @@
   width: calc(100% - 24px) !important;
   border-radius: 8px;
   transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+  color: rgba(0, 0, 0, 0.85);
+}
+
+body.dark-theme .app-menu .ant-menu-item {
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .app-menu .ant-menu-item-selected {
   background: linear-gradient(90deg, #1890ff 0%, #096dd9 100%) !important;
   box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+  color: #fff !important;
 }
 
 .app-menu .ant-menu-item:hover:not(.ant-menu-item-selected) {
+  background: rgba(0, 0, 0, 0.04) !important;
+}
+
+body.dark-theme .app-menu .ant-menu-item:hover:not(.ant-menu-item-selected) {
   background: rgba(255, 255, 255, 0.08) !important;
+}
+
+body.dark-theme .app-menu .ant-menu-item .anticon {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.app-menu .ant-menu-item .anticon {
+  color: rgba(0, 0, 0, 0.65);
+}
+
+body.dark-theme .app-menu .ant-menu-item-selected .anticon {
+  color: #fff;
 }
 
 .app-content-layout {

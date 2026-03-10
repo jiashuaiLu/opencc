@@ -181,34 +181,42 @@ export class ProxyServer extends EventEmitter {
       }
 
       if (claudeRequest.stream) {
-        await this.handleStreamResponse(openaiApiResponse, res, claudeRequest.model, claudeRequest);
+        await this.handleStreamResponse(openaiApiResponse, res, claudeRequest.model, claudeRequest, startTime);
       } else {
         const openaiResponse = await openaiApiResponse.json();
         const claudeResponse = this.convertOpenAIToClaudeResponse(openaiResponse, claudeRequest.model);
         
         res.json(claudeResponse);
 
+        const duration = Date.now() - startTime;
+        const inputTokens = claudeResponse.usage?.input_tokens || 0;
+        const outputTokens = claudeResponse.usage?.output_tokens || 0;
+        
         // 保存对话历史
         this.emit('conversation', {
           id: `conv_${Date.now()}`,
           model: claudeRequest.model,
           request: claudeRequest,
           response: claudeResponse,
-          inputTokens: claudeResponse.usage?.input_tokens || 0,
-          outputTokens: claudeResponse.usage?.output_tokens || 0,
-          duration: Date.now() - startTime,
+          inputTokens,
+          outputTokens,
+          duration,
+        });
+
+        // 保存请求统计
+        this.emit('request', {
+          method: req.method,
+          url: req.url,
+          statusCode: 200,
+          duration,
+          model: claudeRequest.model,
+          inputTokens,
+          outputTokens,
+          cacheReadTokens: 0,
+          cacheCreationTokens: 0,
+          isStreaming: false,
         });
       }
-
-      const duration = Date.now() - startTime;
-      this.emit('request', {
-        method: req.method,
-        url: req.url,
-        statusCode: 200,
-        duration,
-        model: claudeRequest.model,
-        tokens: 0, // Will be updated by conversation event
-      });
     } catch (error: any) {
       console.error(`[Proxy Error] ${error.message}`);
       console.error(`[Proxy Error] Stack: ${error.stack}`);
@@ -237,7 +245,8 @@ export class ProxyServer extends EventEmitter {
     openaiResponse: globalThis.Response,
     res: Response,
     model: string,
-    claudeRequest: ClaudeMessagesRequest
+    claudeRequest: ClaudeMessagesRequest,
+    startTime: number
   ): Promise<void> {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
@@ -312,6 +321,8 @@ export class ProxyServer extends EventEmitter {
             sendEvent('message_stop', { type: 'message_stop' });
             res.end();
             
+            const duration = Date.now() - startTime;
+            
             // 保存流式对话历史
             const claudeResponse = {
               id: messageId,
@@ -333,7 +344,21 @@ export class ProxyServer extends EventEmitter {
               response: claudeResponse,
               inputTokens: inputTokens,
               outputTokens: outputTokens,
-              duration: 0, // Stream duration not tracked
+              duration,
+            });
+            
+            // 保存请求统计
+            this.emit('request', {
+              method: 'POST',
+              url: '/v1/messages',
+              statusCode: 200,
+              duration,
+              model: claudeRequest.model,
+              inputTokens: inputTokens,
+              outputTokens: outputTokens,
+              cacheReadTokens: 0,
+              cacheCreationTokens: 0,
+              isStreaming: true,
             });
             
             return;

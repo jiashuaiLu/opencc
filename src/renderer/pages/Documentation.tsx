@@ -143,11 +143,20 @@ npm --version`}</div>
                     <ul>
                       <li><Text code>配置名称</Text>: 例如 JoyBuilder-Production</li>
                       <li><Text code>API Key</Text>: 你的 API 密钥</li>
-                      <li><Text code>服务提供商</Text>: 选择 JoyBuilder (京东云) 或其他</li>
-                      <li><Text code>代理端口</Text>: 默认 8787</li>
+                      <li><Text code>服务提供商</Text>: 选择 JoyBuilder (京东云)、OpenAI、DeepSeek 等</li>
+                      <li><Text code>代理端口</Text>: 默认 8787（可自定义）</li>
                     </ul>
                   </li>
-                  <li>点击"保存配置"</li>
+                  <li>配置模型（必填）：
+                    <ul>
+                      <li>点击"添加模型"按钮</li>
+                      <li>填写模型名称和模型 ID（如：gpt-4o、deepseek-chat 等）</li>
+                      <li>至少需要添加一个模型</li>
+                      <li>可添加多个模型供切换使用</li>
+                      <li>设置一个默认模型（可选）</li>
+                    </ul>
+                  </li>
+                  <li>点击"保存配置"按钮</li>
                 </ul>
               </Paragraph>
             </Panel>
@@ -169,8 +178,7 @@ npm --version`}</div>
                   <li>配置完成后，直接使用 Claude Code：
                     <div className="code-block" style={{ marginTop: 8 }}>
                       cd /path/to/your_project_dir<br/>
-                      cloude<br/>
-                      /model GLM-5(推荐)<br/>
+                      claude<br/>
                       "你好，请帮我写一个 Python 函数"
                     </div>
                   </li>

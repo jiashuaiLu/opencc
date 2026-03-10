@@ -1,5 +1,5 @@
-import { Form, Input, Button, Card, message, Select, InputNumber, Space, Alert, Divider, Tag } from 'antd';
-import { PlusOutlined, DeleteOutlined, SaveOutlined, ApiOutlined } from '@ant-design/icons';
+import { Form, Input, Button, Card, message, Select, InputNumber, Space, Alert, Divider, Tag, Tooltip } from 'antd';
+import { PlusOutlined, DeleteOutlined, SaveOutlined, ApiOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
 
 interface ModelConfig {
@@ -54,13 +54,24 @@ export default function Config() {
   };
 
   const handleSubmit = async (values: Config) => {
+    if (models.length === 0) {
+      message.error('请至少添加一个模型配置');
+      return;
+    }
+
+    const hasEmptyModel = models.some(m => !m.name.trim() || !m.modelId.trim());
+    if (hasEmptyModel) {
+      message.error('请完整填写所有模型的名称和 ID');
+      return;
+    }
+
     setLoading(true);
     try {
       await window.electronAPI.saveConfig({
         ...values,
         id: 'default',
         models,
-        defaultModel,
+        defaultModel: defaultModel || models[0].id,
       });
       message.success('配置保存成功');
     } catch (error) {
@@ -139,11 +150,19 @@ export default function Config() {
             <div className="form-section-title">基本设置</div>
             
             <Form.Item
-              label="配置名称"
+              label={
+                <Space>
+                  配置名称
+                  <Tooltip title="为配置起一个易于识别的名称，方便后续管理">
+                    <InfoCircleOutlined style={{ color: '#1890ff', fontSize: 14 }} />
+                  </Tooltip>
+                </Space>
+              }
               name="name"
               rules={[{ required: true, message: '请输入配置名称' }]}
+              initialValue="默认配置"
             >
-              <Input placeholder="例如：JoyBuilder-Production" />
+              <Input placeholder="例如：默认配置、JoyBuilder-Production" />
             </Form.Item>
 
             <Form.Item
@@ -201,10 +220,15 @@ export default function Config() {
 
             <Divider />
             
-            <div className="form-section-title">模型配置</div>
+            <div className="form-section-title">
+              <Space>
+                模型配置
+                <Tag color="red">必填</Tag>
+              </Space>
+            </div>
 
             <Alert
-              message="配置模型列表后，启动服务时会自动将模型配置写入 Claude Code 配置文件"
+              message="模型配置为必填项，请至少添加一个模型。配置后启动服务时会自动将模型信息写入 Claude Code 配置文件。"
               type="info"
               showIcon
               style={{ marginBottom: 24 }}
@@ -259,18 +283,28 @@ export default function Config() {
                 }
               >
                 <Space direction="vertical" style={{ width: '100%' }}>
-                  <Input
-                    placeholder="模型名称（例如：Claude 3.5 Sonnet）"
-                    value={model.name}
-                    onChange={(e) => handleModelChange(model.id, 'name', e.target.value)}
-                    addonBefore="名称"
-                  />
-                  <Input
-                    placeholder="模型ID（例如：claude-3-5-sonnet-20241022）"
-                    value={model.modelId}
-                    onChange={(e) => handleModelChange(model.id, 'modelId', e.target.value)}
-                    addonBefore="ID"
-                  />
+                  <div>
+                    <label style={{ marginBottom: 4, display: 'block', fontWeight: 500 }}>
+                      名称 <span style={{ color: '#ff4d4f' }}>*</span>
+                    </label>
+                    <Input
+                      placeholder="模型名称（例如：Claude 3.5 Sonnet）"
+                      value={model.name}
+                      onChange={(e) => handleModelChange(model.id, 'name', e.target.value)}
+                      status={!model.name.trim() && model.modelId ? 'error' : undefined}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ marginBottom: 4, display: 'block', fontWeight: 500 }}>
+                      ID <span style={{ color: '#ff4d4f' }}>*</span>
+                    </label>
+                    <Input
+                      placeholder="模型ID（例如：claude-3-5-sonnet-20241022）"
+                      value={model.modelId}
+                      onChange={(e) => handleModelChange(model.id, 'modelId', e.target.value)}
+                      status={!model.modelId.trim() && model.name ? 'error' : undefined}
+                    />
+                  </div>
                 </Space>
               </Card>
             ))}
