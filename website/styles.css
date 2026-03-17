@@ -493,20 +493,34 @@ body {
 
 .download-requirements h3 {
     font-size: 18px;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
     color: var(--text-primary);
 }
 
-.download-requirements ul {
+.requirements-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+}
+
+.requirements-item h4 {
+    font-size: 16px;
+    margin-bottom: 12px;
+    color: var(--primary-color);
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.requirements-item ul {
     list-style: none;
 }
 
-.download-requirements li {
+.requirements-item li {
     padding: 6px 0;
     color: var(--text-secondary);
 }
 
-.download-requirements li::before {
+.requirements-item li::before {
     content: "•";
     color: var(--primary-color);
     font-weight: bold;
@@ -873,6 +887,11 @@ body {
 
     .download-cards {
         grid-template-columns: 1fr;
+    }
+
+    .requirements-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
     }
 
     .download-info-grid {
