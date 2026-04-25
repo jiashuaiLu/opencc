@@ -17,7 +17,7 @@ export class DataExporter {
   private exportDir: string;
 
   constructor() {
-    this.exportDir = path.join(os.homedir(), '.dongcc', 'exports');
+    this.exportDir = path.join(os.homedir(), '.opencc', 'exports');
   }
 
   async initialize(): Promise<void> {

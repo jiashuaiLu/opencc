@@ -10,18 +10,18 @@
       <stop offset="100%" style="stop-color:#00f2fe;stop-opacity:1" />
     </linearGradient>
   </defs>
-  
+
   <!-- Background circle -->
   <circle cx="256" cy="256" r="240" fill="url(#logoGradient)" opacity="0.1"/>
-  
-  <!-- Main logo shape - Abstract "D" representing DongCC -->
+
+  <!-- Main logo shape - Abstract "O" representing OpenCC -->
   <g transform="translate(256, 256)">
     <!-- Outer ring -->
     <circle cx="0" cy="0" r="180" fill="none" stroke="url(#logoGradient)" stroke-width="20"/>
-    
+
     <!-- Inner design - representing connection/transformation -->
-    <path d="M -80 -120 
-             L 80 -120 
+    <path d="M -80 -120
+             L 80 -120
              C 140 -120, 160 -100, 160 -40
              L 160 40
              C 160 100, 140 120, 80 120
@@ -29,16 +29,16 @@
              L -80 -120 Z"
           fill="url(#logoGradient)"
           opacity="0.9"/>
-    
+
     <!-- Center element - representing AI/transformation -->
     <circle cx="40" cy="0" r="50" fill="url(#accentGradient)" opacity="0.8"/>
-    
+
     <!-- Connection lines -->
     <line x1="-40" y1="-60" x2="40" y2="-60" stroke="white" stroke-width="8" stroke-linecap="round" opacity="0.9"/>
     <line x1="-40" y1="0" x2="0" y2="0" stroke="white" stroke-width="8" stroke-linecap="round" opacity="0.9"/>
     <line x1="-40" y1="60" x2="40" y2="60" stroke="white" stroke-width="8" stroke-linecap="round" opacity="0.9"/>
   </g>
-  
+
   <!-- Decorative elements -->
   <circle cx="100" cy="100" r="20" fill="url(#accentGradient)" opacity="0.3"/>
   <circle cx="412" cy="412" r="25" fill="url(#logoGradient)" opacity="0.3"/>

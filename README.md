@@ -1,14 +1,14 @@
-# DongCC
+# OpenCC
 
 <div align="center">
 
-**DongCC - Claude Code 代理服务管理工具**
+**OpenCC - Claude Code 代理服务管理工具**
 
 一个专为 macOS 设计的桌面应用，用于管理和监控 Claude Code 代理服务
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.1.0-green.svg)](package.json)
-[![Platform](https://img.shields.io/badge/platform-macOS-lightgrey.svg)](https://www.apple.com/macos)
+[![Version](https://img.shields.io/badge/version-1.3.0-green.svg)](package.json)
+[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows-lightgrey.svg)](https://www.apple.com/macos)
 
 </div>
 
@@ -16,7 +16,7 @@
 
 ## 📖 项目简介
 
-DongCC 是一个功能强大的 macOS 桌面应用，旨在简化 Claude Code 代理服务的管理和监控。通过图形化界面，用户可以轻松配置代理服务、查看运行日志、监控 Token 消耗、管理对话历史等。
+OpenCC 是一个功能强大的 macOS/Windows 桌面应用，旨在简化 Claude Code 代理服务的管理和监控。通过图形化界面，用户可以轻松配置代理服务、查看运行日志、监控 Token 消耗、管理对话历史等。
 
 ### ✨ 核心特性
 
@@ -35,7 +35,7 @@ DongCC 是一个功能强大的 macOS 桌面应用，旨在简化 Claude Code �
 
 ### 系统要求
 
-- **操作系统**: macOS 10.15 (Catalina) 或更高版本
+- **操作系统**: macOS 10.15 (Catalina) 或更高版本 / Windows 10/11
 - **Node.js**: v16.0.0 或更高版本
 - **Claude Code**: 已安装并配置
 
@@ -43,18 +43,18 @@ DongCC 是一个功能强大的 macOS 桌面应用，旨在简化 Claude Code �
 
 #### 方式一：下载安装包（推荐）
 
-1. 下载链接 [Releases]() 页面
-2. 下载最新版本的 `DongCC-x.x.x.dmg`
-3. 双击打开 DMG 文件
-4. 将应用拖拽到 Applications 文件夹
-5. 打开 Applications 文件夹，双击启动应用
+1. 访问官网下载页面
+2. 下载最新版本的安装包
+3. 双击打开安装文件
+4. 将应用拖拽到 Applications 文件夹（macOS）或按向导安装（Windows）
+5. 打开应用，开始使用
 
 #### 方式二：从源码构建
 
 ```bash
 # 1. 克隆仓库
-git clone https://coding.jd.com/atop-qa/dongcc.git
-cd DongCC
+git clone https://github.com/jiashuaiLu/opencc.git
+cd opencc
 
 # 2. 安装依赖
 npm install
@@ -129,7 +129,7 @@ npm run electron:build
 ### 项目结构
 
 ```
-dongcc/
+opencc/
 ├── src/
 │   ├── main/                 # Electron 主进程
 │   │   ├── index.ts         # 主进程入口
@@ -192,12 +192,29 @@ npm run format              # 格式化代码
 
 ## 🎯 功能路线图
 
-### v1.1.0 (当前版本)
+### v1.3.0 (当前版本)
 
-- [ ] 高级统计分析
-- [ ] 多配置管理
-- [ ] 配置导入/导出
-- [ ] 自动更新功能
+- [x] 支持京东云 Anthropic 兼容 API
+- [x] 优化代理服务参数清理逻辑
+- [x] 支持 macOS Universal 架构（Intel + Apple Silicon）
+- [x] Windows 平台支持
+- [x] 修复工具调用 ID 格式验证问题
+- [x] 修复空文本内容处理
+
+### v1.2.0 (已发布)
+
+- [x] 配置优化：模型配置改为必填项，添加默认值和说明
+- [x] UI 升级：优化 MCP 和 Skills 管理页面样式
+- [x] Skill 管理：移除项目级 Skill 提升功能，符合官方设计
+- [x] 度量看板：修复请求日志字段显示问题
+- [x] 主题优化：非暗黑模式下菜单栏白色背景
+
+### v1.1.0 (已发布)
+
+- [x] MCP & Skills 管理
+- [x] 全新 UI/UX 设计
+- [x] 暗黑模式支持
+- [x] 修复已知问题
 
 ### v1.0.0 (已发布)
 
@@ -207,15 +224,15 @@ npm run format              # 格式化代码
 - [x] 日志查看
 - [x] 基础统计
 - [x] 对话历史
-- [x] MCP & Skills 管理
-- [x] 全新 UI/UX 设计
-- [x] 暗黑模式支持
+- [x] 使用文档
+- [x] 应用资讯页面
 
-### v1.2.0 (计划中)
+### v1.4.0 (计划中)
 
-- [ ] 性能优化
-- [ ] 插件系统增强
-- [ ] 主题定制增强
+- [ ] 支持更多云服务商（阿里云、腾讯云等）
+- [ ] 添加插件市场，方便用户发现和安装插件
+- [ ] 实现自动更新功能
+- [ ] 添加高级统计分析功能
 
 ---
 
@@ -225,7 +242,7 @@ npm run format              # 格式化代码
 
 ### 如何贡献
 
-1. clone 本仓库
+1. Fork 本仓库
 2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
 3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
 4. 推送到分支 (`git push origin feature/AmazingFeature`)
@@ -261,12 +278,13 @@ npm run format              # 格式化代码
 
 ## 📞 联系方式
 
-- **erp**: lujiashuai.1
+- **GitHub**: [jiashuaiLu](https://github.com/jiashuaiLu)
+- **项目仓库**: [https://github.com/jiashuaiLu/opencc](https://github.com/jiashuaiLu/opencc)
 
 ---
 
 <div align="center">
 
-**Made with ❤️ by DongCC Team**
+**Made with ❤️ by OpenCC Team**
 
 </div>

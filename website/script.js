@@ -1,10 +1,10 @@
 // API 配置
 const API_BASE_URL = 'https://joy-ai-test.jd.com/cache';
-const DOWNLOAD_COUNT_KEY = 'dongcc_download_count';
+const DOWNLOAD_COUNT_KEY = 'opencc_download_count';
 
 // 轮播图配置
 let currentSlide = 0;
-const totalSlides = 5;
+const totalSlides = 7;
 let autoPlayInterval;
 
 // 轮播图控制
@@ -128,7 +128,7 @@ window.addEventListener('scroll', () => {
 // 下载按钮点击统计（可选）
 document.querySelectorAll('a[href$=".dmg"]').forEach(link => {
     link.addEventListener('click', function() {
-        const version = this.textContent.includes('v1.1.0') ? 'v1.1.0' : 'latest';
+        const version = this.textContent.includes('v1.3.0') ? 'v1.3.0' : 'latest';
         console.log(`Download clicked: ${version}`);
         
         // 递增下载计数
@@ -172,16 +172,43 @@ document.addEventListener('DOMContentLoaded', () => {
 // 版本历史数据（可以扩展为从 API 加载）
 const versions = [
     {
+        version: '1.3.0',
+        date: '2026-04-25',
+        changes: [
+            '支持京东云 Anthropic 兼容 API',
+            '优化代理服务参数清理逻辑',
+            '支持 macOS Universal 架构（Intel + Apple Silicon）',
+            '修复工具调用 ID 格式验证问题',
+            '修复空文本内容处理'
+        ],
+        downloadUrl: 'https://joy-ai-test.s3-internal.cn-north-1.jdcloud-oss.com/dongcc/DongCC-1.3.0.dmg',
+        current: true
+    },
+    {
+        version: '1.2.0',
+        date: '2026-03-10',
+        changes: [
+            '配置优化：模型配置改为必填项，添加默认值和说明',
+            'UI 升级：优化 MCP 和 Skills 管理页面样式',
+            'Skill 管理：移除项目级 Skill 提升功能，符合官方设计',
+            '度量看板：修复请求日志字段显示问题',
+            '主题优化：非暗黑模式下菜单栏白色背景'
+        ],
+        downloadUrl: 'https://joy-ai-test.s3-internal.cn-north-1.jdcloud-oss.com/dongcc/DongCC-1.2.0-arm64.dmg',
+        current: false
+    },
+    {
         version: '1.1.0',
         date: '2026-03-08',
         changes: [
-            '体验优化',
+            '功能上新',
+            'MCP & Skills 管理',
             '全新 UI/UX 设计',
             '暗黑模式支持',
             '修复已知问题'
         ],
         downloadUrl: 'https://joy-ai-test.s3-internal.cn-north-1.jdcloud-oss.com/dongcc/DongCC-1.1.0-arm64.dmg',
-        current: true
+        current: false
     },
     {
         version: '1.0.0',

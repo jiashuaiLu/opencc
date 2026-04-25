@@ -9,7 +9,7 @@ export class Logger {
   private database: DatabaseManager | null = null;
 
   constructor() {
-    const logDir = path.join(os.homedir(), '.dongcc', 'logs');
+    const logDir = path.join(os.homedir(), '.opencc', 'logs');
     if (!fs.existsSync(logDir)) {
       fs.mkdirSync(logDir, { recursive: true });
     }

@@ -1,12 +1,13 @@
-# DongCC 官网
+# OpenCC 官网
 
-这是 DongCC 产品的官方网站，提供产品介绍、功能特性、下载链接和版本历史。
+这是 OpenCC 产品的官方网站，提供产品介绍、功能特性、下载链接和版本历史。
 
 ## 📁 文件结构
 
 ```
 website/
 ├── index.html      # 主页面
+├── blog.html       # 博客页面
 ├── styles.css      # 样式文件
 ├── script.js       # JavaScript 脚本
 └── README.md       # 说明文档
@@ -43,7 +44,7 @@ php -S localhost:8000
 在 `index.html` 中找到以下部分并修改：
 
 ```html
-<a href="https://joy-ai-test.s3-internal.cn-north-1.jdcloud-oss.com/dongcc/DongCC-1.1.0-arm64.dmg" class="btn btn-primary btn-large">
+<a href="https://joy-ai-test.s3-internal.cn-north-1.jdcloud-oss.com/dongcc/DongCC-1.3.0.dmg" class="btn btn-primary btn-large">
     下载最新版本
 </a>
 ```
@@ -56,8 +57,8 @@ php -S localhost:8000
 <div class="timeline-item">
     <div class="timeline-badge">新</div>
     <div class="timeline-content">
-        <h3>v1.1.0</h3>
-        <p class="timeline-date">2026-03-10</p>
+        <h3>v1.3.0</h3>
+        <p class="timeline-date">2026-04-25</p>
         <ul class="timeline-changes">
             <li>✨ 新功能描述</li>
             <li>🐛 修复问题</li>
@@ -111,7 +112,7 @@ document.querySelectorAll('a[href$=".dmg"]').forEach(link => {
         // 添加您的统计代码
         // 例如：Google Analytics, 百度统计等
         gtag('event', 'download', {
-            'event_category': 'DongCC',
+            'event_category': 'OpenCC',
             'event_label': this.textContent
         });
     });
@@ -144,10 +145,10 @@ document.querySelectorAll('a[href$=".dmg"]').forEach(link => {
 
 ## 📧 联系方式
 
-如有问题或建议，请联系：
-- ERP: lujiashuai.1
-- 邮箱: lujiashuai.1@jd.com
+如有问题或建议，欢迎通过 GitHub Issues 反馈：
+- GitHub: [jiashuaiLu](https://github.com/jiashuaiLu)
+- 项目仓库: [https://github.com/jiashuaiLu/opencc](https://github.com/jiashuaiLu/opencc)
 
 ## 📄 许可证
 
-© 2026 DongCC Team. All rights reserved.
+© 2026 OpenCC Team. All rights reserved.

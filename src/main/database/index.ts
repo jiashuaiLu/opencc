@@ -20,11 +20,11 @@ export class DatabaseManager {
   private data: DatabaseSchema;
 
   constructor() {
-    const dataDir = path.join(os.homedir(), '.dongcc', 'data');
+    const dataDir = path.join(os.homedir(), '.opencc', 'data');
     if (!fs.existsSync(dataDir)) {
       fs.mkdirSync(dataDir, { recursive: true });
     }
-    this.dbPath = path.join(dataDir, 'dongcc.json');
+    this.dbPath = path.join(dataDir, 'opencc.json');
 
     this.data = {
       configs: [],
@@ -130,7 +130,7 @@ export class DatabaseManager {
       this.writeSync();
 
       // Also try to remove the physical files to prevent them from reappearing as unmanaged
-      const skillsDir = path.join(os.homedir(), '.dongcc', 'skills');
+      const skillsDir = path.join(os.homedir(), '.opencc', 'skills');
       unwantedSkills.forEach(skill => {
         try {
           if (skill.directory) {

@@ -25,7 +25,7 @@ export class ZipInstaller {
   private ssotDir: string;
 
   constructor() {
-    this.ssotDir = path.join(os.homedir(), '.dongcc', 'skills');
+    this.ssotDir = path.join(os.homedir(), '.opencc', 'skills');
   }
 
   async installFromZip(
@@ -38,7 +38,7 @@ export class ZipInstaller {
     }
 
     // Create a temporary directory for extraction
-    const tempDir = path.join(os.tmpdir(), `dongcc-zip-${Date.now()}`);
+    const tempDir = path.join(os.tmpdir(), `opencc-zip-${Date.now()}`);
     await mkdir(tempDir, { recursive: true });
 
     try {

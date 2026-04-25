@@ -52,7 +52,7 @@ export default function Info() {
       <div className="page-header">
         <div className="page-title-group">
           <h1>应用资讯</h1>
-          <p>了解 DongCC 的最新动态和功能特性</p>
+          <p>了解 OpenCC 的最新动态和功能特性</p>
         </div>
       </div>
 
@@ -98,12 +98,12 @@ export default function Info() {
           <Space direction="vertical" size="middle" style={{ width: '100%' }}>
             <div>
               <Text strong>当前版本：</Text>
-              <Tag color="blue">v1.1.0</Tag>
+              <Tag color="blue">v1.3.0</Tag>
             </div>
             <div>
               <Text strong>技术栈：</Text>
               <Space wrap>
-                <Tag color="geekblue">Electron 33</Tag>
+                <Tag color="geekblue">Electron 41</Tag>
                 <Tag color="cyan">React 18</Tag>
                 <Tag color="purple">TypeScript 5.5</Tag>
                 <Tag color="green">Ant Design 5</Tag>
@@ -111,7 +111,8 @@ export default function Info() {
             </div>
             <div>
               <Text strong>支持平台：</Text>
-              <Tag color="orange">macOS (Apple Silicon)</Tag>
+              <Tag color="orange">macOS (Universal)</Tag>
+              <Tag color="blue">Windows (x64)</Tag>
             </div>
           </Space>
         </Card>

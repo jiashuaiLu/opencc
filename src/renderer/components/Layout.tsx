@@ -44,7 +44,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       >
         <div className="app-logo-container">
           <Logo width={32} height={32} />
-          <span className="app-logo-text">DongCC</span>
+          <span className="app-logo-text">OpenCC</span>
         </div>
         <Menu
           mode="inline"

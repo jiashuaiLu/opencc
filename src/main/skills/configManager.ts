@@ -26,7 +26,7 @@ export class SkillConfigManager {
 
   constructor() {
     this.claudeConfigPath = path.join(os.homedir(), '.claude', 'settings.json');
-    this.skillsDir = path.join(os.homedir(), '.dongcc', 'skills');
+    this.skillsDir = path.join(os.homedir(), '.opencc', 'skills');
   }
 
   async initialize(): Promise<void> {

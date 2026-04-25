@@ -90,8 +90,8 @@ export class SkillService {
 
   constructor() {
     this.claudeConfigPath = path.join(os.homedir(), '.claude', 'settings.json');
-    this.ssotDir = path.join(os.homedir(), '.dongcc', 'skills');
-    this.reposPath = path.join(os.homedir(), '.dongcc', 'skill-repos.json');
+    this.ssotDir = path.join(os.homedir(), '.opencc', 'skills');
+    this.reposPath = path.join(os.homedir(), '.opencc', 'skill-repos.json');
     this.claudeProjectsDir = path.join(os.homedir(), '.claude', 'projects');
   }
 
@@ -612,7 +612,7 @@ export class SkillService {
       const response = await fetch(apiUrl, {
         headers: {
           'Accept': 'application/vnd.github.v3+json',
-          'User-Agent': 'DongCC-App',
+          'User-Agent': 'OpenCC-App',
         },
       });
 
@@ -672,7 +672,7 @@ export class SkillService {
 
     // Download skill from GitHub
     const downloadUrl = `https://github.com/${skill.repoOwner}/${skill.repoName}/archive/${skill.repoBranch}.tar.gz`;
-    const tempDir = path.join(os.tmpdir(), `dongcc-skill-${Date.now()}`);
+    const tempDir = path.join(os.tmpdir(), `opencc-skill-${Date.now()}`);
     const tempFile = path.join(os.tmpdir(), `skill-${Date.now()}.tar.gz`);
 
     try {
