@@ -1,6 +1,6 @@
 import { Card, Table, Tag, Space, Button, Modal, Descriptions, message, Popconfirm } from 'antd';
 import { EyeOutlined, DeleteOutlined, ReloadOutlined, MessageOutlined, ClearOutlined } from '@ant-design/icons';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import '../styles/history.css';
 
 interface Message {
@@ -21,7 +21,7 @@ interface Conversation {
   outputTokens?: number;
 }
 
-export default function History() {
+function History() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
@@ -31,7 +31,7 @@ export default function History() {
     loadConversations();
   }, []);
 
-  const loadConversations = async () => {
+  const loadConversations = useCallback(async () => {
     setLoading(true);
     try {
       const data = await window.electronAPI.getConversations();
@@ -41,24 +41,24 @@ export default function History() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const handleViewConversation = (conversation: Conversation) => {
+  const handleViewConversation = useCallback((conversation: Conversation) => {
     setSelectedConversation(conversation);
     setModalVisible(true);
-  };
+  }, []);
 
-  const handleDeleteConversation = async (id: string) => {
+  const handleDeleteConversation = useCallback(async (id: string) => {
     try {
       await window.electronAPI.deleteConversation(id);
-      setConversations(conversations.filter((c) => c.id !== id));
+      setConversations((prev) => prev.filter((c) => c.id !== id));
       message.success('对话已删除');
     } catch (error) {
       message.error('删除对话失败');
     }
-  };
+  }, []);
 
-  const handleClearAllConversations = async () => {
+  const handleClearAllConversations = useCallback(async () => {
     try {
       await window.electronAPI.clearAllConversations();
       setConversations([]);
@@ -66,9 +66,13 @@ export default function History() {
     } catch (error) {
       message.error('清空对话记录失败');
     }
-  };
+  }, []);
 
-  const columns = [
+  const handleCloseModal = useCallback(() => {
+    setModalVisible(false);
+  }, []);
+
+  const columns = useMemo(() => [
     {
       title: '时间',
       dataIndex: 'createdAt',
@@ -128,7 +132,17 @@ export default function History() {
         </Space>
       ),
     },
-  ];
+  ], [handleViewConversation, handleDeleteConversation]);
+
+  const paginationConfig = useMemo(() => ({
+    pageSize: 20,
+    showSizeChanger: true,
+    showTotal: (total: number) => `共 ${total} 条对话`,
+  }), []);
+
+  const modalTitle = useMemo(() => (
+    <div className="form-section-title"><MessageOutlined style={{ marginRight: 8 }} />对话详情</div>
+  ), []);
 
   return (
     <div className="page-container">
@@ -163,19 +177,15 @@ export default function History() {
             dataSource={conversations}
             rowKey="id"
             loading={loading}
-            pagination={{
-              pageSize: 20,
-              showSizeChanger: true,
-              showTotal: (total) => `共 ${total} 条对话`,
-            }}
+            pagination={paginationConfig}
             size="middle"
           />
         </Card>
 
         <Modal
-          title={<div className="form-section-title"><MessageOutlined style={{ marginRight: 8 }} />对话详情</div>}
+          title={modalTitle}
           open={modalVisible}
-          onCancel={() => setModalVisible(false)}
+          onCancel={handleCloseModal}
           width={800}
           footer={null}
           className="history-modal"
@@ -226,3 +236,5 @@ export default function History() {
     </div>
   );
 }
+
+export default memo(History);

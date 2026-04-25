@@ -6,11 +6,9 @@ import { ThemeProvider } from './context/ThemeContext';
 import './styles/global.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <HashRouter>
-      <ThemeProvider>
-        <App />
-      </ThemeProvider>
-    </HashRouter>
-  </React.StrictMode>
+  <HashRouter>
+    <ThemeProvider>
+      <App />
+    </ThemeProvider>
+  </HashRouter>
 );

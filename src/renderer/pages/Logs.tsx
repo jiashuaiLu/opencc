@@ -1,6 +1,6 @@
-import { Card, Table, Tag, Space, Button, Input, Select, message } from 'antd';
-import { ReloadOutlined, SearchOutlined, ClearOutlined, BugOutlined } from '@ant-design/icons';
-import { useState, useEffect } from 'react';
+import { Card, Table, Tag, Button, Input, Select, message } from 'antd';
+import { ReloadOutlined, SearchOutlined, ClearOutlined } from '@ant-design/icons';
+import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 
 interface Log {
   id: string;
@@ -15,7 +15,20 @@ interface Log {
   metadata?: any;
 }
 
-export default function Logs() {
+const levelColorMap: Record<string, string> = {
+  error: 'error',
+  warn: 'warning',
+  info: 'processing',
+};
+
+const selectOptions = [
+  { label: '全部级别', value: 'all' },
+  { label: 'INFO', value: 'info' },
+  { label: 'WARN', value: 'warn' },
+  { label: 'ERROR', value: 'error' },
+];
+
+function Logs() {
   const [logs, setLogs] = useState<Log[]>([]);
   const [loading, setLoading] = useState(false);
   const [levelFilter, setLevelFilter] = useState<string>('all');
@@ -25,14 +38,9 @@ export default function Logs() {
     loadLogs();
   }, [levelFilter]);
 
-  const loadLogs = async () => {
+  const loadLogs = useCallback(async () => {
     setLoading(true);
     try {
-      // Note: The API signature in the original code seemed to expect an object, 
-      // but typical Electron bridges might vary. Assuming the structure is correct based on original file.
-      // If filtering happens on backend, we pass params. 
-      // If filtering is frontend, we might need to fetch all and filter here.
-      // Let's assume the API handles it as implied by the original code.
       const data = await window.electronAPI.getLogs({
         level: levelFilter === 'all' ? undefined : levelFilter,
         search: searchText,
@@ -44,9 +52,9 @@ export default function Logs() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [levelFilter, searchText]);
 
-  const handleClearLogs = async () => {
+  const handleClearLogs = useCallback(async () => {
     try {
       await window.electronAPI.clearLogs();
       setLogs([]);
@@ -54,9 +62,17 @@ export default function Logs() {
     } catch (error) {
       message.error('清空日志失败');
     }
-  };
+  }, []);
 
-  const columns = [
+  const handleSearchTextChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchText(e.target.value);
+  }, []);
+
+  const handleLevelFilterChange = useCallback((value: string) => {
+    setLevelFilter(value);
+  }, []);
+
+  const columns = useMemo(() => [
     {
       title: '时间',
       dataIndex: 'timestamp',
@@ -70,11 +86,7 @@ export default function Logs() {
       key: 'level',
       width: 100,
       render: (level: string) => {
-        let color = 'default';
-        if (level === 'error') color = 'error';
-        else if (level === 'warn') color = 'warning';
-        else if (level === 'info') color = 'processing';
-        
+        const color = levelColorMap[level] || 'default';
         return <Tag color={color}>{level.toUpperCase()}</Tag>;
       },
     },
@@ -117,7 +129,13 @@ export default function Logs() {
       align: 'right' as const,
       render: (duration: number) => duration ? `${duration}ms` : '-',
     },
-  ];
+  ], []);
+
+  const paginationConfig = useMemo(() => ({
+    pageSize: 20,
+    showSizeChanger: true,
+    showTotal: (total: number) => `共 ${total} 条日志`,
+  }), []);
 
   return (
     <div className="page-container">
@@ -140,20 +158,15 @@ export default function Logs() {
         <div className="filter-bar">
           <Select
             value={levelFilter}
-            onChange={setLevelFilter}
+            onChange={handleLevelFilterChange}
             className="filter-select"
-            options={[
-              { label: '全部级别', value: 'all' },
-              { label: 'INFO', value: 'info' },
-              { label: 'WARN', value: 'warn' },
-              { label: 'ERROR', value: 'error' },
-            ]}
+            options={selectOptions}
           />
           <Input
             placeholder="搜索日志内容、URL..."
             prefix={<SearchOutlined />}
             value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
+            onChange={handleSearchTextChange}
             className="filter-input"
             onPressEnter={loadLogs}
           />
@@ -171,11 +184,7 @@ export default function Logs() {
             dataSource={logs}
             rowKey="id"
             loading={loading}
-            pagination={{
-              pageSize: 20,
-              showSizeChanger: true,
-              showTotal: (total) => `共 ${total} 条日志`,
-            }}
+            pagination={paginationConfig}
             size="middle"
           />
         </Card>
@@ -183,3 +192,5 @@ export default function Logs() {
     </div>
   );
 }
+
+export default memo(Logs);

@@ -10,6 +10,8 @@ let mainWindow: BrowserWindow | null = null;
 let proxyServer: ProxyServer;
 let database: DatabaseManager;
 
+const isDev = process.env.NODE_ENV === 'development';
+
 async function initialize() {
   try {
     database = new DatabaseManager();
@@ -19,17 +21,14 @@ async function initialize() {
     proxyServer = new ProxyServer();
     logger.info('Proxy server initialized');
 
-    // 监听代理服务器事件并保存到数据库
     proxyServer.on('request', async (requestData: any) => {
       try {
-        // 保存请求日志
         await database.addLog({
           level: 'info',
           message: `Proxy request: ${requestData.method} ${requestData.url}`,
           ...requestData,
         });
 
-        // 保存请求统计
         await database.addRequest({
           method: requestData.method,
           url: requestData.url,
@@ -63,14 +62,13 @@ async function initialize() {
       }
     });
 
-    // 监听对话事件并保存到数据库
     proxyServer.on('conversation', async (conversation: any) => {
       try {
         await database.addConversation(conversation);
-        logger.info('Conversation saved', { 
-          id: conversation.id, 
+        logger.info('Conversation saved', {
+          id: conversation.id,
           model: conversation.model,
-          tokens: conversation.tokens 
+          tokens: conversation.tokens
         });
       } catch (error) {
         logger.error('Failed to save conversation', error);
@@ -91,6 +89,8 @@ function createWindow(): void {
     height: 800,
     minWidth: 900,
     minHeight: 600,
+    show: false,
+    backgroundColor: '#f0f2f5',
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -100,9 +100,15 @@ function createWindow(): void {
     icon: path.join(__dirname, '../public/icon.png'),
   });
 
-  if (process.env.NODE_ENV === 'development') {
+  mainWindow.once('ready-to-show', () => {
+    mainWindow?.show();
+    if (isDev) {
+      mainWindow?.webContents.openDevTools();
+    }
+  });
+
+  if (isDev) {
     mainWindow.loadURL('http://localhost:5173');
-    mainWindow.webContents.openDevTools();
   } else {
     mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
   }
@@ -120,8 +126,8 @@ app.whenReady()
   .then(async () => {
     await initialize();
     createWindow();
-    
-    if (process.env.NODE_ENV !== 'development') {
+
+    if (!isDev) {
       setTimeout(() => {
         appUpdater.checkForUpdates(true).catch((err) => {
           logger.error('Auto update check failed:', err);

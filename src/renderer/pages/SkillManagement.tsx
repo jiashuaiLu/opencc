@@ -1,6 +1,6 @@
 import { Card, Button, Space, Tag, Modal, Form, Input, message, Empty, Tooltip, Badge, Divider, Typography, Tabs, Select, Spin } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, LinkOutlined, StarOutlined, BookOutlined, EyeOutlined, DownOutlined, UpOutlined, ImportOutlined, GithubOutlined, ExclamationCircleOutlined, GlobalOutlined, FolderOutlined, FolderOpenOutlined, SearchOutlined, DownloadOutlined, CheckOutlined, FileZipOutlined, ShopOutlined } from '@ant-design/icons';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import '../styles/management.css';
 
 const { Text } = Typography;
@@ -70,13 +70,13 @@ const APP_CONFIG = {
 
 type AppId = keyof typeof APP_CONFIG;
 
-function AppCountBar({ totalLabel, counts }: { totalLabel: string; counts: Record<AppId, number> }) {
+const AppCountBar = memo(function AppCountBar({ totalLabel, counts }: { totalLabel: string; counts: Record<AppId, number> }) {
   return (
     <div className="count-bar">
       <div className="count-bar-left">
         <StarOutlined className="count-bar-icon" />
-        <Badge 
-          count={totalLabel} 
+        <Badge
+          count={totalLabel}
           className="count-badge"
         />
       </div>
@@ -97,9 +97,9 @@ function AppCountBar({ totalLabel, counts }: { totalLabel: string; counts: Recor
       </div>
     </div>
   );
-}
+});
 
-function AppToggleGroup({
+const AppToggleGroup = memo(function AppToggleGroup({
   apps,
   onToggle,
 }: {
@@ -129,14 +129,10 @@ function AppToggleGroup({
       })}
     </div>
   );
-}
+});
 
-// ... ListItemRow is not needed here as we use it from management.css classes directly or we can reuse the one from McpManagement if we export it. 
-// For now, let's just inline the div with the class.
-
-export default function SkillManagement() {
+function SkillManagement() {
   const [activeTab, setActiveTab] = useState<'installed' | 'discover'>('installed');
-  // ... state declarations ...
   const [skills, setSkills] = useState<InstalledSkill[]>([]);
   const [repos, setRepos] = useState<SkillRepo[]>([]);
   const [discoverableSkills, setDiscoverableSkills] = useState<DiscoverableSkill[]>([]);
@@ -161,7 +157,7 @@ export default function SkillManagement() {
     loadData();
   }, []);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
       const [skillData, repoData, projectData] = await Promise.all([
@@ -178,9 +174,9 @@ export default function SkillManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const loadDiscoverableSkills = async () => {
+  const loadDiscoverableSkills = useCallback(async () => {
     setDiscoverLoading(true);
     try {
       const skills = await window.electronAPI.discoverSkills();
@@ -191,9 +187,9 @@ export default function SkillManagement() {
     } finally {
       setDiscoverLoading(false);
     }
-  };
+  }, []);
 
-  const loadUnmanaged = async () => {
+  const loadUnmanaged = useCallback(async () => {
     try {
       const data = await window.electronAPI.scanUnmanagedSkills();
       setUnmanaged(data || []);
@@ -201,15 +197,15 @@ export default function SkillManagement() {
     } catch (error) {
       console.error('Failed to scan unmanaged skills:', error);
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (activeTab === 'discover' && discoverableSkills.length === 0) {
       loadDiscoverableSkills();
     }
-  }, [activeTab]);
+  }, [activeTab, discoverableSkills.length, loadDiscoverableSkills]);
 
-  const handleScanCustomProject = async () => {
+  const handleScanCustomProject = useCallback(async () => {
     if (!customProjectPath.trim()) {
       message.warning('请输入项目路径');
       return;
@@ -224,7 +220,7 @@ export default function SkillManagement() {
       }
 
       const existingPaths = new Set(unmanaged.map(s => s.path));
-      const newSkills = customSkills.filter(s => !existingPaths.has(s.path));
+      const newSkills = customSkills.filter((s: UnmanagedSkill) => !existingPaths.has(s.path));
 
       if (newSkills.length === 0) {
         message.info('该项目中的 Skills 已在列表中');
@@ -234,7 +230,7 @@ export default function SkillManagement() {
       setUnmanaged(prev => [...prev, ...newSkills]);
       setSelectedImport(prev => {
         const newSet = new Set(prev);
-        newSkills.forEach(s => newSet.add(s.path));
+        newSkills.forEach((s: UnmanagedSkill) => newSet.add(s.path));
         return newSet;
       });
 
@@ -245,9 +241,9 @@ export default function SkillManagement() {
     } finally {
       setScanningCustom(false);
     }
-  };
+  }, [customProjectPath, unmanaged]);
 
-  const handleDelete = (skill: InstalledSkill) => {
+  const handleDelete = useCallback((skill: InstalledSkill) => {
     Modal.confirm({
       title: '卸载确认',
       icon: <ExclamationCircleOutlined />,
@@ -265,23 +261,23 @@ export default function SkillManagement() {
         }
       },
     });
-  };
+  }, [loadData]);
 
-  const handleToggleApp = async (id: string, app: 'claude', enabled: boolean) => {
+  const handleToggleApp = useCallback(async (id: string, app: 'claude', enabled: boolean) => {
     try {
       await window.electronAPI.toggleSkillApp(id, app, enabled);
       loadData();
     } catch (error) {
       message.error('操作失败');
     }
-  };
+  }, [loadData]);
 
-  const handleViewDetail = (skill: InstalledSkill) => {
+  const handleViewDetail = useCallback((skill: InstalledSkill) => {
     setSelectedSkill(skill);
     setDetailModalVisible(true);
-  };
+  }, []);
 
-  const handleOpenInFinder = async (skill: InstalledSkill) => {
+  const handleOpenInFinder = useCallback(async (skill: InstalledSkill) => {
     try {
       const result = await window.electronAPI.getSkillDirectory(skill.id);
 
@@ -295,17 +291,17 @@ export default function SkillManagement() {
       console.error('handleOpenInFinder error:', error);
       message.error(`打开目录失败: ${error}`);
     }
-  };
+  }, []);
 
-  const handleOpenReadme = async (url: string) => {
+  const handleOpenReadme = useCallback(async (url: string) => {
     try {
       await window.electronAPI.openExternal(url);
     } catch (error) {
       console.error('Failed to open URL:', error);
     }
-  };
+  }, []);
 
-  const handleOpenImport = async () => {
+  const handleOpenImport = useCallback(async () => {
     setImportModalVisible(true);
     setScanningCustom(true);
     try {
@@ -317,9 +313,9 @@ export default function SkillManagement() {
     } finally {
       setScanningCustom(false);
     }
-  };
+  }, []);
 
-  const handleImport = async () => {
+  const handleImport = useCallback(async () => {
     try {
       const paths = Array.from(selectedImport);
       if (paths.length === 0) {
@@ -342,9 +338,9 @@ export default function SkillManagement() {
     } catch (error) {
       message.error('导入失败');
     }
-  };
+  }, [selectedImport, unmanaged, loadData]);
 
-  const handleInstallFromZip = async () => {
+  const handleInstallFromZip = useCallback(async () => {
     try {
       const filePath = await window.electronAPI.openZipFileDialog();
       if (!filePath) return;
@@ -364,9 +360,9 @@ export default function SkillManagement() {
     } catch (error) {
       message.error({ content: `安装失败: ${error}`, key: 'installZip' });
     }
-  };
+  }, [loadData]);
 
-  const handleInstallFromRepo = async (skill: DiscoverableSkill) => {
+  const handleInstallFromRepo = useCallback(async (skill: DiscoverableSkill) => {
     const key = skill.key;
     setInstallingKeys(prev => new Set(prev).add(key));
 
@@ -374,7 +370,6 @@ export default function SkillManagement() {
       await window.electronAPI.installSkillFromRepo(skill, 'claude');
       message.success(`成功安装 ${skill.name}`);
       loadData();
-      // Refresh discoverable skills to update installed status
       await loadDiscoverableSkills();
     } catch (error) {
       message.error(`安装失败: ${error}`);
@@ -385,9 +380,9 @@ export default function SkillManagement() {
         return newSet;
       });
     }
-  };
+  }, [loadData, loadDiscoverableSkills]);
 
-  const handleAddRepo = async () => {
+  const handleAddRepo = useCallback(async () => {
     try {
       const values = await repoForm.validateFields();
       const repo: SkillRepo = {
@@ -400,14 +395,13 @@ export default function SkillManagement() {
       message.success('仓库添加成功');
       repoForm.resetFields();
       loadData();
-      // Refresh discoverable skills
       await loadDiscoverableSkills();
     } catch (error) {
       message.error('添加失败');
     }
-  };
+  }, [repoForm, loadData, loadDiscoverableSkills]);
 
-  const handleDeleteRepo = (owner: string, name: string) => {
+  const handleDeleteRepo = useCallback((owner: string, name: string) => {
     Modal.confirm({
       title: '删除确认',
       icon: <ExclamationCircleOutlined />,
@@ -420,22 +414,21 @@ export default function SkillManagement() {
           await window.electronAPI.deleteSkillRepo(owner, name);
           message.success('仓库删除成功');
           loadData();
-          // Refresh discoverable skills
           await loadDiscoverableSkills();
         } catch (error) {
           message.error('删除失败');
         }
       },
     });
-  };
+  }, [loadData, loadDiscoverableSkills]);
 
-  const handleOpenRepo = async (owner: string, name: string) => {
+  const handleOpenRepo = useCallback(async (owner: string, name: string) => {
     try {
       await window.electronAPI.openExternal(`https://github.com/${owner}/${name}`);
     } catch (error) {
       console.error('Failed to open URL:', error);
     }
-  };
+  }, []);
 
   const enabledCounts = useMemo(() => {
     const counts = { claude: 0 };
@@ -476,19 +469,16 @@ export default function SkillManagement() {
       ),
     }));
 
-    // Filter by repo
     if (filterRepo !== 'all') {
       filtered = filtered.filter(skill => `${skill.repoOwner}/${skill.repoName}` === filterRepo);
     }
 
-    // Filter by status
     if (filterStatus === 'installed') {
       filtered = filtered.filter(skill => skill.installed);
     } else if (filterStatus === 'uninstalled') {
       filtered = filtered.filter(skill => !skill.installed);
     }
 
-    // Filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(skill =>
@@ -501,15 +491,48 @@ export default function SkillManagement() {
     return filtered;
   }, [discoverableSkills, installedSkillKeys, filterRepo, filterStatus, searchQuery]);
 
-  const getSkillCount = (repo: SkillRepo) =>
+  const getSkillCount = useCallback((repo: SkillRepo) =>
     skills.filter(
       (skill) =>
         skill.repoOwner === repo.owner &&
         skill.repoName === repo.name &&
         (skill.repoBranch || 'main') === (repo.branch || 'main')
-    ).length;
+    ).length,
+  [skills]);
 
   const path = window.require ? window.require('path') : { basename: (p: string) => p.split('/').pop() || p };
+
+  const handleTabChange = useCallback((key: string) => {
+    setActiveTab(key as 'installed' | 'discover');
+  }, []);
+
+  const handleSearchQueryChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  }, []);
+
+  const handleFilterRepoChange = useCallback((value: string) => {
+    setFilterRepo(value);
+  }, []);
+
+  const handleFilterStatusChange = useCallback((value: 'all' | 'installed' | 'uninstalled') => {
+    setFilterStatus(value);
+  }, []);
+
+  const handleCustomProjectPathChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setCustomProjectPath(e.target.value);
+  }, []);
+
+  const handleDetailModalClose = useCallback(() => {
+    setDetailModalVisible(false);
+  }, []);
+
+  const handleRepoModalClose = useCallback(() => {
+    setRepoModalVisible(false);
+  }, []);
+
+  const handleImportModalClose = useCallback(() => {
+    setImportModalVisible(false);
+  }, []);
 
   return (
     <div className="page-container">
@@ -529,15 +552,15 @@ export default function SkillManagement() {
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 20, gap: 12 }}>
           {activeTab === 'installed' && (
             <>
-              <Button 
-                icon={<FileZipOutlined />} 
+              <Button
+                icon={<FileZipOutlined />}
                 onClick={handleInstallFromZip}
                 style={{ borderRadius: 8, height: 36 }}
               >
                 从 ZIP 安装
               </Button>
-              <Button 
-                icon={<ImportOutlined />} 
+              <Button
+                icon={<ImportOutlined />}
                 onClick={handleOpenImport}
                 style={{ borderRadius: 8, height: 36 }}
               >
@@ -545,8 +568,8 @@ export default function SkillManagement() {
               </Button>
             </>
           )}
-          <Button 
-            icon={<GithubOutlined />} 
+          <Button
+            icon={<GithubOutlined />}
             onClick={() => setRepoModalVisible(true)}
             style={{ borderRadius: 8, height: 36 }}
           >
@@ -556,7 +579,7 @@ export default function SkillManagement() {
 
         <Tabs
           activeKey={activeTab}
-          onChange={(key) => setActiveTab(key as 'installed' | 'discover')}
+          onChange={handleTabChange}
           style={{ marginBottom: 16 }}
           items={[
             {
@@ -605,9 +628,9 @@ export default function SkillManagement() {
               <div className="management-list-container">
                 {globalSkills.length > 0 && (
                   <>
-                    <div style={{ 
-                      padding: '12px 20px', 
-                      background: 'linear-gradient(90deg, rgba(24, 144, 255, 0.06) 0%, rgba(24, 144, 255, 0.02) 100%)', 
+                    <div style={{
+                      padding: '12px 20px',
+                      background: 'linear-gradient(90deg, rgba(24, 144, 255, 0.06) 0%, rgba(24, 144, 255, 0.02) 100%)',
                       borderBottom: '1px solid var(--border-color)',
                       display: 'flex',
                       alignItems: 'center',
@@ -635,9 +658,9 @@ export default function SkillManagement() {
                     {globalSkills.length > 0 && (
                       <div style={{ height: 1, background: 'var(--border-color)' }} />
                     )}
-                    <div style={{ 
-                      padding: '12px 20px', 
-                      background: 'linear-gradient(90deg, rgba(82, 196, 26, 0.06) 0%, rgba(82, 196, 26, 0.02) 100%)', 
+                    <div style={{
+                      padding: '12px 20px',
+                      background: 'linear-gradient(90deg, rgba(82, 196, 26, 0.06) 0%, rgba(82, 196, 26, 0.02) 100%)',
                       borderBottom: '1px solid var(--border-color)',
                       display: 'flex',
                       alignItems: 'center',
@@ -670,13 +693,13 @@ export default function SkillManagement() {
                 <Search
                   placeholder="搜索技能..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={handleSearchQueryChange}
                   style={{ width: '100%' }}
                 />
                 <Space>
                   <Select
                     value={filterRepo}
-                    onChange={setFilterRepo}
+                    onChange={handleFilterRepoChange}
                     style={{ width: 200 }}
                     options={[
                       { label: '所有仓库', value: 'all' },
@@ -685,7 +708,7 @@ export default function SkillManagement() {
                   />
                   <Select
                     value={filterStatus}
-                    onChange={setFilterStatus}
+                    onChange={handleFilterStatusChange}
                     style={{ width: 120 }}
                     options={[
                       { label: '全部', value: 'all' },
@@ -718,7 +741,6 @@ export default function SkillManagement() {
           </div>
         )}
 
-        {/* Modals - Detail, Repo, Import - Keeping content structure but ensuring consistent styles */}
         {/* Detail Modal */}
         <Modal
           title={
@@ -728,7 +750,7 @@ export default function SkillManagement() {
             </Space>
           }
           open={detailModalVisible}
-          onCancel={() => setDetailModalVisible(false)}
+          onCancel={handleDetailModalClose}
           width={600}
           footer={[
             <Button key="finder" icon={<FolderOpenOutlined />} onClick={() => {
@@ -741,12 +763,11 @@ export default function SkillManagement() {
                 查看 README
               </Button>
             ),
-            <Button key="close" onClick={() => setDetailModalVisible(false)}>
+            <Button key="close" onClick={handleDetailModalClose}>
               关闭
             </Button>,
           ]}
         >
-          {/* ... Modal content ... */}
           {selectedSkill && (
             <div>
               <Space style={{ marginBottom: 16 }}>
@@ -807,11 +828,10 @@ export default function SkillManagement() {
             </Space>
           }
           open={repoModalVisible}
-          onCancel={() => setRepoModalVisible(false)}
+          onCancel={handleRepoModalClose}
           footer={null}
           width={600}
         >
-          {/* ... Repo Modal content ... */}
           <div style={{ marginTop: 16 }}>
             <div style={{ padding: 12, background: '#e6f7ff', borderRadius: 6, marginBottom: 16 }}>
               <Text style={{ fontSize: 12 }}>
@@ -899,19 +919,18 @@ export default function SkillManagement() {
         <Modal
           title="导入本地 Skills"
           open={importModalVisible}
-          onCancel={() => setImportModalVisible(false)}
+          onCancel={handleImportModalClose}
           onOk={handleImport}
           okText="导入选中"
           cancelText="取消"
           width={700}
         >
-          {/* ... Import Modal content ... */}
           <div style={{ marginBottom: 16 }}>
             <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
               <Input
                 placeholder="输入项目路径扫描 Skills，例如：/Users/xxx/projects/my-project"
                 value={customProjectPath}
-                onChange={(e) => setCustomProjectPath(e.target.value)}
+                onChange={handleCustomProjectPathChange}
                 onPressEnter={handleScanCustomProject}
                 prefix={<FolderOpenOutlined style={{ color: '#999' }} />}
               />
@@ -1020,8 +1039,7 @@ export default function SkillManagement() {
   );
 }
 
-// Installed Skill Item Component
-function InstalledSkillItem({
+const InstalledSkillItem = memo(function InstalledSkillItem({
   skill,
   onToggleApp,
   onDelete,
@@ -1037,7 +1055,7 @@ function InstalledSkillItem({
   isLast?: boolean;
 }) {
   const path = window.require ? window.require('path') : { basename: (p: string) => p.split('/').pop() || p };
-  
+
   const sourceLabel = skill.repoOwner && skill.repoName
     ? `${skill.repoOwner}/${skill.repoName}`
     : skill.sourceType === 'project' && skill.sourceProject
@@ -1137,9 +1155,9 @@ function InstalledSkillItem({
             size="small"
             icon={<FolderOpenOutlined style={{ fontSize: 15 }} />}
             onClick={() => onOpenInFinder(skill)}
-            style={{ 
-              width: 32, 
-              height: 32, 
+            style={{
+              width: 32,
+              height: 32,
               padding: 0,
               borderRadius: 8,
               color: 'var(--primary-color)',
@@ -1159,10 +1177,9 @@ function InstalledSkillItem({
       </div>
     </div>
   );
-}
+});
 
-// Discoverable Skill Card Component
-function DiscoverableSkillCard({
+const DiscoverableSkillCard = memo(function DiscoverableSkillCard({
   skill,
   installing,
   onInstall,
@@ -1171,16 +1188,15 @@ function DiscoverableSkillCard({
   installing: boolean;
   onInstall: () => void;
 }) {
-  const handleOpenReadme = async () => {
+  const handleOpenReadme = useCallback(async () => {
     if (!skill.readmeUrl) return;
     try {
       await window.electronAPI.openExternal(skill.readmeUrl);
     } catch (error) {
       console.error('Failed to open URL:', error);
     }
-  };
+  }, [skill.readmeUrl]);
 
-  // Determine if directory should be shown (when it differs from name)
   const showDirectory = Boolean(skill.directory) &&
     skill.directory.trim().toLowerCase() !== skill.name.trim().toLowerCase();
 
@@ -1197,7 +1213,6 @@ function DiscoverableSkillCard({
       }}
       styles={{ body: { flex: 1, display: 'flex', flexDirection: 'column', padding: '16px' } }}
     >
-      {/* Gradient overlay on hover */}
       <div style={{
         position: 'absolute',
         inset: 0,
@@ -1207,7 +1222,6 @@ function DiscoverableSkillCard({
         pointerEvents: 'none',
       }} />
 
-      {/* Header */}
       <div style={{ marginBottom: 12 }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -1269,7 +1283,6 @@ function DiscoverableSkillCard({
         </div>
       </div>
 
-      {/* Description */}
       <div style={{ flex: 1, marginBottom: 12 }}>
         <p style={{
           margin: 0,
@@ -1285,7 +1298,6 @@ function DiscoverableSkillCard({
         </p>
       </div>
 
-      {/* Footer */}
       <div style={{
         display: 'flex',
         gap: 8,
@@ -1335,4 +1347,6 @@ function DiscoverableSkillCard({
       </div>
     </Card>
   );
-}
+});
+
+export default memo(SkillManagement);

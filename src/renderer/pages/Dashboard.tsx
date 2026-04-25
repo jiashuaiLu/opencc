@@ -1,11 +1,10 @@
-import { Tabs, Segmented, Button, Space, message } from 'antd';
+import { Tabs, Segmented, Button, message } from 'antd';
 import {
   ReloadOutlined,
-  LineChartOutlined,
   UnorderedListOutlined,
   BarChartOutlined,
 } from '@ant-design/icons';
-import { useState, useEffect } from 'react';
+import { useState, useCallback, useMemo, memo } from 'react';
 import UsageSummaryCards from '../components/dashboard/UsageSummaryCards';
 import UsageTrendChart from '../components/dashboard/UsageTrendChart';
 import RequestLogTable from '../components/dashboard/RequestLogTable';
@@ -14,28 +13,88 @@ import '../styles/dashboard.css';
 
 type TimeRange = '1d' | '7d' | '30d';
 
-export default function Dashboard() {
+const refreshIntervalOptions = [0, 5000, 10000, 30000, 60000];
+
+const segmentedOptions = [
+  { label: '今天', value: '1d' },
+  { label: '7 天', value: '7d' },
+  { label: '30 天', value: '30d' },
+];
+
+const tabItems = [
+  {
+    key: 'logs',
+    label: (
+      <span>
+        <UnorderedListOutlined style={{ marginRight: 8 }} />
+        请求日志
+      </span>
+    ),
+    children: <RequestLogTable refreshIntervalMs={0} />,
+  },
+  {
+    key: 'models',
+    label: (
+      <span>
+        <BarChartOutlined style={{ marginRight: 8 }} />
+        模型统计
+      </span>
+    ),
+    children: <ModelStatsTable refreshIntervalMs={0} />,
+  },
+];
+
+function Dashboard() {
   const [timeRange, setTimeRange] = useState<TimeRange>('1d');
   const [refreshInterval, setRefreshInterval] = useState(30000);
   const [activeTab, setActiveTab] = useState('logs');
 
-  const days = timeRange === '1d' ? 1 : timeRange === '7d' ? 7 : 30;
+  const days = useMemo(() => {
+    return timeRange === '1d' ? 1 : timeRange === '7d' ? 7 : 30;
+  }, [timeRange]);
 
-  const refreshIntervalOptions = [0, 5000, 10000, 30000, 60000];
+  const changeRefreshInterval = useCallback(() => {
+    setRefreshInterval((prev) => {
+      const currentIndex = refreshIntervalOptions.indexOf(prev);
+      const nextIndex = (currentIndex + 1) % refreshIntervalOptions.length;
+      return refreshIntervalOptions[nextIndex];
+    });
+  }, []);
 
-  const changeRefreshInterval = () => {
-    const currentIndex = refreshIntervalOptions.indexOf(refreshInterval);
-    const nextIndex = (currentIndex + 1) % refreshIntervalOptions.length;
-    setRefreshInterval(refreshIntervalOptions[nextIndex]);
-  };
-
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     message.success('数据已刷新');
-  };
+  }, []);
+
+  const handleTimeRangeChange = useCallback((value: string | number) => {
+    setTimeRange(value as TimeRange);
+  }, []);
+
+  const handleTabChange = useCallback((key: string) => {
+    setActiveTab(key);
+  }, []);
+
+  const refreshLabel = useMemo(() => {
+    return refreshInterval > 0 ? `${refreshInterval / 1000}s` : '自动刷新';
+  }, [refreshInterval]);
+
+  const currentTabItems = useMemo(() => {
+    return tabItems.map((item) => ({
+      ...item,
+      children:
+        item.key === 'logs' ? (
+          <RequestLogTable
+            refreshIntervalMs={refreshInterval > 0 ? refreshInterval : 0}
+          />
+        ) : (
+          <ModelStatsTable
+            refreshIntervalMs={refreshInterval > 0 ? refreshInterval : 0}
+          />
+        ),
+    }));
+  }, [refreshInterval]);
 
   return (
     <div className="dashboard-container">
-      {/* 页面标题和时间范围选择 */}
       <div className="dashboard-header">
         <div className="dashboard-title-group">
           <h1>仪表盘</h1>
@@ -47,63 +106,29 @@ export default function Dashboard() {
             onClick={changeRefreshInterval}
             className="refresh-btn"
           >
-            {refreshInterval > 0 ? `${refreshInterval / 1000}s` : '自动刷新'}
+            {refreshLabel}
           </Button>
           <Segmented
             value={timeRange}
-            onChange={(value) => setTimeRange(value as TimeRange)}
-            options={[
-              { label: '今天', value: '1d' },
-              { label: '7 天', value: '7d' },
-              { label: '30 天', value: '30d' },
-            ]}
+            onChange={handleTimeRangeChange}
+            options={segmentedOptions}
           />
         </div>
       </div>
 
-      {/* 统计卡片 */}
       <UsageSummaryCards days={days} />
 
-      {/* 趋势图表 */}
       <UsageTrendChart days={days} />
 
-      {/* 标签页：请求日志 / 模型统计 */}
       <div className="dashboard-tabs-container">
         <Tabs
           activeKey={activeTab}
-          onChange={setActiveTab}
-          items={[
-            {
-              key: 'logs',
-              label: (
-                <span>
-                  <UnorderedListOutlined style={{ marginRight: 8 }} />
-                  请求日志
-                </span>
-              ),
-              children: (
-                <RequestLogTable
-                  refreshIntervalMs={refreshInterval > 0 ? refreshInterval : 0}
-                />
-              ),
-            },
-            {
-              key: 'models',
-              label: (
-                <span>
-                  <BarChartOutlined style={{ marginRight: 8 }} />
-                  模型统计
-                </span>
-              ),
-              children: (
-                <ModelStatsTable
-                  refreshIntervalMs={refreshInterval > 0 ? refreshInterval : 0}
-                />
-              ),
-            },
-          ]}
+          onChange={handleTabChange}
+          items={currentTabItems}
         />
       </div>
     </div>
   );
 }
+
+export default memo(Dashboard);
