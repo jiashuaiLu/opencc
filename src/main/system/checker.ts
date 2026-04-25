@@ -284,10 +284,11 @@ export class SystemChecker {
 
   // 自动配置 Claude
   async autoConfigureClaude(
-    port: number, 
-    apiKey: string, 
+    port: number,
+    apiKey: string,
     models?: Array<{ id: string; name: string; modelId: string }>,
-    defaultModel?: string
+    defaultModel?: string,
+    apiFormat?: 'chat-completions' | 'responses' | 'anthropic'
   ): Promise<void> {
     const configPath = path.join(os.homedir(), '.claude', 'settings.json');
     const configDir = path.dirname(configPath);
@@ -303,14 +304,15 @@ export class SystemChecker {
 
     // 如果有模型配置，添加到配置文件（使用官方标准格式）
     if (models && models.length > 0) {
+      const provider = apiFormat === 'anthropic' ? 'anthropic' : 'openai';
       settings.llm = {
-        defaultModel: defaultModel 
+        defaultModel: defaultModel
           ? models.find(m => m.id === defaultModel)?.modelId || models[0].modelId
           : models[0].modelId,
         models: models.map(m => ({
           modelId: m.modelId,
           displayName: m.name,
-          provider: 'openai',
+          provider,
           apiEndpoint: `http://localhost:${port}/v1`,
           apiKey: apiKey,
           isEnabled: true,

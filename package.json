@@ -1,6 +1,6 @@
 {
   "name": "dongcc",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "DongCC - Claude Code 代理服务管理工具",
   "main": "dist/main/index.js",
   "author": "DongCC Team",
@@ -39,7 +39,7 @@
     "@vitejs/plugin-react": "^4.3.0",
     "concurrently": "^8.2.0",
     "cross-env": "^7.0.3",
-    "electron": "^33.0.0",
+    "electron": "^41.3.0",
     "electron-builder": "^25.0.0",
     "eslint": "^8.57.0",
     "prettier": "^3.3.0",
@@ -55,6 +55,7 @@
     "antd": "^5.20.0",
     "chart.js": "^4.4.0",
     "electron-store": "^8.1.0",
+    "electron-updater": "^6.8.3",
     "express": "^4.18.0",
     "framer-motion": "^12.35.0",
     "http-proxy-middleware": "^2.0.6",
@@ -75,24 +76,49 @@
     "directories": {
       "output": "release"
     },
+    "publish": {
+      "provider": "generic",
+      "url": "https://your-server.com/updates"
+    },
     "mac": {
-      "category": "public.app-category.developer-tools"
+      "category": "public.app-category.developer-tools",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ]
     },
     "win": {
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         },
         {
           "target": "portable",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ]
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "differentialPackage": true
     },
     "files": [
       "dist/main/**/*",

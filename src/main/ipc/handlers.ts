@@ -69,7 +69,8 @@ export function setupIPC(
         config.port,
         config.apiKey,
         config.models,
-        config.defaultModel
+        config.defaultModel,
+        config.apiFormat
       );
       logger.info('Claude config updated', {
         port: config.port,

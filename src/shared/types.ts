@@ -10,6 +10,7 @@ export interface Config {
     modelId: string;
   }>;
   defaultModel?: string;
+  apiFormat?: 'chat-completions' | 'responses' | 'anthropic';
   isDefault?: boolean;
   createdAt?: Date;
   updatedAt?: Date;

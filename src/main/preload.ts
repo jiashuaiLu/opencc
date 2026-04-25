@@ -76,4 +76,25 @@ contextBridge.exposeInMainWorld('electronAPI', {
   exportToCSV: (data: any, filename: string) => ipcRenderer.invoke('export:csv', data, filename),
   exportToExcel: (data: any, filename: string) => ipcRenderer.invoke('export:excel', data, filename),
   exportToJson: (data: any, filename: string) => ipcRenderer.invoke('export:json', data, filename),
+
+  checkForUpdates: () => ipcRenderer.invoke('updater:check-for-updates'),
+  downloadUpdate: () => ipcRenderer.invoke('updater:download-update'),
+  installUpdate: () => ipcRenderer.invoke('updater:install-update'),
+  getCurrentVersion: () => ipcRenderer.invoke('updater:get-current-version'),
+
+  onUpdateChecking: (callback: () => void) => ipcRenderer.on('update-checking', callback),
+  onUpdateAvailable: (callback: (info: any) => void) => ipcRenderer.on('update-available', (_event, info) => callback(info)),
+  onUpdateNotAvailable: (callback: (info: any) => void) => ipcRenderer.on('update-not-available', (_event, info) => callback(info)),
+  onUpdateDownloadProgress: (callback: (progress: any) => void) => ipcRenderer.on('update-download-progress', (_event, progress) => callback(progress)),
+  onUpdateDownloaded: (callback: (info: any) => void) => ipcRenderer.on('update-downloaded', (_event, info) => callback(info)),
+  onUpdateError: (callback: (error: any) => void) => ipcRenderer.on('update-error', (_event, error) => callback(error)),
+
+  removeUpdateListeners: () => {
+    ipcRenderer.removeAllListeners('update-checking');
+    ipcRenderer.removeAllListeners('update-available');
+    ipcRenderer.removeAllListeners('update-not-available');
+    ipcRenderer.removeAllListeners('update-download-progress');
+    ipcRenderer.removeAllListeners('update-downloaded');
+    ipcRenderer.removeAllListeners('update-error');
+  },
 });

@@ -4,6 +4,7 @@ import { ProxyServer } from './proxy/server';
 import { DatabaseManager } from './database';
 import { setupIPC } from './ipc/handlers';
 import { logger } from './logger';
+import { appUpdater } from './updater';
 
 let mainWindow: BrowserWindow | null = null;
 let proxyServer: ProxyServer;
@@ -110,6 +111,8 @@ function createWindow(): void {
     mainWindow = null;
   });
 
+  appUpdater.setMainWindow(mainWindow);
+
   logger.info('Main window created');
 }
 
@@ -117,6 +120,14 @@ app.whenReady()
   .then(async () => {
     await initialize();
     createWindow();
+    
+    if (process.env.NODE_ENV !== 'development') {
+      setTimeout(() => {
+        appUpdater.checkForUpdates(true).catch((err) => {
+          logger.error('Auto update check failed:', err);
+        });
+      }, 3000);
+    }
   })
   .catch((error) => {
     logger.error('Failed to start application', error);

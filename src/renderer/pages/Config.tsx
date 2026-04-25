@@ -16,6 +16,7 @@ interface Config {
   port: number;
   models?: ModelConfig[];
   defaultModel?: string;
+  apiFormat?: 'chat-completions' | 'responses' | 'anthropic';
 }
 
 export default function Config() {
@@ -24,9 +25,11 @@ export default function Config() {
   const [selectedUrl, setSelectedUrl] = useState<string>('');
   const [models, setModels] = useState<ModelConfig[]>([]);
   const [defaultModel, setDefaultModel] = useState<string>('');
+  const [apiFormat, setApiFormat] = useState<'chat-completions' | 'responses' | 'anthropic'>('chat-completions');
 
   const presetUrls = [
     { label: 'JoyBuilder (京东云)', value: 'http://ai-api.jdcloud.com/v1' },
+    { label: 'Anthropic (京东云)', value: 'http://ai-api.jdcloud.com/anthropic/v1' },
     { label: 'OpenAI', value: 'https://api.openai.com/v1' },
     { label: 'DeepSeek', value: 'https://api.deepseek.com/v1' },
     { label: 'Google Gemini', value: 'https://generativelanguage.googleapis.com/v1beta' },
@@ -47,6 +50,7 @@ export default function Config() {
         setSelectedUrl(config.baseUrl || '');
         setModels(config.models || []);
         setDefaultModel(config.defaultModel || '');
+        setApiFormat(config.apiFormat || 'chat-completions');
       }
     } catch (error) {
       console.error('Failed to load config:', error);
@@ -72,6 +76,7 @@ export default function Config() {
         id: 'default',
         models,
         defaultModel: defaultModel || models[0].id,
+        apiFormat,
       });
       message.success('配置保存成功');
     } catch (error) {
@@ -98,6 +103,14 @@ export default function Config() {
   const handleUrlChange = (value: string) => {
     setSelectedUrl(value);
     form.setFieldsValue({ baseUrl: value });
+    // Auto-suggest apiFormat based on provider
+    if (value.includes('/anthropic/')) {
+      setApiFormat('anthropic');
+    } else if (value === 'https://api.openai.com/v1') {
+      setApiFormat('responses');
+    } else {
+      setApiFormat('chat-completions');
+    }
   };
 
   const handleAddModel = () => {
@@ -216,6 +229,27 @@ export default function Config() {
               rules={[{ required: true, message: '请输入端口号' }]}
             >
               <InputNumber min={1024} max={65535} style={{ width: '100%' }} />
+            </Form.Item>
+
+            <Form.Item
+              label={
+                <Space>
+                  API 格式
+                  <Tooltip title="Anthropic 直通模式无需格式转换，延迟最低；Chat Completions 是经典 OpenAI 格式，兼容性好；Responses 是 OpenAI 新格式，仅部分 API 支持。选择错误会导致请求失败">
+                    <InfoCircleOutlined style={{ color: '#1890ff', fontSize: 14 }} />
+                  </Tooltip>
+                </Space>
+              }
+            >
+              <Select
+                value={apiFormat}
+                onChange={(value) => setApiFormat(value)}
+                options={[
+                  { label: 'Anthropic 直通 (零转换，推荐)', value: 'anthropic' },
+                  { label: 'Chat Completions (兼容性好)', value: 'chat-completions' },
+                  { label: 'Responses API (OpenAI 新格式)', value: 'responses' },
+                ]}
+              />
             </Form.Item>
 
             <Divider />

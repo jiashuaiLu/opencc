@@ -7,9 +7,9 @@ export interface ProxyConfig {
   port: number;
   models?: Array<{ id: string; name: string; modelId: string }>;
   defaultModel?: string;
+  apiFormat?: 'chat-completions' | 'responses' | 'anthropic';
 }
 
-// Claude API Types
 interface ClaudeTool {
   name: string;
   description?: string;
@@ -22,15 +22,17 @@ type ClaudeContent =
       type: 'text' | 'image' | 'tool_use' | 'tool_result';
       text?: string;
       source?: {
-        type: 'base64';
-        media_type: string;
-        data: string;
+        type: 'base64' | 'url';
+        media_type?: string;
+        data?: string;
+        url?: string;
       };
       id?: string;
       name?: string;
       input?: any;
       tool_use_id?: string;
       content?: any;
+      cache_control?: { type: string };
     }>;
 
 interface ClaudeMessage {
@@ -38,10 +40,15 @@ interface ClaudeMessage {
   content: ClaudeContent;
 }
 
+interface ClaudeThinking {
+  type: 'enabled' | 'adaptive';
+  budget_tokens?: number;
+}
+
 interface ClaudeMessagesRequest {
   model: string;
   messages: ClaudeMessage[];
-  system?: string;
+  system?: string | Array<{ type: 'text'; text: string; cache_control?: { type: string } }>;
   max_tokens: number;
   stop_sequences?: string[];
   stream?: boolean;
@@ -50,9 +57,9 @@ interface ClaudeMessagesRequest {
   top_k?: number;
   tools?: ClaudeTool[];
   tool_choice?: { type: 'auto' | 'any' | 'tool'; name?: string };
+  thinking?: ClaudeThinking;
 }
 
-// OpenAI API Types
 interface OpenAIMessage {
   role: 'system' | 'user' | 'assistant' | 'tool';
   content: string | Array<{ type: 'text' | 'image_url'; text?: string; image_url?: { url: string } }>;
@@ -81,6 +88,95 @@ interface OpenAIRequest {
   tool_choice?: 'auto' | 'none' | { type: 'function'; function: { name: string } };
 }
 
+type ResponseInputContent =
+  | { type: 'input_text'; text: string }
+  | { type: 'input_image'; image_url: string; detail?: 'low' | 'high' | 'auto' | 'original' }
+  | { type: 'input_file'; file_data?: string; file_id?: string; file_url?: string; filename?: string };
+
+type ResponseOutputContent =
+  | { type: 'output_text'; text: string; annotations?: any[] }
+  | { type: 'refusal'; refusal: string };
+
+interface ResponsesInputMessage {
+  type: 'message';
+  role: 'user' | 'assistant' | 'system' | 'developer';
+  content: string | ResponseInputContent[];
+  status?: 'in_progress' | 'completed' | 'incomplete';
+}
+
+interface ResponsesFunctionCallOutput {
+  type: 'function_call_output';
+  call_id: string;
+  output: string | ResponseInputContent[];
+  id?: string;
+  status?: 'in_progress' | 'completed' | 'incomplete';
+}
+
+type ResponsesFunctionCallInput = {
+  type: 'function_call';
+  id: string;
+  call_id: string;
+  name: string;
+  arguments: string;
+  status?: 'in_progress' | 'completed' | 'incomplete';
+};
+
+type ResponsesInputItem = ResponsesInputMessage | ResponsesFunctionCallOutput | ResponsesFunctionCallInput;
+
+interface ResponsesRequest {
+  model: string;
+  input: ResponsesInputItem[] | string;
+  instructions?: string;
+  max_output_tokens?: number;
+  temperature?: number;
+  top_p?: number;
+  stream?: boolean;
+  tools?: Array<{
+    type: 'function';
+    name: string;
+    description?: string;
+    parameters?: any;
+  }>;
+  tool_choice?: 'auto' | 'none' | 'required' | { type: 'function'; name: string };
+  previous_response_id?: string;
+}
+
+interface ResponsesOutputMessage {
+  type: 'message';
+  id: string;
+  role: 'assistant';
+  content: ResponseOutputContent[];
+  status: 'in_progress' | 'completed' | 'incomplete';
+}
+
+interface ResponsesFunctionCall {
+  type: 'function_call';
+  id: string;
+  call_id: string;
+  name: string;
+  arguments: string;
+  status: 'in_progress' | 'completed' | 'incomplete';
+}
+
+type ResponsesOutputItem = ResponsesOutputMessage | ResponsesFunctionCall | {
+  type: 'web_search_call' | 'code_interpreter_call' | 'file_search_call';
+  id: string;
+  status: string;
+};
+
+interface ResponsesResponse {
+  id: string;
+  object: 'response';
+  status: 'completed' | 'in_progress' | 'failed';
+  model: string;
+  output: ResponsesOutputItem[];
+  usage?: {
+    input_tokens: number;
+    output_tokens: number;
+    total_tokens: number;
+  };
+}
+
 export class ProxyServer extends EventEmitter {
   private app: express.Application;
   private server: any;
@@ -99,7 +195,7 @@ export class ProxyServer extends EventEmitter {
       res.header('Access-Control-Allow-Origin', '*');
       res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
       res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key, anthropic-version');
-      
+
       if (req.method === 'OPTIONS') {
         return res.sendStatus(200);
       }
@@ -141,10 +237,10 @@ export class ProxyServer extends EventEmitter {
       const claudeRequest: ClaudeMessagesRequest = req.body;
 
       console.log(`[Proxy] ${req.method} ${req.url}`);
-      console.log(`[Proxy] Model: ${claudeRequest.model}`);
-      console.log(`[Proxy] Stream: ${claudeRequest.stream}`);
+    console.log(`[Proxy] Model: ${claudeRequest.model}`);
+    console.log(`[Proxy] Stream: ${claudeRequest.stream}`);
+    console.log(`[Proxy] Original request body: ${JSON.stringify(req.body, null, 2)}`);
 
-      // 如果配置了默认模型，替换请求中的模型名称
       if (this.config && this.config.defaultModel && this.config.models) {
         const defaultModelConfig = this.config.models.find(m => m.id === this.config!.defaultModel);
         if (defaultModelConfig) {
@@ -153,76 +249,16 @@ export class ProxyServer extends EventEmitter {
         }
       }
 
-      const openaiRequest = this.convertClaudeToOpenAIRequest(claudeRequest);
-      const targetUrl = `${this.config.baseUrl}/chat/completions`;
-
-      console.log(`[Proxy] Forwarding to: ${targetUrl}`);
-      console.log(`[Proxy] Request model: ${openaiRequest.model}`);
-
-      const openaiApiResponse = await fetch(targetUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.config.apiKey}`,
-        },
-        body: JSON.stringify(openaiRequest),
-      });
-
-      if (!openaiApiResponse.ok) {
-        const errorBody = await openaiApiResponse.text();
-        console.error(`[Proxy Error] ${openaiApiResponse.status} ${openaiApiResponse.statusText}`);
-        console.error(`[Proxy Error] ${errorBody}`);
-        
-        res.status(openaiApiResponse.status).json({
-          error: 'API Error',
-          message: errorBody,
-        });
-        return;
-      }
-
-      if (claudeRequest.stream) {
-        await this.handleStreamResponse(openaiApiResponse, res, claudeRequest.model, claudeRequest, startTime);
-      } else {
-        const openaiResponse = await openaiApiResponse.json();
-        const claudeResponse = this.convertOpenAIToClaudeResponse(openaiResponse, claudeRequest.model);
-        
-        res.json(claudeResponse);
-
-        const duration = Date.now() - startTime;
-        const inputTokens = claudeResponse.usage?.input_tokens || 0;
-        const outputTokens = claudeResponse.usage?.output_tokens || 0;
-        
-        // 保存对话历史
-        this.emit('conversation', {
-          id: `conv_${Date.now()}`,
-          model: claudeRequest.model,
-          request: claudeRequest,
-          response: claudeResponse,
-          inputTokens,
-          outputTokens,
-          duration,
-        });
-
-        // 保存请求统计
-        this.emit('request', {
-          method: req.method,
-          url: req.url,
-          statusCode: 200,
-          duration,
-          model: claudeRequest.model,
-          inputTokens,
-          outputTokens,
-          cacheReadTokens: 0,
-          cacheCreationTokens: 0,
-          isStreaming: false,
-        });
-      }
+      // 强制使用 anthropic 格式，responses 格式暂时禁用
+      const apiFormat = 'anthropic';
+      console.log(`[Proxy] Using Anthropic Passthrough (responses API temporarily disabled)`);
+      await this.handleWithAnthropicApi(claudeRequest, req, res, startTime);
     } catch (error: any) {
       console.error(`[Proxy Error] ${error.message}`);
       console.error(`[Proxy Error] Stack: ${error.stack}`);
-      
+
       this.emit('error', error);
-      
+
       if (!res.headersSent) {
         if (error.message.includes('ETIMEDOUT') || error.message.includes('ECONNREFUSED')) {
           res.status(502).json({
@@ -238,6 +274,1012 @@ export class ProxyServer extends EventEmitter {
           });
         }
       }
+    }
+  }
+
+  /**
+   * 构建干净的 Anthropic 请求体，移除不必要的参数
+   * 针对京东云等兼容服务进行优化
+   */
+  private buildCleanAnthropicBody(claudeRequest: ClaudeMessagesRequest): any {
+    // 清理 messages，确保格式正确
+    const cleanMessages = claudeRequest.messages.map(msg => {
+      // 确保 content 是数组格式
+      let content = msg.content;
+      if (typeof content === 'string') {
+        content = [{ type: 'text', text: content }];
+      } else if (Array.isArray(content)) {
+        // 清理 content 数组中的每一项
+        content = content.map((block: any) => {
+          if (block.type === 'text') {
+            const text = block.text || '';
+            // 过滤掉空的 text block
+            if (!text.trim()) {
+              return null;
+            }
+            return { type: 'text', text: text };
+          }
+          if (block.type === 'image') {
+            return {
+              type: 'image',
+              source: block.source || {}
+            };
+          }
+          if (block.type === 'tool_use') {
+            // 确保 id 只包含合法字符: a-zA-Z0-9_-
+            const cleanId = (block.id || '').replace(/[^a-zA-Z0-9_-]/g, '_');
+            return {
+              type: 'tool_use',
+              id: cleanId || 'tool_default',
+              name: block.name || '',
+              input: block.input || {}
+            };
+          }
+          if (block.type === 'tool_result') {
+            // 确保 tool_use_id 只包含合法字符: a-zA-Z0-9_-
+            const cleanToolUseId = (block.tool_use_id || '').replace(/[^a-zA-Z0-9_-]/g, '_');
+            return {
+              type: 'tool_result',
+              tool_use_id: cleanToolUseId || 'tool_default',
+              content: block.content || ''
+            };
+          }
+          return block;
+        }).filter(Boolean); // 过滤掉 null 值
+        
+        // 如果过滤后 content 为空，添加一个默认文本
+        if (content.length === 0) {
+          content = [{ type: 'text', text: ' ' }];
+        }
+      }
+      
+      return {
+        role: msg.role,
+        content: content
+      };
+    });
+
+    const body: any = {
+      model: claudeRequest.model,
+      messages: cleanMessages,
+      max_tokens: claudeRequest.max_tokens,
+    };
+
+    // 只添加有值的参数
+    if (claudeRequest.system !== undefined && claudeRequest.system !== null) {
+      body.system = claudeRequest.system;
+    }
+    if (claudeRequest.stop_sequences !== undefined && claudeRequest.stop_sequences !== null) {
+      body.stop_sequences = claudeRequest.stop_sequences;
+    }
+    if (claudeRequest.stream !== undefined && claudeRequest.stream !== null) {
+      body.stream = claudeRequest.stream;
+    }
+    if (claudeRequest.temperature !== undefined && claudeRequest.temperature !== null) {
+      body.temperature = claudeRequest.temperature;
+    }
+    if (claudeRequest.top_p !== undefined && claudeRequest.top_p !== null) {
+      body.top_p = claudeRequest.top_p;
+    }
+    if (claudeRequest.top_k !== undefined && claudeRequest.top_k !== null) {
+      body.top_k = claudeRequest.top_k;
+    }
+    if (claudeRequest.tools !== undefined && claudeRequest.tools !== null && claudeRequest.tools.length > 0) {
+      body.tools = claudeRequest.tools;
+    }
+    if (claudeRequest.tool_choice !== undefined && claudeRequest.tool_choice !== null) {
+      body.tool_choice = claudeRequest.tool_choice;
+    }
+
+    // 处理 thinking 参数 - 根据模型类型进行适配
+    if (claudeRequest.thinking) {
+      const model = claudeRequest.model.toLowerCase();
+      
+      // Claude-Opus-4.6: 只支持 adaptive 类型，不支持 budget_tokens
+      if (model.includes('opus')) {
+        body.thinking = { type: 'adaptive' };
+      }
+      // Claude-Sonnet-4.6: 支持 enabled 类型 + budget_tokens
+      else if (model.includes('sonnet')) {
+        body.thinking = {
+          type: 'enabled',
+          budget_tokens: claudeRequest.thinking.budget_tokens || 16000,
+        };
+      }
+      // 其他模型：如果原始请求有 thinking 且类型匹配则传递，否则移除
+      else {
+        if (claudeRequest.thinking.type === 'adaptive') {
+          body.thinking = { type: 'adaptive' };
+        } else if (claudeRequest.thinking.type === 'enabled' && claudeRequest.thinking.budget_tokens) {
+          body.thinking = {
+            type: 'enabled',
+            budget_tokens: claudeRequest.thinking.budget_tokens,
+          };
+        }
+      }
+    }
+
+    return body;
+  }
+
+  private async handleWithAnthropicApi(
+    claudeRequest: ClaudeMessagesRequest,
+    req: Request,
+    res: Response,
+    startTime: number
+  ): Promise<void> {
+    const targetUrl = `${this.config!.baseUrl}/messages`;
+
+    console.log(`[Proxy] Forwarding to: ${targetUrl}`);
+    console.log(`[Proxy] Request model: ${claudeRequest.model}`);
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${this.config!.apiKey}`,
+    };
+
+    const anthropicVersion = req.headers['anthropic-version'] as string;
+    if (anthropicVersion) {
+      headers['anthropic-version'] = anthropicVersion;
+    } else {
+      // 默认使用 2023-06-01 版本
+      headers['anthropic-version'] = '2023-06-01';
+    }
+
+    const traceId = req.headers['trace-id'] as string;
+    if (traceId) {
+      headers['Trace-Id'] = traceId;
+    }
+
+    // 清理并构建转发请求体，只传递必要的参数
+    const forwardBody = this.buildCleanAnthropicBody(claudeRequest);
+
+    console.log(`[Proxy] Forwarding body keys: ${Object.keys(forwardBody).join(', ')}`);
+    console.log(`[Proxy] Request body: ${JSON.stringify(forwardBody, null, 2)}`);
+    if (forwardBody.thinking) {
+      console.log(`[Proxy] Thinking mode: ${JSON.stringify(forwardBody.thinking)}`);
+    }
+
+    const apiResponse = await fetch(targetUrl, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(forwardBody),
+    });
+
+    if (!apiResponse.ok) {
+      const errorBody = await apiResponse.text();
+      console.error(`[Proxy Error] ${apiResponse.status} ${apiResponse.statusText}`);
+      console.error(`[Proxy Error] ${errorBody}`);
+
+      res.status(apiResponse.status).json({
+        error: 'API Error',
+        message: errorBody,
+      });
+      return;
+    }
+
+    if (claudeRequest.stream) {
+      await this.handleAnthropicStreamResponse(apiResponse, res, claudeRequest.model, claudeRequest, startTime);
+    } else {
+      const anthropicResponse = await apiResponse.json() as any;
+
+      res.json(anthropicResponse);
+
+      const duration = Date.now() - startTime;
+      const inputTokens = anthropicResponse.usage?.input_tokens || 0;
+      const outputTokens = anthropicResponse.usage?.output_tokens || 0;
+
+      this.emit('conversation', {
+        id: `conv_${Date.now()}`,
+        model: claudeRequest.model,
+        request: claudeRequest,
+        response: anthropicResponse,
+        inputTokens,
+        outputTokens,
+        duration,
+      });
+
+      this.emit('request', {
+        method: 'POST',
+        url: '/v1/messages',
+        statusCode: 200,
+        duration,
+        model: claudeRequest.model,
+        inputTokens,
+        outputTokens,
+        cacheReadTokens: anthropicResponse.usage?.cache_read_input_tokens || 0,
+        cacheCreationTokens: anthropicResponse.usage?.cache_creation_input_tokens || 0,
+        isStreaming: false,
+      });
+    }
+  }
+
+  private async handleAnthropicStreamResponse(
+    apiResponse: globalThis.Response,
+    res: Response,
+    model: string,
+    claudeRequest: ClaudeMessagesRequest,
+    startTime: number
+  ): Promise<void> {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    let streamCompleted = false;
+    let inputTokens = 0;
+    let outputTokens = 0;
+    const collectedContent: any[] = [];
+    let stopReason = 'end_turn';
+
+    const reader = apiResponse.body?.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    if (!reader) {
+      throw new Error('无法获取响应流');
+    }
+
+    const sendToClient = (data: string) => {
+      if (!streamCompleted && !res.writableEnded) {
+        res.write(data);
+      }
+    };
+
+    const finalizeStream = () => {
+      if (streamCompleted) return;
+      streamCompleted = true;
+      if (!res.writableEnded) {
+        res.end();
+      }
+
+      const duration = Date.now() - startTime;
+
+      const claudeResponse = {
+        id: `msg_${Date.now()}`,
+        type: 'message',
+        role: 'assistant',
+        model,
+        content: collectedContent.filter(Boolean),
+        stop_reason: stopReason,
+        usage: {
+          input_tokens: inputTokens,
+          output_tokens: outputTokens,
+        },
+      };
+
+      this.emit('conversation', {
+        id: `conv_${Date.now()}`,
+        model: claudeRequest.model,
+        request: claudeRequest,
+        response: claudeResponse,
+        inputTokens,
+        outputTokens,
+        duration,
+      });
+
+      this.emit('request', {
+        method: 'POST',
+        url: '/v1/messages',
+        statusCode: 200,
+        duration,
+        model: claudeRequest.model,
+        inputTokens,
+        outputTokens,
+        cacheReadTokens: 0,
+        cacheCreationTokens: 0,
+        isStreaming: true,
+      });
+    };
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+
+        if (done) {
+          if (!streamCompleted) {
+            finalizeStream();
+          }
+          break;
+        }
+
+        buffer += decoder.decode(value, { stream: true });
+
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          sendToClient(line + '\n');
+
+          if (line.startsWith('data: ')) {
+            const data = line.substring(6);
+            try {
+              const event = JSON.parse(data);
+
+              if (event.type === 'message_start' && event.message?.usage) {
+                inputTokens = event.message.usage.input_tokens || inputTokens;
+                outputTokens = event.message.usage.output_tokens || outputTokens;
+              }
+              if (event.type === 'message_delta') {
+                if (event.usage) {
+                  outputTokens = event.usage.output_tokens || outputTokens;
+                }
+                if (event.delta?.stop_reason) {
+                  stopReason = event.delta.stop_reason;
+                }
+              }
+
+              if (event.type === 'content_block_delta' && event.delta) {
+                const index = event.index || 0;
+                if (event.delta.type === 'text_delta' && event.delta.text) {
+                  if (!collectedContent[index]) {
+                    collectedContent[index] = { type: 'text', text: '' };
+                  }
+                  collectedContent[index].text += event.delta.text;
+                } else if (event.delta.type === 'input_json_delta' && event.delta.partial_json) {
+                  const toolIndex = index;
+                  if (!collectedContent[toolIndex]) {
+                    collectedContent[toolIndex] = { type: 'tool_use', id: '', name: '', _args: '', input: {} };
+                  }
+                  (collectedContent[toolIndex] as any)._args += event.delta.partial_json;
+                }
+              }
+
+              if (event.type === 'content_block_start' && event.content_block) {
+                const index = event.index || 0;
+                if (event.content_block.type === 'tool_use') {
+                  collectedContent[index] = {
+                    type: 'tool_use',
+                    id: event.content_block.id,
+                    name: event.content_block.name,
+                    input: {},
+                    _args: '',
+                  };
+                }
+              }
+
+              if (event.type === 'content_block_stop') {
+                const index = event.index || 0;
+                const block = collectedContent[index] as any;
+                if (block && block._args !== undefined) {
+                  try {
+                    block.input = JSON.parse(block._args);
+                  } catch {
+                    block.input = {};
+                  }
+                  delete block._args;
+                }
+              }
+            } catch {
+              // Ignore JSON parse errors
+            }
+          }
+        }
+      }
+    } catch (error) {
+      if (!streamCompleted && res.headersSent && !res.writableEnded) {
+        res.end();
+        streamCompleted = true;
+      }
+      throw error;
+    } finally {
+      reader.releaseLock();
+    }
+  }
+
+  private async handleWithResponsesApi(
+    claudeRequest: ClaudeMessagesRequest,
+    res: Response,
+    startTime: number
+  ): Promise<void> {
+    const responsesRequest = this.convertClaudeToResponsesRequest(claudeRequest);
+    const targetUrl = `${this.config!.baseUrl}/responses`;
+
+    console.log(`[Proxy] Forwarding to: ${targetUrl}`);
+    console.log(`[Proxy] Request model: ${responsesRequest.model}`);
+    console.log(`[Proxy] Contents count: ${Array.isArray(responsesRequest.contents) ? responsesRequest.contents.length : 0}`);
+    console.log(`[Proxy] Request body: ${JSON.stringify(responsesRequest, null, 2)}`);
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${this.config!.apiKey}`,
+      'Trace-Id': `trace_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    };
+
+    const apiResponse = await fetch(targetUrl, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(responsesRequest),
+    });
+
+    if (!apiResponse.ok) {
+      const errorBody = await apiResponse.text();
+      console.error(`[Proxy Error] ${apiResponse.status} ${apiResponse.statusText}`);
+      console.error(`[Proxy Error] ${errorBody}`);
+
+      res.status(apiResponse.status).json({
+        error: 'API Error',
+        message: errorBody,
+      });
+      return;
+    }
+
+    if (claudeRequest.stream) {
+      await this.handleResponsesStreamResponse(apiResponse, res, claudeRequest.model, claudeRequest, startTime);
+    } else {
+      const responsesResponse = await apiResponse.json() as ResponsesResponse;
+      const claudeResponse = this.convertResponsesToClaudeResponse(responsesResponse, claudeRequest.model);
+
+      res.json(claudeResponse);
+
+      const duration = Date.now() - startTime;
+      const inputTokens = claudeResponse.usage?.input_tokens || 0;
+      const outputTokens = claudeResponse.usage?.output_tokens || 0;
+
+      this.emit('conversation', {
+        id: `conv_${Date.now()}`,
+        model: claudeRequest.model,
+        request: claudeRequest,
+        response: claudeResponse,
+        inputTokens,
+        outputTokens,
+        duration,
+      });
+
+      this.emit('request', {
+        method: 'POST',
+        url: '/v1/messages',
+        statusCode: 200,
+        duration,
+        model: claudeRequest.model,
+        inputTokens,
+        outputTokens,
+        cacheReadTokens: 0,
+        cacheCreationTokens: 0,
+        isStreaming: false,
+      });
+    }
+  }
+
+  private convertClaudeToResponsesRequest(claudeRequest: ClaudeMessagesRequest): any {
+    // 转换为京东云 Responses API 格式
+    const contents: any[] = [];
+
+    for (const message of claudeRequest.messages) {
+      const parts: any[] = [];
+      
+      if (Array.isArray(message.content)) {
+        for (const block of message.content) {
+          if (block.type === 'text') {
+            parts.push({ text: block.text || '' });
+          } else if (block.type === 'image') {
+            // 图片处理
+            if (block.source?.type === 'base64' && block.source.data) {
+              parts.push({
+                inline_data: {
+                  mime_type: block.source.media_type || 'image/png',
+                  data: block.source.data
+                }
+              });
+            }
+          } else if (block.type === 'tool_use') {
+            // 工具调用
+            parts.push({
+              function_call: {
+                name: block.name || '',
+                args: block.input || {}
+              }
+            });
+          } else if (block.type === 'tool_result') {
+            // 工具结果 - 京东云要求 response 必须是对象
+            let responseData: any;
+            if (typeof block.content === 'string') {
+              // 尝试解析为 JSON，如果失败则包装为对象
+              try {
+                responseData = JSON.parse(block.content);
+              } catch {
+                responseData = { result: block.content };
+              }
+            } else {
+              responseData = block.content || {};
+            }
+            
+            // 从 tool_use_id 中提取工具名称，或使用默认值
+            const toolName = block.name || block.tool_use_id || 'default_tool';
+            
+            parts.push({
+              function_response: {
+                name: toolName,
+                response: responseData
+              }
+            });
+          }
+        }
+      } else if (typeof message.content === 'string') {
+        parts.push({ text: message.content });
+      }
+
+      if (parts.length > 0) {
+        contents.push({
+          role: message.role,
+          parts: parts
+        });
+      }
+    }
+
+    // 构建京东云格式的请求体
+    const jdRequest: any = {
+      model: claudeRequest.model,
+      contents: contents,
+    };
+
+    // 添加 system_instruction
+    if (claudeRequest.system) {
+      let systemText = '';
+      if (typeof claudeRequest.system === 'string') {
+        systemText = claudeRequest.system;
+      } else if (Array.isArray(claudeRequest.system)) {
+        systemText = claudeRequest.system.map((s: any) => {
+          if (typeof s === 'string') return s;
+          if (s && typeof s === 'object' && s.text) return s.text;
+          return '';
+        }).filter(Boolean).join('\n\n');
+      }
+      
+      if (systemText) {
+        jdRequest.system_instruction = {
+          parts: [{ text: systemText }]
+        };
+      }
+    }
+
+    // 添加 generation_config
+    const generationConfig: any = {};
+    
+    if (claudeRequest.max_tokens !== undefined) {
+      generationConfig.max_output_tokens = claudeRequest.max_tokens;
+    }
+    if (claudeRequest.temperature !== undefined) {
+      generationConfig.temperature = claudeRequest.temperature;
+    }
+    if (claudeRequest.top_p !== undefined) {
+      generationConfig.top_p = claudeRequest.top_p;
+    }
+    if (claudeRequest.top_k !== undefined) {
+      generationConfig.top_k = claudeRequest.top_k;
+    }
+    
+    // 添加 thinkingConfig（如果适用）
+    if (claudeRequest.thinking) {
+      generationConfig.thinkingConfig = {
+        thinkingLevel: claudeRequest.thinking.type === 'enabled' ? 'HIGH' : 'LOW'
+      };
+    }
+
+    if (Object.keys(generationConfig).length > 0) {
+      jdRequest.generation_config = generationConfig;
+    }
+
+    // 添加 stream 参数
+    if (claudeRequest.stream !== undefined) {
+      jdRequest.stream = claudeRequest.stream;
+    }
+
+    return jdRequest;
+  }
+
+  private convertResponsesToClaudeResponse(responsesResponse: any, model: string): any {
+    const contentBlocks: any[] = [];
+    let hasToolUse = false;
+
+    console.log('[Responses API] Raw response:', JSON.stringify(responsesResponse, null, 2));
+
+    // 处理京东云 Responses API 格式
+    if (responsesResponse.candidates && Array.isArray(responsesResponse.candidates)) {
+      for (const candidate of responsesResponse.candidates) {
+        if (candidate.content && candidate.content.parts) {
+          for (const part of candidate.content.parts) {
+            if (part.text) {
+              contentBlocks.push({ type: 'text', text: part.text });
+            }
+            if (part.function_call) {
+              hasToolUse = true;
+              contentBlocks.push({
+                type: 'tool_use',
+                id: `call_${Date.now()}`,
+                name: part.function_call.name || '',
+                input: part.function_call.args || {},
+              });
+            }
+          }
+        }
+      }
+    }
+    // 处理标准 Anthropic Responses API 格式（兼容）
+    else if (responsesResponse.output && Array.isArray(responsesResponse.output)) {
+      for (const item of responsesResponse.output) {
+        if (item.type === 'message' && 'content' in item) {
+          for (const content of item.content) {
+            if (content.type === 'output_text') {
+              contentBlocks.push({ type: 'text', text: content.text });
+            }
+          }
+        } else if (item.type === 'function_call') {
+          hasToolUse = true;
+          contentBlocks.push({
+            type: 'tool_use',
+            id: item.call_id || item.id || `call_${Date.now()}`,
+            name: item.name,
+            input: JSON.parse(item.arguments || '{}'),
+          });
+        }
+      }
+    }
+
+    const stopReason = hasToolUse ? 'tool_use' : 'end_turn';
+    console.log('[Responses API] Stop reason:', stopReason, 'Content blocks:', contentBlocks.length);
+
+    // 提取 usage 信息（京东云格式）
+    const usage = responsesResponse.usageMetadata || responsesResponse.usage || {};
+    const inputTokens = usage.promptTokenCount || usage.input_tokens || 0;
+    const outputTokens = usage.candidatesTokenCount || usage.output_tokens || 0;
+
+    return {
+      id: responsesResponse.responseId || `msg_${Date.now()}`,
+      type: 'message',
+      role: 'assistant',
+      model: model,
+      content: contentBlocks,
+      stop_reason: stopReason,
+      usage: {
+        input_tokens: inputTokens,
+        output_tokens: outputTokens,
+      },
+    };
+  }
+
+  private async handleResponsesStreamResponse(
+    apiResponse: globalThis.Response,
+    res: Response,
+    model: string,
+    claudeRequest: ClaudeMessagesRequest,
+    startTime: number
+  ): Promise<void> {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    const messageId = `msg_${Math.random().toString(36).substr(2, 9)}`;
+    let streamCompleted = false;
+    let initialized = false;
+    let currentContentIndex = 0;
+    let currentToolCallIndex = 0;
+    const toolCallBlocks: Map<number, { id: string; name: string; args: string; index: number }> = new Map();
+
+    const collectedContent: any[] = [];
+    let inputTokens = 0;
+    let outputTokens = 0;
+
+    const sendEvent = (event: string, data: object) => {
+      if (!streamCompleted && !res.writableEnded) {
+        res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+      }
+    };
+
+    const finalizeStream = (stopReason: string) => {
+      if (streamCompleted) return;
+      streamCompleted = true;
+
+      sendEvent('content_block_stop', {
+        type: 'content_block_stop',
+        index: currentContentIndex,
+      });
+
+      toolCallBlocks.forEach((block) => {
+        sendEvent('content_block_stop', {
+          type: 'content_block_stop',
+          index: block.index,
+        });
+      });
+
+      sendEvent('message_delta', {
+        type: 'message_delta',
+        delta: { stop_reason: stopReason, stop_sequence: null },
+        usage: { output_tokens: outputTokens },
+      });
+      sendEvent('message_stop', { type: 'message_stop' });
+
+      if (!res.writableEnded) {
+        res.end();
+      }
+
+      const duration = Date.now() - startTime;
+
+      const claudeResponse = {
+        id: messageId,
+        type: 'message',
+        role: 'assistant',
+        model,
+        content: collectedContent.filter(Boolean),
+        stop_reason: stopReason,
+        usage: {
+          input_tokens: inputTokens,
+          output_tokens: outputTokens,
+        },
+      };
+
+      this.emit('conversation', {
+        id: `conv_${Date.now()}`,
+        model: claudeRequest.model,
+        request: claudeRequest,
+        response: claudeResponse,
+        inputTokens: inputTokens,
+        outputTokens: outputTokens,
+        duration,
+      });
+
+      this.emit('request', {
+        method: 'POST',
+        url: '/v1/messages',
+        statusCode: 200,
+        duration,
+        model: claudeRequest.model,
+        inputTokens: inputTokens,
+        outputTokens: outputTokens,
+        cacheReadTokens: 0,
+        cacheCreationTokens: 0,
+        isStreaming: true,
+      });
+    };
+
+    const reader = apiResponse.body?.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    if (!reader) {
+      throw new Error('无法获取响应流');
+    }
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+
+        if (done) {
+          if (!streamCompleted) {
+            finalizeStream('end_turn');
+          }
+          break;
+        }
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        let currentEventType = '';
+
+        for (const line of lines) {
+          if (!line.trim()) continue;
+
+          if (line.startsWith('event: ')) {
+            currentEventType = line.substring(7).trim();
+            continue;
+          }
+
+          if (line.startsWith('data: ')) {
+            const data = line.substring(6);
+
+            try {
+              const event = JSON.parse(data);
+
+              if (event.type === 'response.output_item.added' || currentEventType === 'response.output_item.added') {
+                const item = event.item || event;
+
+                if (!initialized) {
+                  sendEvent('message_start', {
+                    type: 'message_start',
+                    message: {
+                      id: messageId,
+                      type: 'message',
+                      role: 'assistant',
+                      model,
+                      content: [],
+                      stop_reason: null,
+                      usage: { input_tokens: 0, output_tokens: 0 },
+                    },
+                  });
+                  initialized = true;
+                }
+
+                if (item.type === 'message') {
+                  sendEvent('content_block_start', {
+                    type: 'content_block_start',
+                    index: currentContentIndex,
+                    content_block: { type: 'text', text: '' },
+                  });
+                } else if (item.type === 'function_call') {
+                  currentToolCallIndex++;
+                  const toolIndex = currentContentIndex + currentToolCallIndex;
+                  const blockId = item.id || item.call_id || `call_${Date.now()}`;
+                  console.log(`[Stream] function_call added: index=${toolIndex}, id=${blockId}, name=${item.name}`);
+                  toolCallBlocks.set(toolIndex, {
+                    id: blockId,
+                    name: item.name || '',
+                    args: '',
+                    index: toolIndex,
+                  });
+                  sendEvent('content_block_start', {
+                    type: 'content_block_start',
+                    index: toolIndex,
+                    content_block: {
+                      type: 'tool_use',
+                      id: item.call_id || item.id,
+                      name: item.name || '',
+                      input: {},
+                    },
+                  });
+                }
+              }
+
+              if (event.type === 'response.output_text.delta' || currentEventType === 'response.output_text.delta') {
+                const text = event.delta || '';
+                if (text) {
+                  sendEvent('content_block_delta', {
+                    type: 'content_block_delta',
+                    index: currentContentIndex,
+                    delta: { type: 'text_delta', text: text },
+                  });
+                  if (!collectedContent[currentContentIndex]) {
+                    collectedContent[currentContentIndex] = { type: 'text', text: '' };
+                  }
+                  collectedContent[currentContentIndex].text += text;
+                }
+              }
+
+              if (event.type === 'response.function_call_arguments.delta' || currentEventType === 'response.function_call_arguments.delta') {
+                const args = event.delta || '';
+                const callId = event.call_id || event.item_id || event.id;
+
+                console.log(`[Stream] function_call delta: callId=${callId}, args=${args}`);
+
+                for (const [index, block] of toolCallBlocks) {
+                  if (block.id === callId || !callId) {
+                    block.args += args;
+                    sendEvent('content_block_delta', {
+                      type: 'content_block_delta',
+                      index: block.index,
+                      delta: { type: 'input_json_delta', partial_json: args },
+                    });
+                    break;
+                  }
+                }
+              }
+
+              if (event.type === 'response.function_call_arguments.done' || currentEventType === 'response.function_call_arguments.done') {
+                const callId = event.call_id || event.item_id || event.id;
+                const parsedArgs = event.arguments || '';
+
+                console.log(`[Stream] function_call done: callId=${callId}, arguments=${parsedArgs}`);
+
+                for (const [index, block] of toolCallBlocks) {
+                  if (block.id === callId || !callId) {
+                    try {
+                      const input = JSON.parse(block.args || parsedArgs || '{}');
+                      collectedContent.push({
+                        type: 'tool_use',
+                        id: block.id,
+                        name: block.name,
+                        input: input,
+                      });
+                      console.log(`[Stream] Tool use collected: ${block.name}(${JSON.stringify(input)})`);
+                    } catch (e) {
+                      collectedContent.push({
+                        type: 'tool_use',
+                        id: block.id,
+                        name: block.name,
+                        input: {},
+                      });
+                    }
+                    break;
+                  }
+                }
+              }
+
+              if (event.type === 'response.completed' || currentEventType === 'response.completed') {
+                if (event.response?.usage) {
+                  inputTokens = event.response.usage.input_tokens || 0;
+                  outputTokens = event.response.usage.output_tokens || 0;
+                }
+
+                const hasToolUse = collectedContent.some(c => c?.type === 'tool_use');
+                const stopReason = hasToolUse ? 'tool_use' : 'end_turn';
+                if (!streamCompleted) {
+                  finalizeStream(stopReason);
+                }
+                return;
+              }
+
+            } catch (e) {
+              // Ignore JSON parse errors
+            }
+          }
+        }
+      }
+    } catch (error) {
+      if (!streamCompleted && res.headersSent && !res.writableEnded) {
+        res.end();
+        streamCompleted = true;
+      }
+      throw error;
+    } finally {
+      reader.releaseLock();
+    }
+  }
+
+  private async handleWithChatCompletionsApi(
+    claudeRequest: ClaudeMessagesRequest,
+    res: Response,
+    startTime: number
+  ): Promise<void> {
+    const openaiRequest = this.convertClaudeToOpenAIRequest(claudeRequest);
+    const targetUrl = `${this.config!.baseUrl}/chat/completions`;
+
+    console.log(`[Proxy] Forwarding to: ${targetUrl}`);
+    console.log(`[Proxy] Request model: ${openaiRequest.model}`);
+
+    const openaiApiResponse = await fetch(targetUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${this.config!.apiKey}`,
+      },
+      body: JSON.stringify(openaiRequest),
+    });
+
+    if (!openaiApiResponse.ok) {
+      const errorBody = await openaiApiResponse.text();
+      console.error(`[Proxy Error] ${openaiApiResponse.status} ${openaiApiResponse.statusText}`);
+      console.error(`[Proxy Error] ${errorBody}`);
+
+      res.status(openaiApiResponse.status).json({
+        error: 'API Error',
+        message: errorBody,
+      });
+      return;
+    }
+
+    if (claudeRequest.stream) {
+      await this.handleStreamResponse(openaiApiResponse, res, claudeRequest.model, claudeRequest, startTime);
+    } else {
+      const openaiResponse = await openaiApiResponse.json();
+      const claudeResponse = this.convertOpenAIToClaudeResponse(openaiResponse, claudeRequest.model);
+
+      res.json(claudeResponse);
+
+      const duration = Date.now() - startTime;
+      const inputTokens = claudeResponse.usage?.input_tokens || 0;
+      const outputTokens = claudeResponse.usage?.output_tokens || 0;
+
+      this.emit('conversation', {
+        id: `conv_${Date.now()}`,
+        model: claudeRequest.model,
+        request: claudeRequest,
+        response: claudeResponse,
+        inputTokens,
+        outputTokens,
+        duration,
+      });
+
+      this.emit('request', {
+        method: 'POST',
+        url: '/v1/messages',
+        statusCode: 200,
+        duration,
+        model: claudeRequest.model,
+        inputTokens,
+        outputTokens,
+        cacheReadTokens: 0,
+        cacheCreationTokens: 0,
+        isStreaming: false,
+      });
     }
   }
 
@@ -264,14 +1306,16 @@ export class ProxyServer extends EventEmitter {
     } = {};
     let contentBlockIndex = 0;
     let initialized = false;
-    
-    // 收集响应内容用于保存对话历史
+    let streamCompleted = false;
+
     const collectedContent: any[] = [];
     let inputTokens = 0;
     let outputTokens = 0;
 
     const sendEvent = (event: string, data: object) => {
-      res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+      if (!streamCompleted && !res.writableEnded) {
+        res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+      }
     };
 
     const reader = openaiResponse.body?.getReader();
@@ -312,31 +1356,33 @@ export class ProxyServer extends EventEmitter {
               }
             });
 
-            let finalStopReason = 'end_turn';
-            sendEvent('message_delta', {
-              type: 'message_delta',
-              delta: { stop_reason: finalStopReason, stop_sequence: null },
-              usage: { output_tokens: 0 },
-            });
-            sendEvent('message_stop', { type: 'message_stop' });
-            res.end();
-            
+            const stopReason = Object.keys(toolCalls).length > 0 ? 'tool_use' : 'end_turn';
+            if (!streamCompleted) {
+              streamCompleted = true;
+              sendEvent('message_delta', {
+                type: 'message_delta',
+                delta: { stop_reason: stopReason, stop_sequence: null },
+                usage: { output_tokens: outputTokens },
+              });
+              sendEvent('message_stop', { type: 'message_stop' });
+              res.end();
+            }
+
             const duration = Date.now() - startTime;
-            
-            // 保存流式对话历史
+
             const claudeResponse = {
               id: messageId,
               type: 'message',
               role: 'assistant',
               model,
               content: collectedContent.filter(Boolean),
-              stop_reason: finalStopReason,
+              stop_reason: stopReason,
               usage: {
                 input_tokens: inputTokens,
                 output_tokens: outputTokens,
               },
             };
-            
+
             this.emit('conversation', {
               id: `conv_${Date.now()}`,
               model: claudeRequest.model,
@@ -346,8 +1392,7 @@ export class ProxyServer extends EventEmitter {
               outputTokens: outputTokens,
               duration,
             });
-            
-            // 保存请求统计
+
             this.emit('request', {
               method: 'POST',
               url: '/v1/messages',
@@ -360,15 +1405,14 @@ export class ProxyServer extends EventEmitter {
               cacheCreationTokens: 0,
               isStreaming: true,
             });
-            
+
             return;
           }
 
           try {
             const openaiChunk = JSON.parse(data);
             const delta = openaiChunk.choices[0]?.delta;
-            
-            // 检查是否有 usage 信息（流式响应的最后一个 chunk）
+
             if (openaiChunk.usage) {
               inputTokens = openaiChunk.usage.prompt_tokens || 0;
               outputTokens = openaiChunk.usage.completion_tokens || 0;
@@ -404,7 +1448,6 @@ export class ProxyServer extends EventEmitter {
                 index: 0,
                 delta: { type: 'text_delta', text: delta.content },
               });
-              // 收集文本内容
               if (!collectedContent[0]) {
                 collectedContent[0] = { type: 'text', text: '' };
               }
@@ -470,7 +1513,13 @@ export class ProxyServer extends EventEmitter {
     const openaiMessages: OpenAIMessage[] = [];
 
     if (claudeRequest.system) {
-      openaiMessages.push({ role: 'system', content: claudeRequest.system });
+      const systemText = typeof claudeRequest.system === 'string'
+        ? claudeRequest.system
+        : claudeRequest.system
+            .filter((s: any) => typeof s === 'string' || s?.text)
+            .map((s: any) => (typeof s === 'string' ? s : s.text))
+            .join('\n\n');
+      openaiMessages.push({ role: 'system', content: systemText });
     }
 
     for (let i = 0; i < claudeRequest.messages.length; i++) {
@@ -554,7 +1603,6 @@ export class ProxyServer extends EventEmitter {
       stop: claudeRequest.stop_sequences,
     };
 
-    // 如果是流式请求，添加 stream_options 以获取 usage 信息
     if (claudeRequest.stream) {
       (openaiRequest as any).stream_options = {
         include_usage: true
