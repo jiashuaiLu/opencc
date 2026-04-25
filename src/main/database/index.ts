@@ -386,6 +386,11 @@ export class DatabaseManager {
     await this.write();
   }
 
+  async clearAllConversations(): Promise<void> {
+    this.data.conversations = [];
+    await this.write();
+  }
+
   async getSettings(): Promise<any> {
     return this.data.settings;
   }

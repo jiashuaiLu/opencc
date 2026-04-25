@@ -1,5 +1,5 @@
-import { Card, Table, Tag, Space, Button, Modal, Descriptions, message } from 'antd';
-import { EyeOutlined, DeleteOutlined, ReloadOutlined, MessageOutlined } from '@ant-design/icons';
+import { Card, Table, Tag, Space, Button, Modal, Descriptions, message, Popconfirm } from 'antd';
+import { EyeOutlined, DeleteOutlined, ReloadOutlined, MessageOutlined, ClearOutlined } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
 import '../styles/history.css';
 
@@ -55,6 +55,16 @@ export default function History() {
       message.success('对话已删除');
     } catch (error) {
       message.error('删除对话失败');
+    }
+  };
+
+  const handleClearAllConversations = async () => {
+    try {
+      await window.electronAPI.clearAllConversations();
+      setConversations([]);
+      message.success('所有对话记录已清空');
+    } catch (error) {
+      message.error('清空对话记录失败');
     }
   };
 
@@ -131,6 +141,18 @@ export default function History() {
           <Button icon={<ReloadOutlined />} onClick={loadConversations}>
             刷新
           </Button>
+          <Popconfirm
+            title="确定要清空所有对话记录吗？"
+            description="此操作不可恢复，所有对话历史将被永久删除。"
+            onConfirm={handleClearAllConversations}
+            okText="确定清空"
+            cancelText="取消"
+            okButtonProps={{ danger: true }}
+          >
+            <Button danger icon={<ClearOutlined />} disabled={conversations.length === 0}>
+              清空全部
+            </Button>
+          </Popconfirm>
         </div>
       </div>
 

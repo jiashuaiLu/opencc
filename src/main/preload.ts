@@ -25,6 +25,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   getConversations: (limit?: number) => ipcRenderer.invoke('conversations:get', limit),
   deleteConversation: (id: string) => ipcRenderer.invoke('conversations:delete', id),
+  clearAllConversations: () => ipcRenderer.invoke('conversations:clearAll'),
 
   getSettings: () => ipcRenderer.invoke('settings:get'),
   saveSettings: (settings: any) => ipcRenderer.invoke('settings:save', settings),

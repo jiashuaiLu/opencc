@@ -187,6 +187,17 @@ export function setupIPC(
     }
   });
 
+  ipcMain.handle('conversations:clearAll', async () => {
+    try {
+      await database.clearAllConversations();
+      logger.info('All conversations cleared');
+      return { success: true };
+    } catch (error) {
+      logger.error('Failed to clear all conversations', error);
+      throw error;
+    }
+  });
+
   ipcMain.handle('settings:get', async () => {
     try {
       const settings = await database.getSettings();

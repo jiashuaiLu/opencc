@@ -175,6 +175,7 @@ declare global {
 
       getConversations: (limit?: number) => Promise<Conversation[]>;
       deleteConversation: (id: string) => Promise<{ success: boolean }>;
+      clearAllConversations: () => Promise<{ success: boolean }>;
 
       getSettings: () => Promise<Settings>;
       saveSettings: (settings: Settings) => Promise<{ success: boolean }>;

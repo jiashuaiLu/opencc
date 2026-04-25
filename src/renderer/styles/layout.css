@@ -134,3 +134,27 @@ body.dark-theme .app-content {
 body.dark-theme .app-content::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.1);
 }
+
+/* Lightweight page transition - GPU accelerated */
+.page-transition-wrapper {
+  animation: pageFadeIn 0.2s ease-out;
+  will-change: opacity;
+}
+
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .page-transition-wrapper {
+    animation: none;
+  }
+}
