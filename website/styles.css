@@ -909,6 +909,216 @@ body {
     .install-step-card {
         max-width: 100%;
     }
+
+    .promo-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .promo-actions {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .blog-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .blog-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .qr-code-img {
+        width: 150px;
+        height: 150px;
+    }
+}
+
+/* 推广横幅 */
+.promo-banner {
+    padding: 40px 0;
+    background: linear-gradient(135deg, #fff7e6 0%, #fff1b8 100%);
+    border-bottom: 1px solid #ffd591;
+}
+
+.promo-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+    flex-wrap: wrap;
+}
+
+.promo-text {
+    flex: 1;
+    min-width: 300px;
+}
+
+.promo-tag {
+    display: inline-block;
+    background: linear-gradient(135deg, #fa8c16, #fa541c);
+    color: white;
+    padding: 4px 16px;
+    border-radius: 16px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.promo-text h3 {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.promo-text p {
+    font-size: 16px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.promo-actions {
+    display: flex;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.promo-actions .btn-secondary {
+    background: white;
+    color: #fa541c;
+    border: 2px solid #fa541c;
+}
+
+.promo-actions .btn-secondary:hover {
+    background: #fa541c;
+    color: white;
+}
+
+/* 技术博客区域 */
+.blog-section {
+    padding: 80px 0;
+    background: linear-gradient(135deg, #f0f5ff 0%, #ffffff 100%);
+}
+
+.blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 24px;
+}
+
+.blog-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    background: white;
+    padding: 28px;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    transition: all 0.3s;
+    text-decoration: none;
+    color: inherit;
+    border: 2px solid transparent;
+}
+
+.blog-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-large);
+    border-color: var(--primary-color);
+}
+
+.blog-card.blog-placeholder {
+    opacity: 0.7;
+    cursor: default;
+}
+
+.blog-card.blog-placeholder:hover {
+    transform: none;
+    box-shadow: var(--shadow);
+    border-color: transparent;
+}
+
+.blog-icon {
+    font-size: 40px;
+    flex-shrink: 0;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #e6f7ff, #f0f5ff);
+    border-radius: 12px;
+}
+
+.blog-content {
+    flex: 1;
+}
+
+.blog-content h3 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.blog-content p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 12px;
+    font-size: 15px;
+}
+
+.blog-link {
+    color: var(--primary-color);
+    font-weight: 500;
+    font-size: 14px;
+}
+
+/* 用户群二维码卡片 */
+.community-card {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.community-card .download-badge {
+    background: linear-gradient(135deg, #722ed1, #531dab);
+}
+
+.qr-code-wrapper {
+    margin: 16px 0;
+    padding: 16px;
+    background: linear-gradient(135deg, #f9f0ff, #f0f5ff);
+    border-radius: 12px;
+    border: 2px dashed #d3adf7;
+}
+
+.qr-code-img {
+    width: 180px;
+    height: 180px;
+    border-radius: 8px;
+    display: block;
+    margin: 0 auto 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.qr-code-tip {
+    font-size: 13px;
+    color: var(--text-tertiary);
+    margin: 0;
+}
+
+.community-info {
+    margin-top: 8px;
+}
+
+.community-info p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 4px 0;
 }
 
 /* 平滑滚动 */
