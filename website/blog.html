@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DongCC 发展历程 - 从初版到 v1.3.0 的进化之路</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="logo.png">
+    <style>
+        .blog-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 120px 24px 80px;
+        }
+        .blog-header {
+            text-align: center;
+            margin-bottom: 64px;
+        }
+        .blog-header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+        .blog-meta {
+            color: var(--text-tertiary);
+            font-size: 14px;
+        }
+        .blog-content {
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+        .blog-content h2 {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 48px 0 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border-color);
+        }
+        .blog-content h3 {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 32px 0 16px;
+        }
+        .blog-content p {
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+        .blog-content ul {
+            margin-bottom: 20px;
+            padding-left: 24px;
+        }
+        .blog-content li {
+            margin-bottom: 8px;
+        }
+        .version-highlight {
+            background: linear-gradient(135deg, #e6f7ff, #f0f5ff);
+            border-left: 4px solid var(--primary-color);
+            padding: 24px;
+            border-radius: 0 12px 12px 0;
+            margin: 24px 0;
+        }
+        .version-highlight h4 {
+            color: var(--primary-color);
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 24px 0;
+        }
+        .tech-tag {
+            background: var(--background-secondary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+        .quote-box {
+            background: linear-gradient(135deg, #fff7e6, #fff1b8);
+            padding: 24px;
+            border-radius: 12px;
+            margin: 32px 0;
+            font-style: italic;
+            border-left: 4px solid #fa8c16;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 32px;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <img src="logo.png" alt="DongCC Logo" class="nav-logo">
+                <h1>DongCC</h1>
+                <span class="version-badge">Blog</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">首页</a></li>
+                <li><a href="index.html#download">下载</a></li>
+                <li><a href="https://coding.jd.com/atop-qa/dongcc" target="_blank">源代码</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="blog-container">
+        <a href="index.html" class="back-link">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            返回首页
+        </a>
+
+        <div class="blog-header">
+            <h1>DongCC 发展历程</h1>
+            <p class="blog-meta">从初版到 v1.3.0 的进化之路 | 2026-04-25</p>
+        </div>
+
+        <div class="blog-content">
+            <p>两个月前，我们发布了 DongCC 的第一个版本。那时候，它只是一个简单的 Claude Code 代理服务管理工具，功能单一，界面朴素。而今天，DongCC 已经成长为一个功能完善、界面精美、支持多平台的桌面应用。这篇文章将带你回顾 DongCC 从 v1.0.0 到 v1.3.0 的完整进化历程。</p>
+
+            <h2>🚀 v1.0.0：从零到一（2026-03-05）</h2>
+            <p>一切从一个简单的想法开始：让 Claude Code 的使用更简单。</p>
+            <p>在 v1.0.0 版本中，我们搭建了基础框架，实现了核心功能：</p>
+            <ul>
+                <li><strong>代理服务管理</strong>：一键启动/停止代理服务</li>
+                <li><strong>配置管理</strong>：图形化界面配置 API Key 和 Base URL</li>
+                <li><strong>日志系统</strong>：实时查看运行日志</li>
+                <li><strong>监控统计</strong>：基础的 Token 消耗统计</li>
+                <li><strong>对话历史</strong>：查看和管理对话记录</li>
+            </ul>
+
+            <div class="version-highlight">
+                <h4>v1.0.0 技术选型</h4>
+                <p>我们选择了 Electron + React + TypeScript 的技术栈，这是桌面应用开发的经典组合。前端使用 Ant Design 5 作为 UI 组件库，数据库采用轻量级的 LowDB，日志系统使用 Winston。</p>
+                <div class="tech-stack">
+                    <span class="tech-tag">Electron</span>
+                    <span class="tech-tag">React 18</span>
+                    <span class="tech-tag">TypeScript</span>
+                    <span class="tech-tag">Ant Design 5</span>
+                    <span class="tech-tag">LowDB</span>
+                    <span class="tech-tag">Winston</span>
+                </div>
+            </div>
+
+            <h2>✨ v1.1.0：焕然一新（2026-03-08）</h2>
+            <p>v1.0.0 发布后，我们收到了很多反馈。用户说："功能不错，但界面有点丑。"于是，我们决定进行一次彻底的设计升级。</p>
+            <p>v1.1.0 是一次重大的 UI/UX 改版：</p>
+            <ul>
+                <li><strong>全新设计系统</strong>：采用极简主义设计，清晰的视觉层次和信息架构</li>
+                <li><strong>暗黑模式</strong>：原生支持深色模式，可跟随系统自动切换</li>
+                <li><strong>MCP 管理</strong>：配置和管理 Model Context Protocol 服务器</li>
+                <li><strong>Skills 管理</strong>：管理和发现 Claude Code 技能插件</li>
+            </ul>
+
+            <div class="quote-box">
+                "设计不仅仅是外观，更是功能。好的设计让复杂的事情变得简单。"
+            </div>
+
+            <h2>🎯 v1.2.0：精益求精（2026-03-10）</h2>
+            <p>在界面升级后，我们开始专注于功能的完善和细节的打磨。</p>
+            <p>v1.2.0 版本的改进包括：</p>
+            <ul>
+                <li><strong>配置优化</strong>：模型配置改为必填项，添加默认值和说明</li>
+                <li><strong>UI 升级</strong>：优化 MCP 和 Skills 管理页面样式</li>
+                <li><strong>Skill 管理</strong>：移除项目级 Skill 提升功能，符合官方设计</li>
+                <li><strong>度量看板</strong>：修复请求日志字段显示问题</li>
+                <li><strong>主题优化</strong>：非暗黑模式下菜单栏白色背景</li>
+            </ul>
+
+            <h2>🎉 v1.3.0：跨越平台（2026-04-25）</h2>
+            <p>这是 DongCC 发展史上的一个重要里程碑。我们不仅增加了对 Windows 平台的支持，还实现了与京东云 Anthropic 兼容 API 的对接。</p>
+            <p>v1.3.0 的核心更新：</p>
+            <ul>
+                <li><strong>京东云支持</strong>：支持京东云 Anthropic 兼容 API</li>
+                <li><strong>参数清理</strong>：优化代理服务参数清理逻辑，兼容更多云服务商</li>
+                <li><strong>Universal 架构</strong>：macOS 版本支持 Intel 和 Apple Silicon 双架构</li>
+                <li><strong>工具调用修复</strong>：修复工具调用 ID 格式验证问题</li>
+                <li><strong>空内容处理</strong>：修复空文本内容处理问题</li>
+            </ul>
+
+            <div class="version-highlight">
+                <h4>v1.3.0 架构升级</h4>
+                <p>为了实现跨平台支持，我们对构建配置进行了重大调整。macOS 版本现在采用 Universal 架构，同时包含 x64 和 arm64 两个架构，一个安装包即可支持所有 Mac 设备。</p>
+            </div>
+
+            <h2>🔧 技术挑战与解决方案</h2>
+            <h3>挑战一：代理服务参数兼容</h3>
+            <p>不同的 AI 服务商对请求参数的要求各不相同。例如，京东云要求 tool_use.id 必须符合正则表达式 <code>^[a-zA-Z0-9_-]+$</code>，而 Claude Code 生成的 ID 可能包含其他字符。</p>
+            <p><strong>解决方案</strong>：我们在代理服务层添加了参数清理逻辑，自动过滤和转换不符合要求的参数。</p>
+
+            <h3>挑战二：跨平台打包</h3>
+            <p>Electron 应用在不同平台上的打包配置差异很大，特别是 macOS 的签名和公证流程。</p>
+            <p><strong>解决方案</strong>：我们使用 electron-builder 的通用架构配置，通过 <code>"arch": ["x64", "arm64"]</code> 实现一次打包，双架构支持。</p>
+
+            <h3>挑战三：API 格式适配</h3>
+            <p>京东云的 Responses API 格式与标准 Anthropic API 有很大差异，包括字段命名、数据结构和响应格式。</p>
+            <p><strong>解决方案</strong>：我们实现了灵活的 API 格式转换层，支持 Anthropic、Chat Completions 和 Responses 三种格式的自动转换。</p>
+
+            <h2>📊 数据见证成长</h2>
+            <p>从 v1.0.0 到 v1.3.0，DongCC 的代码量增长了 3 倍，功能模块从 6 个扩展到 12 个，支持的云平台从 1 个增加到 4 个。</p>
+            <ul>
+                <li>代码行数：从 5,000+ 行增长到 15,000+ 行</li>
+                <li>功能模块：从 6 个扩展到 12 个</li>
+                <li>支持平台：从仅 macOS 扩展到 macOS + Windows</li>
+                <li>支持云服务商：从 1 个增加到 4 个</li>
+            </ul>
+
+            <h2>🙏 感谢与展望</h2>
+            <p>感谢每一位使用 DongCC 的用户，是你们的反馈让这个项目不断进步。特别感谢京东云团队提供的 Anthropic 兼容 API 支持。</p>
+            <p>未来，我们计划：</p>
+            <ul>
+                <li>支持更多云服务商（阿里云、腾讯云等）</li>
+                <li>添加插件市场，方便用户发现和安装插件</li>
+                <li>实现自动更新功能</li>
+                <li>添加高级统计分析功能</li>
+            </ul>
+
+            <div class="quote-box">
+                "最好的产品不是功能最多的，而是最懂用户的。"
+            </div>
+
+            <p>如果你还没有尝试过 DongCC，欢迎下载最新版本体验。如果你已经是老用户，请务必升级到 v1.3.0，享受更稳定、更强大的功能。</p>
+
+            <p style="text-align: center; margin-top: 48px;">
+                <a href="index.html#download" class="btn btn-primary btn-large">下载 DongCC v1.3.0</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>DongCC</h3>
+                    <p>Claude Code 本地代理服务管理工具</p>
+                    <p class="footer-copyright">© 2026 DongCC Team. All rights reserved.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>快速链接</h3>
+                    <ul>
+                        <li><a href="index.html">首页</a></li>
+                        <li><a href="index.html#download">下载</a></li>
+                        <li><a href="index.html#history">版本历史</a></li>
+                        <li><a href="https://coding.jd.com/atop-qa/dongcc" target="_blank">源代码</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
