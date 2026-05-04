@@ -106,7 +106,7 @@ export class SkillService {
   }
 
   getClaudeSkillsDir(): string {
-    return path.join(os.homedir(), '.config', 'claude-code', 'plugins');
+    return path.join(os.homedir(), '.claude', 'commands');
   }
 
   getClaudeProjectsDir(): string {
@@ -163,6 +163,11 @@ export class SkillService {
       return;
     }
 
+    if (skill.directory.includes('..') || path.isAbsolute(skill.directory)) {
+      console.error(`[Skills] Rejected unsafe directory: ${skill.directory}`);
+      return;
+    }
+
     await this.initialize();
 
     const sourceDir = path.join(this.ssotDir, skill.directory);
@@ -180,6 +185,11 @@ export class SkillService {
   }
 
   async removeFromClaude(directory: string): Promise<void> {
+    if (directory.includes('..') || path.isAbsolute(directory)) {
+      console.error(`[Skills] Rejected unsafe directory: ${directory}`);
+      return;
+    }
+
     const claudeSkillsDir = this.getClaudeSkillsDir();
     const destDir = path.join(claudeSkillsDir, directory);
 
@@ -271,8 +281,18 @@ export class SkillService {
         } else {
           inMultiline = false;
           result[currentKey] = currentValue.trim();
-          currentKey = '';
-          currentValue = '';
+          const newColonIndex = line.indexOf(':');
+          if (newColonIndex > 0) {
+            currentKey = line.slice(0, newColonIndex).trim();
+            currentValue = line.slice(newColonIndex + 1).trim();
+            if (currentValue.startsWith('|') || currentValue.startsWith('>')) {
+              inMultiline = true;
+              currentValue = '';
+            }
+          } else {
+            currentKey = '';
+            currentValue = '';
+          }
         }
       }
     }
@@ -382,7 +402,7 @@ export class SkillService {
       }
     };
 
-    // 1. Scan Claude Code global plugins directory (~/.config/claude-code/plugins/)
+    // 1. Scan Claude Code global plugins directory (~/.claude/commands/)
     await scanDir(this.getClaudeSkillsDir(), 'global');
 
     // 2. Scan SSOT directory

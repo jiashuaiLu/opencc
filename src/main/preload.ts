@@ -25,7 +25,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   getConversations: (limit?: number) => ipcRenderer.invoke('conversations:get', limit),
   deleteConversation: (id: string) => ipcRenderer.invoke('conversations:delete', id),
-  clearAllConversations: () => ipcRenderer.invoke('conversations:clearAll'),
+  deleteAllConversations: () => ipcRenderer.invoke('conversations:deleteAll'),
 
   getSettings: () => ipcRenderer.invoke('settings:get'),
   saveSettings: (settings: any) => ipcRenderer.invoke('settings:save', settings),
@@ -70,7 +70,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   calculateCost: (modelId: string, inputTokens: number, outputTokens: number, cacheCreationTokens?: number, cacheReadTokens?: number) =>
     ipcRenderer.invoke('cost:calculate', modelId, inputTokens, outputTokens, cacheCreationTokens, cacheReadTokens),
-  getPricing: (modelId?: string) => ipcRenderer.invoke('cost:pricing', modelId),
+  getPricing: (modelId?: string) => ipcRenderer.invoke('cost:getPricing', modelId),
   estimateMonthlyCost: (modelId: string, dailyInputTokens: number, dailyOutputTokens: number) =>
     ipcRenderer.invoke('cost:estimateMonthly', modelId, dailyInputTokens, dailyOutputTokens),
 

@@ -1,10 +1,11 @@
 import { Card, Typography, Divider, Space, Tag, List } from 'antd';
 import { InfoCircleOutlined } from '@ant-design/icons';
+import { useMemo, memo } from 'react';
 
 const { Title, Paragraph, Text } = Typography;
 
-export default function Info() {
-  const features = [
+function Info() {
+  const features = useMemo(() => [
     {
       title: '代理服务管理',
       description: '一键启动/停止代理服务，支持多种 API 服务提供商',
@@ -35,7 +36,7 @@ export default function Info() {
       description: '详细的使用指南和常见问题解答',
       status: 'stable',
     },
-  ];
+  ], []);
 
   const getStatusTag = (status: string) => {
     const statusMap: Record<string, { color: string; text: string }> = {
@@ -98,12 +99,12 @@ export default function Info() {
           <Space direction="vertical" size="middle" style={{ width: '100%' }}>
             <div>
               <Text strong>当前版本：</Text>
-              <Tag color="blue">v1.3.0</Tag>
+              <Tag color="blue">v1.1.0</Tag>
             </div>
             <div>
               <Text strong>技术栈：</Text>
               <Space wrap>
-                <Tag color="geekblue">Electron 41</Tag>
+                <Tag color="geekblue">Electron 33</Tag>
                 <Tag color="cyan">React 18</Tag>
                 <Tag color="purple">TypeScript 5.5</Tag>
                 <Tag color="green">Ant Design 5</Tag>
@@ -111,8 +112,7 @@ export default function Info() {
             </div>
             <div>
               <Text strong>支持平台：</Text>
-              <Tag color="orange">macOS (Universal)</Tag>
-              <Tag color="blue">Windows (x64)</Tag>
+              <Tag color="orange">macOS (Apple Silicon)</Tag>
             </div>
           </Space>
         </Card>
@@ -120,3 +120,5 @@ export default function Info() {
     </div>
   );
 }
+
+export default memo(Info);

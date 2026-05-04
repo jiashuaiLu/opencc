@@ -386,7 +386,7 @@ export class DatabaseManager {
     await this.write();
   }
 
-  async clearAllConversations(): Promise<void> {
+  async deleteAllConversations(): Promise<void> {
     this.data.conversations = [];
     await this.write();
   }
@@ -473,6 +473,23 @@ export class DatabaseManager {
           totalCacheReadTokens: 0,
         });
       }
+    } else {
+      const current = new Date(start);
+      current.setHours(0, 0, 0, 0);
+      while (current <= end) {
+        const key = `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}-${String(current.getDate()).padStart(2, '0')}`;
+        trends.set(key, {
+          date: key,
+          requestCount: 0,
+          totalCost: '0',
+          totalTokens: 0,
+          totalInputTokens: 0,
+          totalOutputTokens: 0,
+          totalCacheCreationTokens: 0,
+          totalCacheReadTokens: 0,
+        });
+        current.setDate(current.getDate() + 1);
+      }
     }
 
     this.data.conversations.forEach((c: any) => {
@@ -482,24 +499,15 @@ export class DatabaseManager {
           ? `${timestamp.getFullYear()}-${String(timestamp.getMonth() + 1).padStart(2, '0')}-${String(timestamp.getDate()).padStart(2, '0')}T${String(timestamp.getHours()).padStart(2, '0')}:00`
           : `${timestamp.getFullYear()}-${String(timestamp.getMonth() + 1).padStart(2, '0')}-${String(timestamp.getDate()).padStart(2, '0')}`;
 
-        const existing = trends.get(key) || {
-          date: key,
-          requestCount: 0,
-          totalCost: '0',
-          totalTokens: 0,
-          totalInputTokens: 0,
-          totalOutputTokens: 0,
-          totalCacheCreationTokens: 0,
-          totalCacheReadTokens: 0,
-        };
-
-        existing.requestCount += 1;
-        existing.totalInputTokens += c.inputTokens || 0;
-        existing.totalOutputTokens += c.outputTokens || 0;
-        existing.totalCacheCreationTokens += c.cacheCreationTokens || 0;
-        existing.totalCacheReadTokens += c.cacheReadTokens || 0;
-        existing.totalTokens = existing.totalInputTokens + existing.totalOutputTokens;
-        trends.set(key, existing);
+        const existing = trends.get(key);
+        if (existing) {
+          existing.requestCount += 1;
+          existing.totalInputTokens += c.inputTokens || 0;
+          existing.totalOutputTokens += c.outputTokens || 0;
+          existing.totalCacheCreationTokens += c.cacheCreationTokens || 0;
+          existing.totalCacheReadTokens += c.cacheReadTokens || 0;
+          existing.totalTokens = existing.totalInputTokens + existing.totalOutputTokens;
+        }
       }
     });
 

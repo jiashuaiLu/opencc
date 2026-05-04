@@ -70,13 +70,13 @@ const APP_CONFIG = {
 
 type AppId = keyof typeof APP_CONFIG;
 
-const AppCountBar = memo(function AppCountBar({ totalLabel, counts }: { totalLabel: string; counts: Record<AppId, number> }) {
+function AppCountBar({ totalLabel, counts }: { totalLabel: string; counts: Record<AppId, number> }) {
   return (
     <div className="count-bar">
       <div className="count-bar-left">
         <StarOutlined className="count-bar-icon" />
-        <Badge
-          count={totalLabel}
+        <Badge 
+          count={totalLabel} 
           className="count-badge"
         />
       </div>
@@ -97,9 +97,9 @@ const AppCountBar = memo(function AppCountBar({ totalLabel, counts }: { totalLab
       </div>
     </div>
   );
-});
+}
 
-const AppToggleGroup = memo(function AppToggleGroup({
+function AppToggleGroup({
   apps,
   onToggle,
 }: {
@@ -129,7 +129,10 @@ const AppToggleGroup = memo(function AppToggleGroup({
       })}
     </div>
   );
-});
+}
+
+// ... ListItemRow is not needed here as we use it from management.css classes directly or we can reuse the one from McpManagement if we export it. 
+// For now, let's just inline the div with the class.
 
 function SkillManagement() {
   const [activeTab, setActiveTab] = useState<'installed' | 'discover'>('installed');
@@ -220,7 +223,7 @@ function SkillManagement() {
       }
 
       const existingPaths = new Set(unmanaged.map(s => s.path));
-      const newSkills = customSkills.filter((s: UnmanagedSkill) => !existingPaths.has(s.path));
+      const newSkills = customSkills.filter(s => !existingPaths.has(s.path));
 
       if (newSkills.length === 0) {
         message.info('该项目中的 Skills 已在列表中');
@@ -230,7 +233,7 @@ function SkillManagement() {
       setUnmanaged(prev => [...prev, ...newSkills]);
       setSelectedImport(prev => {
         const newSet = new Set(prev);
-        newSkills.forEach((s: UnmanagedSkill) => newSet.add(s.path));
+        newSkills.forEach(s => newSet.add(s.path));
         return newSet;
       });
 
@@ -370,6 +373,7 @@ function SkillManagement() {
       await window.electronAPI.installSkillFromRepo(skill, 'claude');
       message.success(`成功安装 ${skill.name}`);
       loadData();
+      // Refresh discoverable skills to update installed status
       await loadDiscoverableSkills();
     } catch (error) {
       message.error(`安装失败: ${error}`);
@@ -395,6 +399,7 @@ function SkillManagement() {
       message.success('仓库添加成功');
       repoForm.resetFields();
       loadData();
+      // Refresh discoverable skills
       await loadDiscoverableSkills();
     } catch (error) {
       message.error('添加失败');
@@ -414,6 +419,7 @@ function SkillManagement() {
           await window.electronAPI.deleteSkillRepo(owner, name);
           message.success('仓库删除成功');
           loadData();
+          // Refresh discoverable skills
           await loadDiscoverableSkills();
         } catch (error) {
           message.error('删除失败');
@@ -469,16 +475,19 @@ function SkillManagement() {
       ),
     }));
 
+    // Filter by repo
     if (filterRepo !== 'all') {
       filtered = filtered.filter(skill => `${skill.repoOwner}/${skill.repoName}` === filterRepo);
     }
 
+    // Filter by status
     if (filterStatus === 'installed') {
       filtered = filtered.filter(skill => skill.installed);
     } else if (filterStatus === 'uninstalled') {
       filtered = filtered.filter(skill => !skill.installed);
     }
 
+    // Filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(skill =>
@@ -491,48 +500,15 @@ function SkillManagement() {
     return filtered;
   }, [discoverableSkills, installedSkillKeys, filterRepo, filterStatus, searchQuery]);
 
-  const getSkillCount = useCallback((repo: SkillRepo) =>
+  const getSkillCount = (repo: SkillRepo) =>
     skills.filter(
       (skill) =>
         skill.repoOwner === repo.owner &&
         skill.repoName === repo.name &&
         (skill.repoBranch || 'main') === (repo.branch || 'main')
-    ).length,
-  [skills]);
+    ).length;
 
   const path = window.require ? window.require('path') : { basename: (p: string) => p.split('/').pop() || p };
-
-  const handleTabChange = useCallback((key: string) => {
-    setActiveTab(key as 'installed' | 'discover');
-  }, []);
-
-  const handleSearchQueryChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  }, []);
-
-  const handleFilterRepoChange = useCallback((value: string) => {
-    setFilterRepo(value);
-  }, []);
-
-  const handleFilterStatusChange = useCallback((value: 'all' | 'installed' | 'uninstalled') => {
-    setFilterStatus(value);
-  }, []);
-
-  const handleCustomProjectPathChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setCustomProjectPath(e.target.value);
-  }, []);
-
-  const handleDetailModalClose = useCallback(() => {
-    setDetailModalVisible(false);
-  }, []);
-
-  const handleRepoModalClose = useCallback(() => {
-    setRepoModalVisible(false);
-  }, []);
-
-  const handleImportModalClose = useCallback(() => {
-    setImportModalVisible(false);
-  }, []);
 
   return (
     <div className="page-container">
@@ -552,15 +528,15 @@ function SkillManagement() {
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 20, gap: 12 }}>
           {activeTab === 'installed' && (
             <>
-              <Button
-                icon={<FileZipOutlined />}
+              <Button 
+                icon={<FileZipOutlined />} 
                 onClick={handleInstallFromZip}
                 style={{ borderRadius: 8, height: 36 }}
               >
                 从 ZIP 安装
               </Button>
-              <Button
-                icon={<ImportOutlined />}
+              <Button 
+                icon={<ImportOutlined />} 
                 onClick={handleOpenImport}
                 style={{ borderRadius: 8, height: 36 }}
               >
@@ -568,8 +544,8 @@ function SkillManagement() {
               </Button>
             </>
           )}
-          <Button
-            icon={<GithubOutlined />}
+          <Button 
+            icon={<GithubOutlined />} 
             onClick={() => setRepoModalVisible(true)}
             style={{ borderRadius: 8, height: 36 }}
           >
@@ -579,7 +555,7 @@ function SkillManagement() {
 
         <Tabs
           activeKey={activeTab}
-          onChange={handleTabChange}
+          onChange={(key) => setActiveTab(key as 'installed' | 'discover')}
           style={{ marginBottom: 16 }}
           items={[
             {
@@ -628,9 +604,9 @@ function SkillManagement() {
               <div className="management-list-container">
                 {globalSkills.length > 0 && (
                   <>
-                    <div style={{
-                      padding: '12px 20px',
-                      background: 'linear-gradient(90deg, rgba(24, 144, 255, 0.06) 0%, rgba(24, 144, 255, 0.02) 100%)',
+                    <div style={{ 
+                      padding: '12px 20px', 
+                      background: 'linear-gradient(90deg, rgba(24, 144, 255, 0.06) 0%, rgba(24, 144, 255, 0.02) 100%)', 
                       borderBottom: '1px solid var(--border-color)',
                       display: 'flex',
                       alignItems: 'center',
@@ -658,9 +634,9 @@ function SkillManagement() {
                     {globalSkills.length > 0 && (
                       <div style={{ height: 1, background: 'var(--border-color)' }} />
                     )}
-                    <div style={{
-                      padding: '12px 20px',
-                      background: 'linear-gradient(90deg, rgba(82, 196, 26, 0.06) 0%, rgba(82, 196, 26, 0.02) 100%)',
+                    <div style={{ 
+                      padding: '12px 20px', 
+                      background: 'linear-gradient(90deg, rgba(82, 196, 26, 0.06) 0%, rgba(82, 196, 26, 0.02) 100%)', 
                       borderBottom: '1px solid var(--border-color)',
                       display: 'flex',
                       alignItems: 'center',
@@ -693,13 +669,13 @@ function SkillManagement() {
                 <Search
                   placeholder="搜索技能..."
                   value={searchQuery}
-                  onChange={handleSearchQueryChange}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   style={{ width: '100%' }}
                 />
                 <Space>
                   <Select
                     value={filterRepo}
-                    onChange={handleFilterRepoChange}
+                    onChange={setFilterRepo}
                     style={{ width: 200 }}
                     options={[
                       { label: '所有仓库', value: 'all' },
@@ -708,7 +684,7 @@ function SkillManagement() {
                   />
                   <Select
                     value={filterStatus}
-                    onChange={handleFilterStatusChange}
+                    onChange={setFilterStatus}
                     style={{ width: 120 }}
                     options={[
                       { label: '全部', value: 'all' },
@@ -741,6 +717,7 @@ function SkillManagement() {
           </div>
         )}
 
+        {/* Modals - Detail, Repo, Import - Keeping content structure but ensuring consistent styles */}
         {/* Detail Modal */}
         <Modal
           title={
@@ -750,7 +727,7 @@ function SkillManagement() {
             </Space>
           }
           open={detailModalVisible}
-          onCancel={handleDetailModalClose}
+          onCancel={() => setDetailModalVisible(false)}
           width={600}
           footer={[
             <Button key="finder" icon={<FolderOpenOutlined />} onClick={() => {
@@ -763,11 +740,12 @@ function SkillManagement() {
                 查看 README
               </Button>
             ),
-            <Button key="close" onClick={handleDetailModalClose}>
+            <Button key="close" onClick={() => setDetailModalVisible(false)}>
               关闭
             </Button>,
           ]}
         >
+          {/* ... Modal content ... */}
           {selectedSkill && (
             <div>
               <Space style={{ marginBottom: 16 }}>
@@ -828,10 +806,11 @@ function SkillManagement() {
             </Space>
           }
           open={repoModalVisible}
-          onCancel={handleRepoModalClose}
+          onCancel={() => setRepoModalVisible(false)}
           footer={null}
           width={600}
         >
+          {/* ... Repo Modal content ... */}
           <div style={{ marginTop: 16 }}>
             <div style={{ padding: 12, background: '#e6f7ff', borderRadius: 6, marginBottom: 16 }}>
               <Text style={{ fontSize: 12 }}>
@@ -919,18 +898,19 @@ function SkillManagement() {
         <Modal
           title="导入本地 Skills"
           open={importModalVisible}
-          onCancel={handleImportModalClose}
+          onCancel={() => setImportModalVisible(false)}
           onOk={handleImport}
           okText="导入选中"
           cancelText="取消"
           width={700}
         >
+          {/* ... Import Modal content ... */}
           <div style={{ marginBottom: 16 }}>
             <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
               <Input
                 placeholder="输入项目路径扫描 Skills，例如：/Users/xxx/projects/my-project"
                 value={customProjectPath}
-                onChange={handleCustomProjectPathChange}
+                onChange={(e) => setCustomProjectPath(e.target.value)}
                 onPressEnter={handleScanCustomProject}
                 prefix={<FolderOpenOutlined style={{ color: '#999' }} />}
               />
@@ -948,7 +928,7 @@ function SkillManagement() {
                 自动扫描目录：
               </Text>
               <ul style={{ margin: 0, paddingLeft: 20, color: 'var(--text-secondary-color)', fontSize: 12, lineHeight: '20px' }}>
-                <li>全局: ~/.config/claude-code/plugins/</li>
+                <li>全局: ~/.claude/commands/</li>
                 <li>项目极简模式: 项目根目录/skills/</li>
                 <li>项目插件模式: 项目根目录/.claude-plugin/skills/</li>
                 <li>项目配置: 项目根目录/.claude/skills/</li>
@@ -1039,7 +1019,8 @@ function SkillManagement() {
   );
 }
 
-const InstalledSkillItem = memo(function InstalledSkillItem({
+// Installed Skill Item Component
+function InstalledSkillItem({
   skill,
   onToggleApp,
   onDelete,
@@ -1055,7 +1036,7 @@ const InstalledSkillItem = memo(function InstalledSkillItem({
   isLast?: boolean;
 }) {
   const path = window.require ? window.require('path') : { basename: (p: string) => p.split('/').pop() || p };
-
+  
   const sourceLabel = skill.repoOwner && skill.repoName
     ? `${skill.repoOwner}/${skill.repoName}`
     : skill.sourceType === 'project' && skill.sourceProject
@@ -1155,9 +1136,9 @@ const InstalledSkillItem = memo(function InstalledSkillItem({
             size="small"
             icon={<FolderOpenOutlined style={{ fontSize: 15 }} />}
             onClick={() => onOpenInFinder(skill)}
-            style={{
-              width: 32,
-              height: 32,
+            style={{ 
+              width: 32, 
+              height: 32, 
               padding: 0,
               borderRadius: 8,
               color: 'var(--primary-color)',
@@ -1177,9 +1158,10 @@ const InstalledSkillItem = memo(function InstalledSkillItem({
       </div>
     </div>
   );
-});
+}
 
-const DiscoverableSkillCard = memo(function DiscoverableSkillCard({
+// Discoverable Skill Card Component
+function DiscoverableSkillCard({
   skill,
   installing,
   onInstall,
@@ -1188,15 +1170,16 @@ const DiscoverableSkillCard = memo(function DiscoverableSkillCard({
   installing: boolean;
   onInstall: () => void;
 }) {
-  const handleOpenReadme = useCallback(async () => {
+  const handleOpenReadme = async () => {
     if (!skill.readmeUrl) return;
     try {
       await window.electronAPI.openExternal(skill.readmeUrl);
     } catch (error) {
       console.error('Failed to open URL:', error);
     }
-  }, [skill.readmeUrl]);
+  };
 
+  // Determine if directory should be shown (when it differs from name)
   const showDirectory = Boolean(skill.directory) &&
     skill.directory.trim().toLowerCase() !== skill.name.trim().toLowerCase();
 
@@ -1213,6 +1196,7 @@ const DiscoverableSkillCard = memo(function DiscoverableSkillCard({
       }}
       styles={{ body: { flex: 1, display: 'flex', flexDirection: 'column', padding: '16px' } }}
     >
+      {/* Gradient overlay on hover */}
       <div style={{
         position: 'absolute',
         inset: 0,
@@ -1222,6 +1206,7 @@ const DiscoverableSkillCard = memo(function DiscoverableSkillCard({
         pointerEvents: 'none',
       }} />
 
+      {/* Header */}
       <div style={{ marginBottom: 12 }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -1283,6 +1268,7 @@ const DiscoverableSkillCard = memo(function DiscoverableSkillCard({
         </div>
       </div>
 
+      {/* Description */}
       <div style={{ flex: 1, marginBottom: 12 }}>
         <p style={{
           margin: 0,
@@ -1298,6 +1284,7 @@ const DiscoverableSkillCard = memo(function DiscoverableSkillCard({
         </p>
       </div>
 
+      {/* Footer */}
       <div style={{
         display: 'flex',
         gap: 8,
@@ -1347,6 +1334,6 @@ const DiscoverableSkillCard = memo(function DiscoverableSkillCard({
       </div>
     </Card>
   );
-});
+}
 
 export default memo(SkillManagement);

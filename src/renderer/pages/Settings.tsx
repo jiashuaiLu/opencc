@@ -1,8 +1,8 @@
 import { Card, Form, Switch, Button, message, Divider, Space, Popconfirm, Select, InputNumber } from 'antd';
 import { SaveOutlined, ReloadOutlined, DeleteOutlined, InfoCircleOutlined } from '@ant-design/icons';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 
-export default function Settings() {
+function Settings() {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
@@ -10,7 +10,7 @@ export default function Settings() {
     loadSettings();
   }, []);
 
-  const loadSettings = async () => {
+  const loadSettings = useCallback(async () => {
     try {
       const settings = await window.electronAPI.getSettings();
       if (settings) {
@@ -19,9 +19,9 @@ export default function Settings() {
     } catch (error) {
       console.error('Failed to load settings:', error);
     }
-  };
+  }, [form]);
 
-  const handleSubmit = async (values: any) => {
+  const handleSubmit = useCallback(async (values: any) => {
     setLoading(true);
     try {
       await window.electronAPI.saveSettings(values);
@@ -31,9 +31,9 @@ export default function Settings() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const handleReset = async () => {
+  const handleReset = useCallback(async () => {
     try {
       await window.electronAPI.resetSettings();
       message.success('设置已重置');
@@ -41,16 +41,16 @@ export default function Settings() {
     } catch (error) {
       message.error('重置设置失败');
     }
-  };
+  }, [loadSettings]);
 
-  const handleClearCache = async () => {
+  const handleClearCache = useCallback(async () => {
     try {
       await window.electronAPI.clearCache();
       message.success('缓存已清除');
     } catch (error) {
       message.error('清除缓存失败');
     }
-  };
+  }, []);
 
   return (
     <div className="page-container">
@@ -138,7 +138,7 @@ export default function Settings() {
           <Space align="start">
             <InfoCircleOutlined style={{ fontSize: 24, color: 'var(--primary-color)' }} />
             <div>
-              <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 4 }}>OpenCC v1.3.0</div>
+              <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 4 }}>OpenCC v1.4.0</div>
               <div style={{ marginBottom: 8 }}>Claude Code 本地代理服务管理工具</div>
               <div style={{ color: 'var(--text-secondary-color)', fontSize: 12 }}>
                 © 2026 OpenCC Team. All rights reserved.
@@ -150,3 +150,5 @@ export default function Settings() {
     </div>
   );
 }
+
+export default memo(Settings);

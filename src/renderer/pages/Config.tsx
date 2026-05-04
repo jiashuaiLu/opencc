@@ -1,6 +1,6 @@
 import { Form, Input, Button, Card, message, Select, InputNumber, Space, Alert, Divider, Tag, Tooltip } from 'antd';
 import { PlusOutlined, DeleteOutlined, SaveOutlined, ApiOutlined, InfoCircleOutlined } from '@ant-design/icons';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 
 interface ModelConfig {
   id: string;
@@ -19,7 +19,18 @@ interface Config {
   apiFormat?: 'chat-completions' | 'responses' | 'anthropic';
 }
 
-export default function Config() {
+const presetUrls = [
+  { label: 'JoyBuilder (京东云)', value: 'http://ai-api.jdcloud.com/v1' },
+  { label: 'Anthropic (京东云)', value: 'http://ai-api.jdcloud.com/anthropic/v1' },
+  { label: 'OpenAI', value: 'https://api.openai.com/v1' },
+  { label: 'DeepSeek', value: 'https://api.deepseek.com/v1' },
+  { label: 'Google Gemini', value: 'https://generativelanguage.googleapis.com/v1beta' },
+  { label: 'Groq', value: 'https://api.groq.com/openai/v1' },
+  { label: 'Ollama (本地)', value: 'http://localhost:11434/v1' },
+  { label: '自定义', value: 'custom' },
+];
+
+function Config() {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [selectedUrl, setSelectedUrl] = useState<string>('');
@@ -27,22 +38,11 @@ export default function Config() {
   const [defaultModel, setDefaultModel] = useState<string>('');
   const [apiFormat, setApiFormat] = useState<'chat-completions' | 'responses' | 'anthropic'>('chat-completions');
 
-  const presetUrls = [
-    { label: 'JoyBuilder (京东云)', value: 'http://ai-api.jdcloud.com/v1' },
-    { label: 'Anthropic (京东云)', value: 'http://ai-api.jdcloud.com/anthropic/v1' },
-    { label: 'OpenAI', value: 'https://api.openai.com/v1' },
-    { label: 'DeepSeek', value: 'https://api.deepseek.com/v1' },
-    { label: 'Google Gemini', value: 'https://generativelanguage.googleapis.com/v1beta' },
-    { label: 'Groq', value: 'https://api.groq.com/openai/v1' },
-    { label: 'Ollama (本地)', value: 'http://localhost:11434/v1' },
-    { label: '自定义', value: 'custom' },
-  ];
-
   useEffect(() => {
     loadConfig();
   }, []);
 
-  const loadConfig = async () => {
+  const loadConfig = useCallback(async () => {
     try {
       const config = await window.electronAPI.getConfig('default');
       if (config) {
@@ -55,9 +55,9 @@ export default function Config() {
     } catch (error) {
       console.error('Failed to load config:', error);
     }
-  };
+  }, [form]);
 
-  const handleSubmit = async (values: Config) => {
+  const handleSubmit = useCallback(async (values: Config) => {
     if (models.length === 0) {
       message.error('请至少添加一个模型配置');
       return;
@@ -84,9 +84,9 @@ export default function Config() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [models, defaultModel, apiFormat]);
 
-  const handleTestConnection = async () => {
+  const handleTestConnection = useCallback(async () => {
     try {
       await form.validateFields();
       message.loading('正在测试连接...', 0);
@@ -98,9 +98,9 @@ export default function Config() {
     } catch (error) {
       message.error('连接测试失败');
     }
-  };
+  }, [form]);
 
-  const handleUrlChange = (value: string) => {
+  const handleUrlChange = useCallback((value: string) => {
     setSelectedUrl(value);
     form.setFieldsValue({ baseUrl: value });
     // Auto-suggest apiFormat based on provider
@@ -111,30 +111,30 @@ export default function Config() {
     } else {
       setApiFormat('chat-completions');
     }
-  };
+  }, [form]);
 
-  const handleAddModel = () => {
+  const handleAddModel = useCallback(() => {
     const newModel: ModelConfig = {
       id: `model_${Date.now()}`,
       name: '',
       modelId: '',
     };
-    setModels([...models, newModel]);
-  };
+    setModels(prev => [...prev, newModel]);
+  }, []);
 
-  const handleDeleteModel = (id: string) => {
-    const newModels = models.filter(m => m.id !== id);
-    setModels(newModels);
-    if (defaultModel === id) {
-      setDefaultModel('');
-    }
-  };
+  const handleDeleteModel = useCallback((id: string) => {
+    setModels(prev => {
+      const newModels = prev.filter(m => m.id !== id);
+      return newModels;
+    });
+    setDefaultModel(prev => prev === id ? '' : prev);
+  }, []);
 
-  const handleModelChange = (id: string, field: 'name' | 'modelId', value: string) => {
-    setModels(models.map(m => 
+  const handleModelChange = useCallback((id: string, field: 'name' | 'modelId', value: string) => {
+    setModels(prev => prev.map(m => 
       m.id === id ? { ...m, [field]: value } : m
     ));
-  };
+  }, []);
 
   return (
     <div className="page-container">
@@ -247,7 +247,7 @@ export default function Config() {
                 options={[
                   { label: 'Anthropic 直通 (零转换，推荐)', value: 'anthropic' },
                   { label: 'Chat Completions (兼容性好)', value: 'chat-completions' },
-                  { label: 'Responses API (OpenAI 新格式)', value: 'responses' },
+                  // { label: 'Responses API (OpenAI 新格式)', value: 'responses' },
                 ]}
               />
             </Form.Item>
@@ -348,3 +348,5 @@ export default function Config() {
     </div>
   );
 }
+
+export default memo(Config);

@@ -1,27 +1,28 @@
 import { Card, Space, Divider, ColorPicker, Button, message, Alert, Switch } from 'antd';
 import { SunOutlined, MoonOutlined, CheckOutlined } from '@ant-design/icons';
+import { useCallback, memo } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { lightTheme, darkTheme } from '../theme/manager';
 
-export default function ThemeSettings() {
+function ThemeSettings() {
   const { mode, setMode, customColors, setCustomColors } = useTheme();
 
-  const handleColorChange = (color: any) => {
+  const handleColorChange = useCallback((color: any) => {
     const primaryColor = typeof color === 'string' ? color : color.toHexString();
     setCustomColors({ ...customColors, primary: primaryColor });
     message.success('颜色设置已应用');
-  };
+  }, [customColors, setCustomColors]);
 
-  const handleModeChange = (checked: boolean) => {
+  const handleModeChange = useCallback((checked: boolean) => {
     setMode(checked ? 'dark' : 'light');
     message.success(`已切换至${checked ? '深色' : '浅色'}模式`);
-  };
+  }, [setMode]);
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     setCustomColors({});
     setMode('light');
     message.success('主题已重置为默认设置');
-  };
+  }, [setCustomColors, setMode]);
 
   const currentPrimary = customColors.primary || (mode === 'dark' ? darkTheme.primary : lightTheme.primary);
 
@@ -131,3 +132,5 @@ export default function ThemeSettings() {
     </div>
   );
 }
+
+export default memo(ThemeSettings);

@@ -1,5 +1,5 @@
-import { Button, Space, Tag, Modal, Form, Input, message, Tooltip, Badge, Radio, Spin } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, LinkOutlined, CloudServerOutlined, DownOutlined, UpOutlined, ImportOutlined, ExclamationCircleOutlined, SettingOutlined } from '@ant-design/icons';
+import { Card, Button, Space, Tag, Modal, Form, Input, message, Empty, Tooltip, Badge, Radio, Divider, Spin } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, LinkOutlined, CloudServerOutlined, DownOutlined, UpOutlined, ImportOutlined, CheckOutlined, ExclamationCircleOutlined, SettingOutlined } from '@ant-design/icons';
 import { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import '../styles/management.css';
 
@@ -48,13 +48,13 @@ const APP_CONFIG = {
 
 type AppId = keyof typeof APP_CONFIG;
 
-const AppCountBar = memo(function AppCountBar({ totalLabel, counts }: { totalLabel: string; counts: Record<AppId, number> }) {
+function AppCountBar({ totalLabel, counts }: { totalLabel: string; counts: Record<AppId, number> }) {
   return (
     <div className="count-bar">
       <div className="count-bar-left">
         <CloudServerOutlined className="count-bar-icon" />
-        <Badge
-          count={totalLabel}
+        <Badge 
+          count={totalLabel} 
           className="count-badge"
         />
       </div>
@@ -75,9 +75,9 @@ const AppCountBar = memo(function AppCountBar({ totalLabel, counts }: { totalLab
       </div>
     </div>
   );
-});
+}
 
-const AppToggleGroup = memo(function AppToggleGroup({
+function AppToggleGroup({
   apps,
   onToggle,
 }: {
@@ -107,9 +107,9 @@ const AppToggleGroup = memo(function AppToggleGroup({
       })}
     </div>
   );
-});
+}
 
-const ListItemRow = memo(function ListItemRow({
+function ListItemRow({
   isLast,
   children,
 }: {
@@ -121,7 +121,7 @@ const ListItemRow = memo(function ListItemRow({
       {children}
     </div>
   );
-});
+}
 
 function McpManagement() {
   const [servers, setServers] = useState<McpServer[]>([]);
@@ -132,6 +132,7 @@ function McpManagement() {
   const [selectedPreset, setSelectedPreset] = useState<number | null>(-1);
   const [showMetadata, setShowMetadata] = useState(false);
   const [serverType, setServerType] = useState<'stdio' | 'http' | 'sse'>('stdio');
+  const [enabledClaude, setEnabledClaude] = useState(true);
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -160,6 +161,7 @@ function McpManagement() {
     setSelectedPreset(-1);
     setShowMetadata(false);
     setServerType('stdio');
+    setEnabledClaude(true);
     form.resetFields();
     setModalVisible(true);
   }, [form]);
@@ -169,6 +171,7 @@ function McpManagement() {
     setSelectedPreset(null);
     setShowMetadata(!!(server.description || server.tags?.length || server.homepage || server.docs));
     setServerType(server.server.type);
+    setEnabledClaude(server.apps.claude);
     form.setFieldsValue({
       id: server.id,
       name: server.name,
@@ -237,26 +240,24 @@ function McpManagement() {
       return;
     }
 
-    setSelectedPreset((prev) => {
-      const preset = presets[index];
-      if (!preset) return prev;
-      setServerType(preset.server.type);
-      form.setFieldsValue({
-        id: preset.id,
-        name: preset.name,
-        description: preset.description,
-        serverType: preset.server.type,
-        command: preset.server.command,
-        argsStr: preset.server.args?.join(' ') || '',
-        url: preset.server.url,
-        homepage: preset.homepage,
-        docs: preset.docs,
-        tags: preset.tags?.join(', ') || '',
-        enabledClaude: true,
-      });
-      return index;
+    const preset = presets[index];
+    setSelectedPreset(index);
+    setServerType(preset.server.type);
+    setEnabledClaude(true);
+    form.setFieldsValue({
+      id: preset.id,
+      name: preset.name,
+      description: preset.description,
+      serverType: preset.server.type,
+      command: preset.server.command,
+      argsStr: preset.server.args?.join(' ') || '',
+      url: preset.server.url,
+      homepage: preset.homepage,
+      docs: preset.docs,
+      tags: preset.tags?.join(', ') || '',
+      enabledClaude: true,
     });
-  }, [form, presets]);
+  }, [presets, form]);
 
   const handleSubmit = useCallback(async () => {
     try {
@@ -292,7 +293,7 @@ function McpManagement() {
         serverSpec.command = values.command?.trim() || '';
         serverSpec.args = values.argsStr ? values.argsStr.split(' ').filter(Boolean) : [];
         serverSpec.env = values.envStr
-          ? values.envStr.split('\n').reduce((acc: Record<string, string>, line: string) => {
+          ? values.envStr.split('\n').reduce((acc: any, line: string) => {
               const [key, ...valueParts] = line.split('=');
               if (key && valueParts.length > 0) {
                 acc[key.trim()] = valueParts.join('=').trim();
@@ -303,7 +304,7 @@ function McpManagement() {
       } else {
         serverSpec.url = values.url?.trim() || '';
         serverSpec.headers = values.headersStr
-          ? values.headersStr.split('\n').reduce((acc: Record<string, string>, line: string) => {
+          ? values.headersStr.split('\n').reduce((acc: any, line: string) => {
               const colonIdx = line.indexOf(':');
               if (colonIdx > 0) {
                 acc[line.slice(0, colonIdx).trim()] = line.slice(colonIdx + 1).trim();
@@ -333,7 +334,7 @@ function McpManagement() {
     } catch (error) {
       message.error('保存失败');
     }
-  }, [form, servers, editingServer, loadData]);
+  }, [editingServer, servers, form, loadData]);
 
   const openExternal = useCallback(async (url: string) => {
     try {
@@ -351,138 +352,6 @@ function McpManagement() {
     return counts;
   }, [servers]);
 
-  const serverList = useMemo(() => {
-    if (loading) {
-      return (
-        <div className="loading-container">
-          <Spin size="large" />
-        </div>
-      );
-    }
-    if (servers.length === 0) {
-      return (
-        <div className="empty-state-container">
-          <div className="empty-placeholder-icon">
-            <CloudServerOutlined style={{ fontSize: 32, color: 'var(--primary-color)' }} />
-          </div>
-          <h3 style={{ margin: '0 0 12px', fontSize: 18, fontWeight: 600, color: 'var(--text-color)' }}>
-            暂无 MCP 服务器
-          </h3>
-          <p style={{ margin: 0, color: 'var(--text-secondary-color)', fontSize: 14, lineHeight: 1.6 }}>
-            点击上方按钮添加 MCP 服务器<br />或从 Claude 导入已有配置
-          </p>
-        </div>
-      );
-    }
-    return servers.map((server, index) => {
-      const name = server.name || server.id;
-      const description = server.description || '';
-      const docsUrl = server.docs || server.homepage;
-      const tags = server.tags;
-
-      return (
-        <ListItemRow key={server.id} isLast={index === servers.length - 1}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-              <span style={{ fontWeight: 600, fontSize: 15, color: 'var(--text-color)' }}>
-                {name}
-              </span>
-              {docsUrl && (
-                <Tooltip title="查看文档">
-                  <button
-                    type="button"
-                    onClick={() => openExternal(docsUrl)}
-                    style={{
-                      border: 'none',
-                      background: 'transparent',
-                      cursor: 'pointer',
-                      padding: 0,
-                      color: 'var(--primary-color)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      transition: 'all 0.2s',
-                    }}
-                  >
-                    <LinkOutlined style={{ fontSize: 14 }} />
-                  </button>
-                </Tooltip>
-              )}
-              <Tag className={`server-type-tag server-type-${server.server.type}`}>
-                {server.server.type?.toUpperCase()}
-              </Tag>
-            </div>
-            {description && (
-              <p style={{ margin: 0, fontSize: 13, color: 'var(--text-secondary-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {description}
-              </p>
-            )}
-            {!description && tags && tags.length > 0 && (
-              <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
-                {tags.slice(0, 3).map(tag => (
-                  <Tag key={tag} style={{ margin: 0, fontSize: 11, padding: '0 8px', borderRadius: 4 }}>
-                    {tag}
-                  </Tag>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <AppToggleGroup
-            apps={server.apps}
-            onToggle={(app, enabled) => handleToggleApp(server.id, app, enabled)}
-          />
-
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-            }}
-          >
-            <Tooltip title="编辑">
-              <Button
-                type="text"
-                size="small"
-                icon={<EditOutlined style={{ fontSize: 15 }} />}
-                onClick={() => handleEdit(server)}
-                style={{
-                  width: 32,
-                  height: 32,
-                  padding: 0,
-                  borderRadius: 8,
-                  color: 'var(--primary-color)',
-                }}
-              />
-            </Tooltip>
-            <Tooltip title="删除">
-              <Button
-                type="text"
-                size="small"
-                danger
-                icon={<DeleteOutlined style={{ fontSize: 15 }} />}
-                onClick={() => handleDelete(server.id)}
-                style={{ width: 32, height: 32, padding: 0, borderRadius: 8 }}
-              />
-            </Tooltip>
-          </div>
-        </ListItemRow>
-      );
-    });
-  }, [loading, servers, openExternal, handleToggleApp, handleEdit, handleDelete]);
-
-  const handleModalCancel = useCallback(() => {
-    setModalVisible(false);
-  }, []);
-
-  const handleServerTypeChange = useCallback((e: any) => {
-    setServerType(e.target.value);
-    form.setFieldValue('serverType', e.target.value);
-  }, [form]);
-
-  const handleShowMetadataToggle = useCallback(() => {
-    setShowMetadata((prev) => !prev);
-  }, []);
-
   return (
     <div className="page-container">
       <div className="page-header">
@@ -499,16 +368,16 @@ function McpManagement() {
         />
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 20, gap: 12 }}>
-          <Button
-            icon={<ImportOutlined />}
+          <Button 
+            icon={<ImportOutlined />} 
             onClick={handleImport}
             style={{ borderRadius: 8, height: 36 }}
           >
             从 Claude 导入
           </Button>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
+          <Button 
+            type="primary" 
+            icon={<PlusOutlined />} 
             onClick={handleAdd}
             style={{ borderRadius: 8, height: 36, fontWeight: 500 }}
           >
@@ -517,7 +386,118 @@ function McpManagement() {
         </div>
 
         <div className="management-list-container">
-          {serverList}
+          {loading ? (
+            <div className="loading-container">
+              <Spin size="large" />
+            </div>
+          ) : servers.length === 0 ? (
+            <div className="empty-state-container">
+              <div className="empty-placeholder-icon">
+                <CloudServerOutlined style={{ fontSize: 32, color: 'var(--primary-color)' }} />
+              </div>
+              <h3 style={{ margin: '0 0 12px', fontSize: 18, fontWeight: 600, color: 'var(--text-color)' }}>
+                暂无 MCP 服务器
+              </h3>
+              <p style={{ margin: 0, color: 'var(--text-secondary-color)', fontSize: 14, lineHeight: 1.6 }}>
+                点击上方按钮添加 MCP 服务器<br />或从 Claude 导入已有配置
+              </p>
+            </div>
+          ) : (
+            servers.map((server, index) => {
+              const name = server.name || server.id;
+              const description = server.description || '';
+              const docsUrl = server.docs || server.homepage;
+              const tags = server.tags;
+
+              return (
+                <ListItemRow key={server.id} isLast={index === servers.length - 1}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                      <span style={{ fontWeight: 600, fontSize: 15, color: 'var(--text-color)' }}>
+                        {name}
+                      </span>
+                      {docsUrl && (
+                        <Tooltip title="查看文档">
+                          <button
+                            type="button"
+                            onClick={() => openExternal(docsUrl)}
+                            style={{
+                              border: 'none',
+                              background: 'transparent',
+                              cursor: 'pointer',
+                              padding: 0,
+                              color: 'var(--primary-color)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              transition: 'all 0.2s',
+                            }}
+                          >
+                            <LinkOutlined style={{ fontSize: 14 }} />
+                          </button>
+                        </Tooltip>
+                      )}
+                      <Tag className={`server-type-tag server-type-${server.server.type}`}>
+                        {server.server.type?.toUpperCase()}
+                      </Tag>
+                    </div>
+                    {description && (
+                      <p style={{ margin: 0, fontSize: 13, color: 'var(--text-secondary-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {description}
+                      </p>
+                    )}
+                    {!description && tags && tags.length > 0 && (
+                      <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
+                        {tags.slice(0, 3).map(tag => (
+                          <Tag key={tag} style={{ margin: 0, fontSize: 11, padding: '0 8px', borderRadius: 4 }}>
+                            {tag}
+                          </Tag>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <AppToggleGroup
+                    apps={server.apps}
+                    onToggle={(app, enabled) => handleToggleApp(server.id, app, enabled)}
+                  />
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                    }}
+                  >
+                    <Tooltip title="编辑">
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<EditOutlined style={{ fontSize: 15 }} />}
+                        onClick={() => handleEdit(server)}
+                        style={{ 
+                          width: 32, 
+                          height: 32, 
+                          padding: 0,
+                          borderRadius: 8,
+                          color: 'var(--primary-color)',
+                        }}
+                      />
+                    </Tooltip>
+                    <Tooltip title="删除">
+                      <Button
+                        type="text"
+                        size="small"
+                        danger
+                        icon={<DeleteOutlined style={{ fontSize: 15 }} />}
+                        onClick={() => handleDelete(server.id)}
+                        style={{ width: 32, height: 32, padding: 0, borderRadius: 8 }}
+                      />
+                    </Tooltip>
+                  </div>
+                </ListItemRow>
+              );
+            })
+          )}
         </div>
 
         <Modal
@@ -529,7 +509,7 @@ function McpManagement() {
           }
           open={modalVisible}
           onOk={handleSubmit}
-          onCancel={handleModalCancel}
+          onCancel={() => setModalVisible(false)}
           width={720}
           okText="保存"
           cancelText="取消"
@@ -537,143 +517,156 @@ function McpManagement() {
             body: { maxHeight: '60vh', overflowY: 'auto' }
           }}
         >
+          {/* ... (Modal content remains largely the same but can be optimized if needed) ... */}
+          {/* For brevity, keeping Form content as is but ensuring styles are consistent */}
           <Form form={form} layout="vertical" style={{ marginTop: 20 }}>
+            {/* ... Form fields ... */}
             {!editingServer && (
-              <Form.Item label="选择预设">
-                <Space wrap>
-                  <Button
-                    type={selectedPreset === -1 ? 'primary' : 'default'}
-                    size="small"
-                    onClick={() => applyPreset(-1)}
-                    style={{ borderRadius: 6 }}
-                  >
-                    自定义
-                  </Button>
-                  {presets.map((preset, idx) => (
-                    <Tooltip key={preset.id} title={preset.description}>
-                      <Button
-                        type={selectedPreset === idx ? 'primary' : 'default'}
-                        size="small"
-                        onClick={() => applyPreset(idx)}
-                        style={{ borderRadius: 6 }}
-                      >
-                        {preset.id}
-                      </Button>
-                    </Tooltip>
-                  ))}
-                </Space>
-              </Form.Item>
-            )}
+            <Form.Item label="选择预设">
+              <Space wrap>
+                <Button
+                  type={selectedPreset === -1 ? 'primary' : 'default'}
+                  size="small"
+                  onClick={() => applyPreset(-1)}
+                  style={{
+                    borderRadius: 6,
+                  }}
+                >
+                  自定义
+                </Button>
+                {presets.map((preset, idx) => (
+                  <Tooltip key={preset.id} title={preset.description}>
+                    <Button
+                      type={selectedPreset === idx ? 'primary' : 'default'}
+                      size="small"
+                      onClick={() => applyPreset(idx)}
+                      style={{
+                        borderRadius: 6,
+                      }}
+                    >
+                      {preset.id}
+                    </Button>
+                  </Tooltip>
+                ))}
+              </Space>
+            </Form.Item>
+          )}
 
-            <Form.Item
-              label={<span style={{ fontWeight: 600 }}>ID <span style={{ color: '#ff4d4f' }}>*</span></span>}
-              name="id"
-              rules={[{ required: true, message: '请输入 ID' }]}
+          <Form.Item
+            label={<span style={{ fontWeight: 600 }}>ID <span style={{ color: '#ff4d4f' }}>*</span></span>}
+            name="id"
+            rules={[{ required: true, message: '请输入 ID' }]}
+          >
+            <Input placeholder="例如：mcp-server-fetch" disabled={!!editingServer} style={{ borderRadius: 8 }} />
+          </Form.Item>
+
+          <Form.Item label={<span style={{ fontWeight: 600 }}>名称</span>} name="name">
+            <Input placeholder="例如：MCP Server Fetch" style={{ borderRadius: 8 }} />
+          </Form.Item>
+
+          <Form.Item label={<span style={{ fontWeight: 600 }}>服务器类型</span>} name="serverType">
+            <Radio.Group
+              value={form.getFieldValue('serverType') || 'stdio'}
+              onChange={(e) => {
+                setServerType(e.target.value);
+                form.setFieldValue('serverType', e.target.value);
+              }}
             >
-              <Input placeholder="例如：mcp-server-fetch" disabled={!!editingServer} style={{ borderRadius: 8 }} />
-            </Form.Item>
+              <Radio value="stdio">STDIO</Radio>
+              <Radio value="http">HTTP</Radio>
+              <Radio value="sse">SSE</Radio>
+            </Radio.Group>
+          </Form.Item>
 
-            <Form.Item label={<span style={{ fontWeight: 600 }}>名称</span>} name="name">
-              <Input placeholder="例如：MCP Server Fetch" style={{ borderRadius: 8 }} />
-            </Form.Item>
-
-            <Form.Item label={<span style={{ fontWeight: 600 }}>服务器类型</span>} name="serverType">
-              <Radio.Group
-                value={form.getFieldValue('serverType') || 'stdio'}
-                onChange={handleServerTypeChange}
+          {serverType === 'stdio' && (
+            <>
+              <Form.Item
+                label={<span style={{ fontWeight: 600 }}>命令 <span style={{ color: '#ff4d4f' }}>*</span></span>}
+                name="command"
+                rules={[{ required: true, message: '请输入命令' }]}
               >
-                <Radio value="stdio">STDIO</Radio>
-                <Radio value="http">HTTP</Radio>
-                <Radio value="sse">SSE</Radio>
-              </Radio.Group>
-            </Form.Item>
+                <Input placeholder="例如：npx 或 uvx" style={{ borderRadius: 8 }} />
+              </Form.Item>
 
-            {serverType === 'stdio' && (
-              <>
-                <Form.Item
-                  label={<span style={{ fontWeight: 600 }}>命令 <span style={{ color: '#ff4d4f' }}>*</span></span>}
-                  name="command"
-                  rules={[{ required: true, message: '请输入命令' }]}
-                >
-                  <Input placeholder="例如：npx 或 uvx" style={{ borderRadius: 8 }} />
-                </Form.Item>
+              <Form.Item label={<span style={{ fontWeight: 600 }}>参数</span>} name="argsStr">
+                <Input placeholder="用空格分隔，例如：-y @modelcontextprotocol/server-time" style={{ borderRadius: 8 }} />
+              </Form.Item>
 
-                <Form.Item label={<span style={{ fontWeight: 600 }}>参数</span>} name="argsStr">
-                  <Input placeholder="用空格分隔，例如：-y @modelcontextprotocol/server-time" style={{ borderRadius: 8 }} />
-                </Form.Item>
-
-                <Form.Item label={<span style={{ fontWeight: 600 }}>环境变量</span>} name="envStr">
-                  <Input.TextArea
-                    rows={3}
-                    placeholder="每行一个，格式：KEY=value&#10;例如：&#10;API_KEY=xxx&#10;DEBUG=true"
-                    style={{ borderRadius: 8 }}
-                  />
-                </Form.Item>
-              </>
-            )}
-
-            {(serverType === 'http' || serverType === 'sse') && (
-              <>
-                <Form.Item
-                  label={<span style={{ fontWeight: 600 }}>URL <span style={{ color: '#ff4d4f' }}>*</span></span>}
-                  name="url"
-                  rules={[{ required: true, message: '请输入 URL' }]}
-                >
-                  <Input placeholder="例如：http://localhost:8080/mcp" style={{ borderRadius: 8 }} />
-                </Form.Item>
-
-                <Form.Item label={<span style={{ fontWeight: 600 }}>请求头</span>} name="headersStr">
-                  <Input.TextArea
-                    rows={3}
-                    placeholder="每行一个，格式：KEY: value&#10;例如：&#10;Authorization: Bearer xxx&#10;Content-Type: application/json"
-                    style={{ borderRadius: 8 }}
-                  />
-                </Form.Item>
-              </>
-            )}
-
-            <Form.Item label={<span style={{ fontWeight: 600 }}>启用到应用</span>}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={form.getFieldValue('enabledClaude')}
-                  onChange={(e) => form.setFieldValue('enabledClaude', e.target.checked)}
-                  style={{ width: 18, height: 18, borderRadius: 4 }}
+              <Form.Item label={<span style={{ fontWeight: 600 }}>环境变量</span>} name="envStr">
+                <Input.TextArea
+                  rows={3}
+                  placeholder="每行一个，格式：KEY=value&#10;例如：&#10;API_KEY=xxx&#10;DEBUG=true"
+                  style={{ borderRadius: 8 }}
                 />
-                <span style={{ fontSize: 14 }}>Claude Code</span>
-              </label>
-            </Form.Item>
+              </Form.Item>
+            </>
+          )}
 
-            <div style={{ marginBottom: 16 }}>
-              <Button
-                type="link"
-                onClick={handleShowMetadataToggle}
-                icon={showMetadata ? <UpOutlined /> : <DownOutlined />}
-                style={{ padding: 0, fontWeight: 500 }}
+          {(serverType === 'http' || serverType === 'sse') && (
+            <>
+              <Form.Item
+                label={<span style={{ fontWeight: 600 }}>URL <span style={{ color: '#ff4d4f' }}>*</span></span>}
+                name="url"
+                rules={[{ required: true, message: '请输入 URL' }]}
               >
-                附加信息
-              </Button>
-            </div>
+                <Input placeholder="例如：http://localhost:8080/mcp" style={{ borderRadius: 8 }} />
+              </Form.Item>
 
-            {showMetadata && (
-              <>
-                <Form.Item label={<span style={{ fontWeight: 600 }}>描述</span>} name="description">
-                  <Input placeholder="简要描述这个 MCP 服务器的功能" style={{ borderRadius: 8 }} />
-                </Form.Item>
+              <Form.Item label={<span style={{ fontWeight: 600 }}>请求头</span>} name="headersStr">
+                <Input.TextArea
+                  rows={3}
+                  placeholder="每行一个，格式：KEY: value&#10;例如：&#10;Authorization: Bearer xxx&#10;Content-Type: application/json"
+                  style={{ borderRadius: 8 }}
+                />
+              </Form.Item>
+            </>
+          )}
 
-                <Form.Item label={<span style={{ fontWeight: 600 }}>标签</span>} name="tags">
-                  <Input placeholder="用逗号分隔，例如：http, web, fetch" style={{ borderRadius: 8 }} />
-                </Form.Item>
+          <Form.Item label={<span style={{ fontWeight: 600 }}>启用到应用</span>}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={enabledClaude}
+                onChange={(e) => {
+                  setEnabledClaude(e.target.checked);
+                  form.setFieldValue('enabledClaude', e.target.checked);
+                }}
+                style={{ width: 18, height: 18, borderRadius: 4 }}
+              />
+              <span style={{ fontSize: 14 }}>Claude Code</span>
+            </label>
+          </Form.Item>
 
-                <Form.Item label={<span style={{ fontWeight: 600 }}>主页 URL</span>} name="homepage">
-                  <Input placeholder="https://github.com/..." style={{ borderRadius: 8 }} />
-                </Form.Item>
+          <div style={{ marginBottom: 16 }}>
+            <Button
+              type="link"
+              onClick={() => setShowMetadata(!showMetadata)}
+              icon={showMetadata ? <UpOutlined /> : <DownOutlined />}
+              style={{ padding: 0, fontWeight: 500 }}
+            >
+              附加信息
+            </Button>
+          </div>
 
-                <Form.Item label={<span style={{ fontWeight: 600 }}>文档 URL</span>} name="docs">
-                  <Input placeholder="https://github.com/.../docs" style={{ borderRadius: 8 }} />
-                </Form.Item>
-              </>
-            )}
+          {showMetadata && (
+            <>
+              <Form.Item label={<span style={{ fontWeight: 600 }}>描述</span>} name="description">
+                <Input placeholder="简要描述这个 MCP 服务器的功能" style={{ borderRadius: 8 }} />
+              </Form.Item>
+
+              <Form.Item label={<span style={{ fontWeight: 600 }}>标签</span>} name="tags">
+                <Input placeholder="用逗号分隔，例如：http, web, fetch" style={{ borderRadius: 8 }} />
+              </Form.Item>
+
+              <Form.Item label={<span style={{ fontWeight: 600 }}>主页 URL</span>} name="homepage">
+                <Input placeholder="https://github.com/..." style={{ borderRadius: 8 }} />
+              </Form.Item>
+
+              <Form.Item label={<span style={{ fontWeight: 600 }}>文档 URL</span>} name="docs">
+                <Input placeholder="https://github.com/.../docs" style={{ borderRadius: 8 }} />
+              </Form.Item>
+            </>
+          )}
           </Form>
         </Modal>
       </div>

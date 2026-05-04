@@ -193,8 +193,18 @@ export class ZipInstaller {
         } else {
           inMultiline = false;
           result[currentKey] = currentValue.trim();
-          currentKey = '';
-          currentValue = '';
+          const newColonIndex = line.indexOf(':');
+          if (newColonIndex > 0) {
+            currentKey = line.slice(0, newColonIndex).trim();
+            currentValue = line.slice(newColonIndex + 1).trim();
+            if (currentValue.startsWith('|') || currentValue.startsWith('>')) {
+              inMultiline = true;
+              currentValue = '';
+            }
+          } else {
+            currentKey = '';
+            currentValue = '';
+          }
         }
       }
     }

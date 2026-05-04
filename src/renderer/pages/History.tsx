@@ -1,5 +1,5 @@
 import { Card, Table, Tag, Space, Button, Modal, Descriptions, message, Popconfirm } from 'antd';
-import { EyeOutlined, DeleteOutlined, ReloadOutlined, MessageOutlined, ClearOutlined } from '@ant-design/icons';
+import { EyeOutlined, DeleteOutlined, ReloadOutlined, MessageOutlined, ClearOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import '../styles/history.css';
 
@@ -51,25 +51,21 @@ function History() {
   const handleDeleteConversation = useCallback(async (id: string) => {
     try {
       await window.electronAPI.deleteConversation(id);
-      setConversations((prev) => prev.filter((c) => c.id !== id));
+      setConversations(prev => prev.filter((c) => c.id !== id));
       message.success('对话已删除');
     } catch (error) {
       message.error('删除对话失败');
     }
   }, []);
 
-  const handleClearAllConversations = useCallback(async () => {
+  const handleDeleteAllConversations = useCallback(async () => {
     try {
-      await window.electronAPI.clearAllConversations();
+      await window.electronAPI.deleteAllConversations();
       setConversations([]);
       message.success('所有对话记录已清空');
     } catch (error) {
       message.error('清空对话记录失败');
     }
-  }, []);
-
-  const handleCloseModal = useCallback(() => {
-    setModalVisible(false);
   }, []);
 
   const columns = useMemo(() => [
@@ -134,16 +130,6 @@ function History() {
     },
   ], [handleViewConversation, handleDeleteConversation]);
 
-  const paginationConfig = useMemo(() => ({
-    pageSize: 20,
-    showSizeChanger: true,
-    showTotal: (total: number) => `共 ${total} 条对话`,
-  }), []);
-
-  const modalTitle = useMemo(() => (
-    <div className="form-section-title"><MessageOutlined style={{ marginRight: 8 }} />对话详情</div>
-  ), []);
-
   return (
     <div className="page-container">
       <div className="page-header">
@@ -156,14 +142,20 @@ function History() {
             刷新
           </Button>
           <Popconfirm
-            title="确定要清空所有对话记录吗？"
-            description="此操作不可恢复，所有对话历史将被永久删除。"
-            onConfirm={handleClearAllConversations}
-            okText="确定清空"
+            title="清空所有对话"
+            description="确定要删除所有对话记录吗？此操作不可恢复。"
+            icon={<ExclamationCircleOutlined style={{ color: '#ff4d4f' }} />}
+            onConfirm={handleDeleteAllConversations}
+            okText="确定"
             cancelText="取消"
             okButtonProps={{ danger: true }}
+            disabled={conversations.length === 0}
           >
-            <Button danger icon={<ClearOutlined />} disabled={conversations.length === 0}>
+            <Button
+              danger
+              icon={<ClearOutlined />}
+              disabled={conversations.length === 0}
+            >
               清空全部
             </Button>
           </Popconfirm>
@@ -177,15 +169,19 @@ function History() {
             dataSource={conversations}
             rowKey="id"
             loading={loading}
-            pagination={paginationConfig}
+            pagination={{
+              pageSize: 20,
+              showSizeChanger: true,
+              showTotal: (total) => `共 ${total} 条对话`,
+            }}
             size="middle"
           />
         </Card>
 
         <Modal
-          title={modalTitle}
+          title={<div className="form-section-title"><MessageOutlined style={{ marginRight: 8 }} />对话详情</div>}
           open={modalVisible}
-          onCancel={handleCloseModal}
+          onCancel={() => setModalVisible(false)}
           width={800}
           footer={null}
           className="history-modal"

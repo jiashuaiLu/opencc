@@ -220,6 +220,24 @@ export class ProxyServer extends EventEmitter {
 
     this.app.post('/v1/messages', this.handleMessages.bind(this));
     this.app.post('/v1/messages/*', this.handleMessages.bind(this));
+
+    this.app.get('/v1/models', (req: Request, res: Response) => {
+      if (!this.config?.models || this.config.models.length === 0) {
+        res.json({ object: 'list', data: [] });
+        return;
+      }
+      const now = Math.floor(Date.now() / 1000);
+      res.json({
+        object: 'list',
+        data: this.config.models.map(m => ({
+          id: m.modelId,
+          object: 'model',
+          created: now,
+          owned_by: 'opencc',
+          display_name: m.name,
+        })),
+      });
+    });
   }
 
   private async handleMessages(req: Request, res: Response): Promise<void> {
@@ -239,20 +257,16 @@ export class ProxyServer extends EventEmitter {
       console.log(`[Proxy] ${req.method} ${req.url}`);
     console.log(`[Proxy] Model: ${claudeRequest.model}`);
     console.log(`[Proxy] Stream: ${claudeRequest.stream}`);
-    console.log(`[Proxy] Original request body: ${JSON.stringify(req.body, null, 2)}`);
 
-      if (this.config && this.config.defaultModel && this.config.models) {
-        const defaultModelConfig = this.config.models.find(m => m.id === this.config!.defaultModel);
-        if (defaultModelConfig) {
-          console.log(`[Proxy] Replacing model ${claudeRequest.model} with ${defaultModelConfig.modelId}`);
-          claudeRequest.model = defaultModelConfig.modelId;
-        }
+      const apiFormat = this.config.apiFormat || 'anthropic';
+      console.log(`[Proxy] Using API format: ${apiFormat}`);
+
+      if (apiFormat === 'chat-completions') {
+        await this.handleWithChatCompletionsApi(claudeRequest, req, res, startTime);
+      } else {
+        // responses 格式暂时禁用，统一走 anthropic 透传
+        await this.handleWithAnthropicApi(claudeRequest, req, res, startTime);
       }
-
-      // 强制使用 anthropic 格式，responses 格式暂时禁用
-      const apiFormat = 'anthropic';
-      console.log(`[Proxy] Using Anthropic Passthrough (responses API temporarily disabled)`);
-      await this.handleWithAnthropicApi(claudeRequest, req, res, startTime);
     } catch (error: any) {
       console.error(`[Proxy Error] ${error.message}`);
       console.error(`[Proxy Error] Stack: ${error.stack}`);
@@ -293,36 +307,53 @@ export class ProxyServer extends EventEmitter {
         content = content.map((block: any) => {
           if (block.type === 'text') {
             const text = block.text || '';
-            // 过滤掉空的 text block
             if (!text.trim()) {
               return null;
             }
-            return { type: 'text', text: text };
+            const textBlock: any = { type: 'text', text: text };
+            if (block.cache_control) {
+              textBlock.cache_control = block.cache_control;
+            }
+            return textBlock;
           }
           if (block.type === 'image') {
-            return {
+            const imageBlock: any = {
               type: 'image',
               source: block.source || {}
             };
+            if (block.cache_control) {
+              imageBlock.cache_control = block.cache_control;
+            }
+            return imageBlock;
           }
           if (block.type === 'tool_use') {
-            // 确保 id 只包含合法字符: a-zA-Z0-9_-
             const cleanId = (block.id || '').replace(/[^a-zA-Z0-9_-]/g, '_');
-            return {
+            const toolUseBlock: any = {
               type: 'tool_use',
               id: cleanId || 'tool_default',
               name: block.name || '',
               input: block.input || {}
             };
+            if (block.cache_control) {
+              toolUseBlock.cache_control = block.cache_control;
+            }
+            return toolUseBlock;
           }
           if (block.type === 'tool_result') {
-            // 确保 tool_use_id 只包含合法字符: a-zA-Z0-9_-
             const cleanToolUseId = (block.tool_use_id || '').replace(/[^a-zA-Z0-9_-]/g, '_');
-            return {
+            const toolResultBlock: any = {
               type: 'tool_result',
               tool_use_id: cleanToolUseId || 'tool_default',
               content: block.content || ''
             };
+            if (block.cache_control) {
+              toolResultBlock.cache_control = block.cache_control;
+            }
+            return toolResultBlock;
+          }
+          // 过滤掉 thinking 块 - 签名与上游绑定，转发会导致 Invalid signature
+          if (block.type === 'thinking' || block.type === 'redacted_thinking') {
+            return null;
           }
           return block;
         }).filter(Boolean); // 过滤掉 null 值
@@ -468,6 +499,8 @@ export class ProxyServer extends EventEmitter {
       const duration = Date.now() - startTime;
       const inputTokens = anthropicResponse.usage?.input_tokens || 0;
       const outputTokens = anthropicResponse.usage?.output_tokens || 0;
+      const cacheReadTokens = anthropicResponse.usage?.cache_read_input_tokens || 0;
+      const cacheCreationTokens = anthropicResponse.usage?.cache_creation_input_tokens || 0;
 
       this.emit('conversation', {
         id: `conv_${Date.now()}`,
@@ -476,6 +509,8 @@ export class ProxyServer extends EventEmitter {
         response: anthropicResponse,
         inputTokens,
         outputTokens,
+        cacheReadTokens,
+        cacheCreationTokens,
         duration,
       });
 
@@ -508,6 +543,8 @@ export class ProxyServer extends EventEmitter {
     let streamCompleted = false;
     let inputTokens = 0;
     let outputTokens = 0;
+    let cacheReadTokens = 0;
+    let cacheCreationTokens = 0;
     const collectedContent: any[] = [];
     let stopReason = 'end_turn';
 
@@ -554,6 +591,8 @@ export class ProxyServer extends EventEmitter {
         response: claudeResponse,
         inputTokens,
         outputTokens,
+        cacheReadTokens,
+        cacheCreationTokens,
         duration,
       });
 
@@ -565,8 +604,8 @@ export class ProxyServer extends EventEmitter {
         model: claudeRequest.model,
         inputTokens,
         outputTokens,
-        cacheReadTokens: 0,
-        cacheCreationTokens: 0,
+        cacheReadTokens,
+        cacheCreationTokens,
         isStreaming: true,
       });
     };
@@ -598,6 +637,8 @@ export class ProxyServer extends EventEmitter {
               if (event.type === 'message_start' && event.message?.usage) {
                 inputTokens = event.message.usage.input_tokens || inputTokens;
                 outputTokens = event.message.usage.output_tokens || outputTokens;
+                cacheReadTokens = event.message.usage.cache_read_input_tokens || cacheReadTokens;
+                cacheCreationTokens = event.message.usage.cache_creation_input_tokens || cacheCreationTokens;
               }
               if (event.type === 'message_delta') {
                 if (event.usage) {
@@ -722,6 +763,8 @@ export class ProxyServer extends EventEmitter {
         response: claudeResponse,
         inputTokens,
         outputTokens,
+        cacheReadTokens: 0,
+        cacheCreationTokens: 0,
         duration,
       });
 
@@ -1014,6 +1057,8 @@ export class ProxyServer extends EventEmitter {
         response: claudeResponse,
         inputTokens: inputTokens,
         outputTokens: outputTokens,
+        cacheReadTokens: 0,
+        cacheCreationTokens: 0,
         duration,
       });
 
@@ -1216,6 +1261,7 @@ export class ProxyServer extends EventEmitter {
 
   private async handleWithChatCompletionsApi(
     claudeRequest: ClaudeMessagesRequest,
+    req: Request,
     res: Response,
     startTime: number
   ): Promise<void> {
@@ -1224,13 +1270,20 @@ export class ProxyServer extends EventEmitter {
 
     console.log(`[Proxy] Forwarding to: ${targetUrl}`);
     console.log(`[Proxy] Request model: ${openaiRequest.model}`);
+    console.log(`[Proxy] Request body: ${JSON.stringify(openaiRequest, null, 2)}`);
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${this.config!.apiKey}`,
+    };
+    const traceId = req.headers['trace-id'] as string;
+    if (traceId) {
+      headers['Trace-Id'] = traceId;
+    }
 
     const openaiApiResponse = await fetch(targetUrl, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.config!.apiKey}`,
-      },
+      headers,
       body: JSON.stringify(openaiRequest),
     });
 
@@ -1265,6 +1318,8 @@ export class ProxyServer extends EventEmitter {
         response: claudeResponse,
         inputTokens,
         outputTokens,
+        cacheReadTokens: 0,
+        cacheCreationTokens: 0,
         duration,
       });
 
@@ -1390,6 +1445,8 @@ export class ProxyServer extends EventEmitter {
               response: claudeResponse,
               inputTokens: inputTokens,
               outputTokens: outputTokens,
+              cacheReadTokens: 0,
+              cacheCreationTokens: 0,
               duration,
             });
 
@@ -1579,6 +1636,7 @@ export class ProxyServer extends EventEmitter {
                 },
               });
             }
+            // thinking / redacted_thinking 块直接丢弃，签名与上游绑定
           });
         }
 
@@ -1607,6 +1665,18 @@ export class ProxyServer extends EventEmitter {
       (openaiRequest as any).stream_options = {
         include_usage: true
       };
+    }
+
+    // 京东云 chat/completions 使用 thinking_budget 控制思考预算（仅 Sonnet 支持）
+    if (claudeRequest.thinking) {
+      const model = claudeRequest.model.toLowerCase();
+      if (model.includes('sonnet')) {
+        (openaiRequest as any).thinking_budget =
+          claudeRequest.thinking.budget_tokens || 16000;
+      } else if (!model.includes('opus') && claudeRequest.thinking.budget_tokens) {
+        (openaiRequest as any).thinking_budget = claudeRequest.thinking.budget_tokens;
+      }
+      // Opus 走 adaptive，不传 thinking_budget
     }
 
     if (claudeRequest.tools) {

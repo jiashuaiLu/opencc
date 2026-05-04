@@ -175,7 +175,7 @@ declare global {
 
       getConversations: (limit?: number) => Promise<Conversation[]>;
       deleteConversation: (id: string) => Promise<{ success: boolean }>;
-      clearAllConversations: () => Promise<{ success: boolean }>;
+      deleteAllConversations: () => Promise<{ success: boolean }>;
 
       getSettings: () => Promise<Settings>;
       saveSettings: (settings: Settings) => Promise<{ success: boolean }>;
@@ -183,21 +183,20 @@ declare global {
       clearCache: () => Promise<{ success: boolean }>;
 
       getMcpServers: () => Promise<McpServer[]>;
-      saveMcpServer: (server: McpServer) => Promise<void>;
+      saveMcpServer: (server: McpServer) => Promise<{ success: boolean }>;
       deleteMcpServer: (id: string) => Promise<{ success: boolean }>;
-      toggleMcpApp: (id: string, app: string, enabled: boolean) => Promise<void>;
+      toggleMcpApp: (id: string, app: string, enabled: boolean) => Promise<{ success: boolean }>;
       getMcpPresets: () => Promise<McpPreset[]>;
-      importMcpFromClaude: () => Promise<{ count: number }>;
+      importMcpFromClaude: () => Promise<{ count: number; servers: McpServer[] }>;
 
       getSkills: () => Promise<InstalledSkill[]>;
-      saveSkill: (skill: InstalledSkill) => Promise<void>;
-      deleteSkill: (id: string) => Promise<void>;
-      toggleSkillApp: (id: string, app: string, enabled: boolean) => Promise<void>;
+      saveSkill: (skill: InstalledSkill) => Promise<{ success: boolean }>;
+      deleteSkill: (id: string) => Promise<{ success: boolean }>;
+      toggleSkillApp: (id: string, app: string, enabled: boolean) => Promise<{ success: boolean }>;
       scanUnmanagedSkills: () => Promise<UnmanagedSkill[]>;
       importSkill: (directory: string) => Promise<InstalledSkill | null>;
       importSkills: (directories: string[]) => Promise<InstalledSkill[]>;
       importSkillFromPath: (sourcePath: string, sourceType: 'global' | 'project', sourceProject?: string) => Promise<InstalledSkill | null>;
-      promoteSkillToGlobal: (id: string) => Promise<InstalledSkill>;
       listProjectsWithSkills: () => Promise<ProjectInfo[]>;
       scanCustomProject: (projectPath: string) => Promise<UnmanagedSkill[]>;
       getSkillDirectory: (id: string) => Promise<{ dir: string; exists: boolean }>;

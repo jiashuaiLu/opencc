@@ -7,7 +7,7 @@
 一个专为 macOS 设计的桌面应用，用于管理和监控 Claude Code 代理服务
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.3.0-green.svg)](package.json)
+[![Version](https://img.shields.io/badge/version-1.4.0-green.svg)](package.json)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows-lightgrey.svg)](https://www.apple.com/macos)
 
 </div>
@@ -21,13 +21,14 @@ OpenCC 是一个功能强大的 macOS/Windows 桌面应用，旨在简化 Claude
 ### ✨ 核心特性
 
 - 🎯 **图形化配置** - 无需手动编辑配置文件，通过界面轻松配置代理服务
-- 📊 **实时监控** - 实时查看运行日志、Token 消耗、请求统计
+- 📊 **实时监控** - 实时查看运行日志、Token 消耗（含缓存命中）、请求统计
 - 💬 **对话历史** - 查看和管理所有对话历史，支持搜索和导出
 - 🔧 **环境检查** - 自动检测本地环境，确保依赖完整
 - 📈 **数据统计** - 可视化展示 Token 消耗、请求耗时、成功率等数据
 - 🎨 **极简设计** - 采用全新的极简主义设计系统，提供清晰的视觉层次和信息架构
 - 🌓 **暗黑模式** - 原生支持深色模式，可跟随系统自动切换或手动设置
 - 🔌 **插件管理** - 完善的 MCP (Model Context Protocol) 和 Skills 管理功能
+- 🔀 **默认模型** - 启动服务后 Claude Code 自动使用配置的默认模型，`/model` 命令热切换生效
 
 ---
 
@@ -192,9 +193,20 @@ npm run format              # 格式化代码
 
 ## 🎯 功能路线图
 
-### v1.3.0 (当前版本)
+### v1.4.0 (当前版本)
 
-- [x] 支持京东云 Anthropic 兼容 API
+- [x] 修复默认模型配置：启动后 Claude Code 自动使用 OpenCC 配置的默认模型（写入 `settings.json` 顶层 `model` 字段）
+- [x] 代理服务器新增 `GET /v1/models` 端点，返回已配置模型列表
+- [x] 缓存 token 统计（cache_read / cache_creation）
+- [x] cache control 透传支持（text / image / tool_use / tool_result block）
+- [x] thinking / redacted_thinking 块过滤（防止 Invalid signature 错误）
+- [x] Skills 目录路径安全校验（防止路径遍历）
+- [x] YAML frontmatter 多行块解析优化
+- [x] 性能优化：管理页面组件 memo 化
+
+### v1.3.0 (已发布)
+
+- [x] 支持 Anthropic 兼容 API
 - [x] 优化代理服务参数清理逻辑
 - [x] 支持 macOS Universal 架构（Intel + Apple Silicon）
 - [x] Windows 平台支持
@@ -226,13 +238,6 @@ npm run format              # 格式化代码
 - [x] 对话历史
 - [x] 使用文档
 - [x] 应用资讯页面
-
-### v1.4.0 (计划中)
-
-- [ ] 支持更多云服务商（阿里云、腾讯云等）
-- [ ] 添加插件市场，方便用户发现和安装插件
-- [ ] 实现自动更新功能
-- [ ] 添加高级统计分析功能
 
 ---
 

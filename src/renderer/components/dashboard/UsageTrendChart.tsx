@@ -1,5 +1,5 @@
 import { Card, Spin, Empty, Segmented } from 'antd';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   AreaChart,
   Area,
@@ -65,6 +65,11 @@ export default function UsageTrendChart({ days }: UsageTrendChartProps) {
     label: formatDate(item.date),
     totalTokens: item.totalInputTokens + item.totalOutputTokens,
   }));
+
+  const hasCacheData = useMemo(() =>
+    chartData.some(item => item.totalCacheCreationTokens > 0 || item.totalCacheReadTokens > 0),
+    [chartData]
+  );
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -204,24 +209,28 @@ export default function UsageTrendChart({ days }: UsageTrendChartProps) {
                   fill="url(#colorOutput)"
                   strokeWidth={2}
                 />
-                <Area
-                  type="monotone"
-                  dataKey="totalCacheCreationTokens"
-                  name="缓存创建"
-                  stroke="#f97316"
-                  fillOpacity={1}
-                  fill="url(#colorCacheCreation)"
-                  strokeWidth={2}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="totalCacheReadTokens"
-                  name="缓存命中"
-                  stroke="#a855f7"
-                  fillOpacity={1}
-                  fill="url(#colorCacheRead)"
-                  strokeWidth={2}
-                />
+                {hasCacheData && (
+                  <>
+                    <Area
+                      type="monotone"
+                      dataKey="totalCacheCreationTokens"
+                      name="缓存创建"
+                      stroke="#f97316"
+                      fillOpacity={1}
+                      fill="url(#colorCacheCreation)"
+                      strokeWidth={2}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="totalCacheReadTokens"
+                      name="缓存命中"
+                      stroke="#a855f7"
+                      fillOpacity={1}
+                      fill="url(#colorCacheRead)"
+                      strokeWidth={2}
+                    />
+                  </>
+                )}
               </>
             ) : (
               <Area

@@ -1,4 +1,4 @@
-import { Card, Table, Tag, Button, Input, Select, message } from 'antd';
+import { Card, Table, Tag, Space, Button, Input, Select, message } from 'antd';
 import { ReloadOutlined, SearchOutlined, ClearOutlined } from '@ant-design/icons';
 import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 
@@ -14,19 +14,6 @@ interface Log {
   model?: string;
   metadata?: any;
 }
-
-const levelColorMap: Record<string, string> = {
-  error: 'error',
-  warn: 'warning',
-  info: 'processing',
-};
-
-const selectOptions = [
-  { label: '全部级别', value: 'all' },
-  { label: 'INFO', value: 'info' },
-  { label: 'WARN', value: 'warn' },
-  { label: 'ERROR', value: 'error' },
-];
 
 function Logs() {
   const [logs, setLogs] = useState<Log[]>([]);
@@ -64,14 +51,6 @@ function Logs() {
     }
   }, []);
 
-  const handleSearchTextChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchText(e.target.value);
-  }, []);
-
-  const handleLevelFilterChange = useCallback((value: string) => {
-    setLevelFilter(value);
-  }, []);
-
   const columns = useMemo(() => [
     {
       title: '时间',
@@ -86,7 +65,11 @@ function Logs() {
       key: 'level',
       width: 100,
       render: (level: string) => {
-        const color = levelColorMap[level] || 'default';
+        let color = 'default';
+        if (level === 'error') color = 'error';
+        else if (level === 'warn') color = 'warning';
+        else if (level === 'info') color = 'processing';
+        
         return <Tag color={color}>{level.toUpperCase()}</Tag>;
       },
     },
@@ -131,12 +114,6 @@ function Logs() {
     },
   ], []);
 
-  const paginationConfig = useMemo(() => ({
-    pageSize: 20,
-    showSizeChanger: true,
-    showTotal: (total: number) => `共 ${total} 条日志`,
-  }), []);
-
   return (
     <div className="page-container">
       <div className="page-header">
@@ -158,15 +135,20 @@ function Logs() {
         <div className="filter-bar">
           <Select
             value={levelFilter}
-            onChange={handleLevelFilterChange}
+            onChange={setLevelFilter}
             className="filter-select"
-            options={selectOptions}
+            options={[
+              { label: '全部级别', value: 'all' },
+              { label: 'INFO', value: 'info' },
+              { label: 'WARN', value: 'warn' },
+              { label: 'ERROR', value: 'error' },
+            ]}
           />
           <Input
             placeholder="搜索日志内容、URL..."
             prefix={<SearchOutlined />}
             value={searchText}
-            onChange={handleSearchTextChange}
+            onChange={(e) => setSearchText(e.target.value)}
             className="filter-input"
             onPressEnter={loadLogs}
           />
@@ -184,7 +166,11 @@ function Logs() {
             dataSource={logs}
             rowKey="id"
             loading={loading}
-            pagination={paginationConfig}
+            pagination={{
+              pageSize: 20,
+              showSizeChanger: true,
+              showTotal: (total) => `共 ${total} 条日志`,
+            }}
             size="middle"
           />
         </Card>

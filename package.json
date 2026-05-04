@@ -1,6 +1,6 @@
 {
   "name": "opencc",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "OpenCC - Claude Code 代理服务管理工具",
   "main": "dist/main/index.js",
   "author": "OpenCC Team",

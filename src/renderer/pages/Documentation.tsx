@@ -10,11 +10,12 @@ import {
   DatabaseOutlined,
   FileTextOutlined,
 } from '@ant-design/icons';
+import { memo } from 'react';
 
 const { Title, Paragraph, Text } = Typography;
 const { Panel } = Collapse;
 
-export default function Documentation() {
+function Documentation() {
   return (
     <div className="page-container">
       <div className="page-header">
@@ -321,10 +322,12 @@ Claude Code 客户端`}
 
         <div style={{ textAlign: 'center', padding: '16px 0' }}>
           <Text type="secondary" style={{ fontSize: 12 }}>
-            如有问题或建议，欢迎通过 GitHub Issues 反馈
+            如有问题或建议，请联系管理员：ERP: lujiashuai.1 | 邮箱: lujiashuai.1@jd.com
           </Text>
         </div>
       </div>
     </div>
   );
 }
+
+export default memo(Documentation);

@@ -187,13 +187,13 @@ export function setupIPC(
     }
   });
 
-  ipcMain.handle('conversations:clearAll', async () => {
+  ipcMain.handle('conversations:deleteAll', async () => {
     try {
-      await database.clearAllConversations();
-      logger.info('All conversations cleared');
+      await database.deleteAllConversations();
+      logger.info('All conversations deleted');
       return { success: true };
     } catch (error) {
-      logger.error('Failed to clear all conversations', error);
+      logger.error('Failed to delete all conversations', error);
       throw error;
     }
   });
@@ -302,6 +302,8 @@ export function setupIPC(
 
       if (server.apps.claude) {
         await mcpService.syncServerToClaude(server);
+      } else {
+        await mcpService.removeServerFromClaude(server.id);
       }
 
       logger.info('MCP server saved', { id: server.id });
@@ -362,10 +364,10 @@ export function setupIPC(
   ipcMain.handle('mcp:importFromClaude', async () => {
     try {
       const imported = await mcpService.importFromClaude();
+      const existing = await database.getMcpServers();
       let newCount = 0;
 
       for (const server of imported) {
-        const existing = await database.getMcpServers();
         if (!existing.find(s => s.id === server.id)) {
           await database.saveMcpServer(server);
           newCount++;
@@ -396,6 +398,8 @@ export function setupIPC(
 
       if (skill.apps.claude) {
         await skillService.syncToClaude(skill);
+      } else {
+        await skillService.removeFromClaude(skill.directory);
       }
 
       logger.info('Skill saved', { id: skill.id });
@@ -708,6 +712,7 @@ export function setupIPC(
 
       for (const skill of skills) {
         await database.saveSkill(skill);
+        await skillService.syncToClaude(skill);
         logger.info('Skill installed from ZIP', { id: skill.id, name: skill.name });
       }
 
@@ -748,6 +753,7 @@ export function setupIPC(
 
       const installedSkill = await skillService.installSkillFromRepo(skill, currentApp);
       await database.saveSkill(installedSkill);
+      await skillService.syncToClaude(installedSkill);
 
       logger.info('Skill installed from repo successfully', {
         id: installedSkill.id,
@@ -761,5 +767,7 @@ export function setupIPC(
     }
   });
 
+
   logger.info('IPC handlers setup complete');
+
 }

@@ -295,33 +295,30 @@ export class SystemChecker {
 
     await this.ensureDir(configDir);
 
-    const settings: any = {
-      env: {
-        ANTHROPIC_AUTH_TOKEN: apiKey,
-        ANTHROPIC_BASE_URL: `http://localhost:${port}`,
-      },
-    };
-
-    // 如果有模型配置，添加到配置文件（使用官方标准格式）
-    if (models && models.length > 0) {
-      const provider = apiFormat === 'anthropic' ? 'anthropic' : 'openai';
-      settings.llm = {
-        defaultModel: defaultModel
-          ? models.find(m => m.id === defaultModel)?.modelId || models[0].modelId
-          : models[0].modelId,
-        models: models.map(m => ({
-          modelId: m.modelId,
-          displayName: m.name,
-          provider,
-          apiEndpoint: `http://localhost:${port}/v1`,
-          apiKey: apiKey,
-          isEnabled: true,
-          parameters: {},
-        })),
-      };
+    let existing: any = {};
+    try {
+      const content = await readFile(configPath, 'utf-8');
+      existing = JSON.parse(content);
+    } catch {
+      // file doesn't exist or is invalid JSON
     }
 
-    await writeFile(configPath, JSON.stringify(settings, null, 2), 'utf-8');
+    existing.env = {
+      ...(existing.env || {}),
+      ANTHROPIC_AUTH_TOKEN: apiKey,
+      ANTHROPIC_BASE_URL: `http://localhost:${port}`,
+    };
+
+    if (models && models.length > 0) {
+      const resolvedDefaultModel = defaultModel
+        ? models.find(m => m.id === defaultModel)?.modelId || models[0].modelId
+        : models[0].modelId;
+
+      // Claude Code 通过顶层 model 字段决定启动时的默认模型
+      existing.model = resolvedDefaultModel;
+    }
+
+    await writeFile(configPath, JSON.stringify(existing, null, 2), 'utf-8');
   }
 
   // 还原 Claude 配置
@@ -336,13 +333,12 @@ export class SystemChecker {
         const config = JSON.parse(content);
         
         if (config.env) {
-          // 只删除代理相关的配置，保留模型配置
           delete config.env.ANTHROPIC_AUTH_TOKEN;
           delete config.env.ANTHROPIC_BASE_URL;
           delete config.env.ANTHROPIC_API_KEY;
         }
-        
-        // 保留 llm 配置（模型列表和默认模型）
+
+        // 保留 model 配置（默认模型）
         
         await writeFile(configPath, JSON.stringify(config, null, 2), 'utf-8');
       }
