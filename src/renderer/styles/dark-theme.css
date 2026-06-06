@@ -1,0 +1,366 @@
+/* Dark Theme Glass Overrides */
+
+/* AntD components that need dark glass treatment beyond token control */
+
+.dark-theme .ant-card {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dark-theme .ant-card-head {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dark-theme .ant-card-head-title {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.dark-theme .ant-card-actions {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dark-theme .ant-card-actions > li {
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Table */
+.dark-theme .ant-table-thead > tr > th {
+  background: rgba(255, 255, 255, 0.04) !important;
+  color: rgba(255, 255, 255, 0.85);
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark-theme .ant-table-tbody > tr > td {
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.dark-theme .ant-table-tbody > tr:hover > td {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+/* Input & Select */
+.dark-theme .ant-input,
+.dark-theme .ant-input-number,
+.dark-theme .ant-select-selector,
+.dark-theme .ant-picker {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.dark-theme .ant-input::placeholder {
+  color: rgba(255, 255, 255, 0.35) !important;
+}
+
+/* Button */
+.dark-theme .ant-btn-default {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.dark-theme .ant-btn-default:hover {
+  border-color: var(--primary-color) !important;
+  color: var(--primary-color) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Modal */
+.dark-theme .ant-modal-content {
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark-theme .ant-modal-header {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark-theme .ant-modal-title {
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+.dark-theme .ant-modal-close-x {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+.dark-theme .ant-modal-close:hover {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.dark-theme .ant-modal-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Form */
+.dark-theme .ant-form-item-label > label {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* Select dropdown */
+.dark-theme .ant-select-dropdown {
+  background: rgba(30, 30, 40, 0.92) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark-theme .ant-select-item {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.dark-theme .ant-select-item-option-active {
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+.dark-theme .ant-select-item-option-selected {
+  background: var(--primary-color) !important;
+}
+
+/* Dropdown */
+.dark-theme .ant-dropdown-menu {
+  background: rgba(30, 30, 40, 0.92) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark-theme .ant-dropdown-menu-item {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.dark-theme .ant-dropdown-menu-item:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* Tabs */
+.dark-theme .ant-tabs-tab {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+.dark-theme .ant-tabs-tab-active {
+  color: var(--primary-color) !important;
+}
+
+.dark-theme .ant-tabs-ink-bar {
+  background: var(--primary-color) !important;
+}
+
+.dark-theme .ant-tabs-nav {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Empty */
+.dark-theme .ant-empty-description {
+  color: rgba(255, 255, 255, 0.35) !important;
+}
+
+/* Statistic */
+.dark-theme .ant-statistic-title {
+  color: rgba(255, 255, 255, 0.55) !important;
+}
+
+.dark-theme .ant-statistic-content {
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+/* Switch */
+.dark-theme .ant-switch {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.dark-theme .ant-switch-checked {
+  background-color: var(--primary-color) !important;
+}
+
+/* Segmented */
+.dark-theme .ant-segmented {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark-theme .ant-segmented-item {
+  color: rgba(255, 255, 255, 0.55) !important;
+}
+
+.dark-theme .ant-segmented-item-selected {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+/* Alert */
+.dark-theme .ant-alert {
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+.dark-theme .ant-alert-info {
+  background: rgba(59, 130, 246, 0.1) !important;
+}
+
+.dark-theme .ant-alert-success {
+  background: rgba(34, 197, 94, 0.1) !important;
+}
+
+.dark-theme .ant-alert-warning {
+  background: rgba(245, 158, 11, 0.1) !important;
+}
+
+.dark-theme .ant-alert-error {
+  background: rgba(239, 68, 68, 0.1) !important;
+}
+
+/* Popover */
+.dark-theme .ant-popover-inner {
+  background: rgba(30, 30, 40, 0.92) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark-theme .ant-popover-message {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* Code */
+.dark-theme code {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #ff7875 !important;
+  border: none !important;
+}
+
+/* Layout */
+.dark-theme .ant-layout-sider {
+  background: transparent !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+/* Menu */
+.dark-theme .ant-menu {
+  background: transparent !important;
+  border-right: none !important;
+}
+
+/* Headings */
+.dark-theme h1,
+.dark-theme h2,
+.dark-theme h3,
+.dark-theme h4,
+.dark-theme h5,
+.dark-theme h6 {
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+.dark-theme p {
+  color: rgba(255, 255, 255, 0.65) !important;
+}
+
+/* Charts */
+.dark-theme .recharts-cartesian-grid-horizontal line,
+.dark-theme .recharts-cartesian-grid-vertical line {
+  stroke: rgba(255, 255, 255, 0.06) !important;
+}
+
+.dark-theme .recharts-text {
+  fill: rgba(255, 255, 255, 0.45) !important;
+}
+
+/* Tooltip */
+.dark-theme .ant-tooltip-inner {
+  background: rgba(30, 30, 40, 0.92) !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* Message & Notification */
+.dark-theme .ant-message-notice-content {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.dark-theme .ant-notification-notice {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* Progress */
+.dark-theme .ant-progress-text {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* Descriptions */
+.dark-theme .ant-descriptions-bordered .ant-descriptions-item-label {
+  background: rgba(255, 255, 255, 0.04) !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.dark-theme .ant-descriptions-item-content {
+  color: rgba(255, 255, 255, 0.65) !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* Collapse */
+.dark-theme .ant-collapse {
+  border-color: rgba(255, 255, 255, 0.06) !important;
+  background: transparent !important;
+}
+
+.dark-theme .ant-collapse-item {
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.dark-theme .ant-collapse-header {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.dark-theme .ant-collapse-content {
+  background: transparent !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* Divider */
+.dark-theme .ant-divider {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Pagination */
+.dark-theme .ant-pagination-item {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark-theme .ant-pagination-item a {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.dark-theme .ant-pagination-item-active {
+  border-color: var(--primary-color) !important;
+}
+
+.dark-theme .ant-pagination-item-active a {
+  color: var(--primary-color) !important;
+}
+
+/* Drawer */
+.dark-theme .ant-drawer-content {
+  background: rgba(30, 30, 40, 0.92) !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.dark-theme .ant-drawer-header {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark-theme .ant-drawer-title {
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+.dark-theme .ant-drawer-close {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+.dark-theme .ant-drawer-close:hover {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* Tag */
+.dark-theme .ant-tag {
+  border: 1px solid transparent !important;
+}
+
+/* Avatar */
+.dark-theme .ant-avatar {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* wildcard border — removed; using per-component border now */

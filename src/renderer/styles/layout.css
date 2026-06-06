@@ -1,0 +1,218 @@
+/* Layout — macOS Vibrancy Glass (no AntD) */
+
+.app-layout {
+  height: 100vh;
+  display: flex;
+  overflow: hidden;
+  background: transparent;
+}
+
+/* Sidebar — uses sider-bg variable (transparent in light, deep dark in dark mode) */
+.app-sider {
+  width: 260px;
+  flex-shrink: 0;
+  background: var(--sider-bg, transparent);
+  border-right: 1px solid var(--sider-border, rgba(0, 0, 0, 0.06));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Logo area — draggable titlebar region */
+.app-logo-container {
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-color);
+  border-bottom: 1px solid var(--sider-border, rgba(0, 0, 0, 0.06));
+  margin-top: 36px;
+  padding-left: 20px;
+  gap: 10px;
+  background: transparent;
+  -webkit-app-region: drag;
+  flex-shrink: 0;
+}
+
+.app-logo-text {
+  background: linear-gradient(135deg, var(--primary-color, #007AFF), #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 0.3px;
+}
+
+/* Navigation items — macOS settings-app style */
+.app-nav {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.app-nav::-webkit-scrollbar {
+  width: 4px;
+}
+
+.app-nav::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 2px;
+}
+
+body.dark-theme .app-nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.app-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 150ms ease;
+  -webkit-app-region: no-drag;
+}
+
+.app-nav-item:hover {
+  background: var(--nav-hover);
+}
+
+.app-nav-item-active {
+  background: var(--nav-active);
+}
+
+/* Colored icon block */
+.app-nav-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.app-nav-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.app-nav-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-color);
+  line-height: 1.3;
+}
+
+.app-nav-desc {
+  font-size: 11px;
+  color: var(--text-secondary-color);
+  line-height: 1.3;
+}
+
+/* Main content area */
+.app-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Content panel — glass */
+.app-content {
+  margin: 0;
+  padding: 24px;
+  background: var(--panel-bg);
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturate, 180%));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturate, 180%));
+  border: none;
+  border-left: 1px solid var(--sider-border);
+  border-radius: 0;
+  overflow: auto;
+  position: relative;
+  flex: 1;
+}
+
+/* Content scrollbar */
+.app-content::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.app-content::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 3px;
+}
+
+body.dark-theme .app-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.app-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* User info at bottom of sider */
+.app-user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--sider-border, rgba(0, 0, 0, 0.06));
+  flex-shrink: 0;
+}
+
+.app-user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--primary-color, #007AFF);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.app-user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.app-user-detail {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.app-user-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-color);
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-user-org {
+  font-size: 11px;
+  color: var(--text-secondary-color);
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

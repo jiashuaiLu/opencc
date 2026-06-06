@@ -1,0 +1,227 @@
+/* Common Page Layout — Polished Commercial Glass */
+
+.page-container {
+  padding: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-header {
+  margin-bottom: 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.page-title-group h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-color);
+  line-height: 1.2;
+  letter-spacing: -0.3px;
+}
+
+.page-title-group p {
+  margin: 6px 0 0 0;
+  color: var(--text-secondary-color);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.page-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.page-content {
+  flex: 1;
+  overflow: auto;
+}
+
+/* Card Enhancements — glass inner surface */
+.content-card {
+  border-radius: 10px;
+  margin-bottom: 16px;
+  background: var(--card-bg);
+  backdrop-filter: blur(10px) saturate(150%);
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
+  border: 1px solid var(--card-border);
+}
+
+.content-card .ant-card-head {
+  border-bottom: 1px solid var(--glass-border);
+  padding: 14px 20px;
+  min-height: auto;
+}
+
+.content-card .ant-card-head-title {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 0;
+}
+
+.content-card .ant-card-body {
+  padding: 20px;
+}
+
+.content-card-no-padding .ant-card-body {
+  padding: 0;
+}
+
+/* Section title (left accent bar) */
+.form-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--text-color);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-section-title::before {
+  content: '';
+  display: block;
+  width: 3px;
+  height: 14px;
+  background: var(--primary-color);
+  border-radius: 2px;
+}
+
+/* Status Badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+.status-badge-success {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.status-badge-error {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.status-badge-warning {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+.status-badge-default {
+  background: rgba(107, 114, 128, 0.08);
+  color: var(--text-secondary-color);
+}
+
+body.dark-theme .status-badge-success {
+  background: rgba(16, 185, 129, 0.15);
+}
+
+body.dark-theme .status-badge-error {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+body.dark-theme .status-badge-warning {
+  background: rgba(245, 158, 11, 0.15);
+}
+
+body.dark-theme .status-badge-default {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Code Snippets */
+.code-block {
+  font-family: 'SF Mono', 'JetBrains Mono', Consolas, monospace;
+  background: rgba(0, 0, 0, 0.03);
+  padding: 14px 16px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--text-color);
+  border: 1px solid var(--glass-border);
+  overflow-x: auto;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+body.dark-theme .code-block {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* Empty States */
+.empty-state-container {
+  padding: 60px 0;
+  text-align: center;
+}
+
+/* List Items */
+.list-item-hover {
+  transition: background-color 0.15s;
+  border-radius: 8px;
+}
+
+.list-item-hover:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+body.dark-theme .list-item-hover:hover {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+/* Inline row style — label on left, control on right */
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.setting-row:last-child {
+  border-bottom: none;
+}
+
+.setting-row-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.setting-row-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.setting-row-desc {
+  font-size: 11px;
+  color: var(--text-secondary-color);
+}
+
+/* Section group header */
+.section-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary-color);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  margin-top: 24px;
+  padding-left: 2px;
+}
+
+.section-label:first-child {
+  margin-top: 0;
+}
