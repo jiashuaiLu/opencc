@@ -28,6 +28,7 @@ OpenCC 是一个功能强大的跨平台桌面应用，旨在简化 Claude Code 
 - 🎨 **极简设计** - 采用全新的极简主义设计系统，提供清晰的视觉层次和信息架构
 - 🌓 **暗黑模式** - 原生支持深色模式，可跟随系统自动切换或手动设置
 - 🔌 **插件管理** - 完善的 MCP (Model Context Protocol) 和 Skills 管理功能
+- 🔄 **多模型支持** - 支持 Claude Code 和 Codex CLI 双客户端
 
 ---
 
@@ -35,7 +36,7 @@ OpenCC 是一个功能强大的跨平台桌面应用，旨在简化 Claude Code 
 
 ### 系统要求
 
-- **操作系统**: macOS 10.15 (Catalina) 或更高版本
+- **操作系统**: macOS 10.15 (Catalina) 或更高版本 / Windows 10/11
 - **Node.js**: v16.0.0 或更高版本
 - **Claude Code**: 已安装并配置
 
@@ -43,18 +44,18 @@ OpenCC 是一个功能强大的跨平台桌面应用，旨在简化 Claude Code 
 
 #### 方式一：下载安装包（推荐）
 
-1. 下载链接 [Releases]() 页面
-2. 下载最新版本的 `OpenCC-x.x.x.dmg`
-3. 双击打开 DMG 文件
-4. 将应用拖拽到 Applications 文件夹
-5. 打开 Applications 文件夹，双击启动应用
+1. 访问 [Releases](https://github.com/jiashuaiLu/opencc/releases) 页面
+2. 下载最新版本的 `OpenCC-x.x.x.dmg`（macOS）或 `OpenCC-x.x.x.exe`（Windows）
+3. 双击打开安装文件
+4. 将应用拖拽到 Applications 文件夹（macOS）或按向导安装（Windows）
+5. 打开应用，开始使用
 
 #### 方式二：从源码构建
 
 ```bash
 # 1. 克隆仓库
 git clone https://github.com/jiashuaiLu/opencc.git
-cd OpenCC
+cd opencc
 
 # 2. 安装依赖
 npm install
@@ -192,14 +193,7 @@ npm run format              # 格式化代码
 
 ## 🎯 功能路线图
 
-### v1.1.0 (当前版本)
-
-- [ ] 高级统计分析
-- [ ] 多配置管理
-- [ ] 配置导入/导出
-- [ ] 自动更新功能
-
-### v1.0.0 (已发布)
+### v2.0.0 (当前版本)
 
 - [x] 基础框架搭建
 - [x] 代理服务管理
@@ -210,12 +204,17 @@ npm run format              # 格式化代码
 - [x] MCP & Skills 管理
 - [x] 全新 UI/UX 设计
 - [x] 暗黑模式支持
+- [x] Codex CLI 支持
+- [x] 多配置管理
+- [x] 配置导入/导出
 
-### v1.2.0 (计划中)
+### v2.1.0 (计划中)
 
+- [ ] 高级统计分析
 - [ ] 性能优化
 - [ ] 插件系统增强
 - [ ] 主题定制增强
+- [ ] 自动更新功能
 
 ---
 
@@ -235,7 +234,7 @@ npm run format              # 格式化代码
 | **技术栈** | Electron + React + TypeScript | Tauri 2 + React + Rust |
 | **安装体积** | ~122 MB | ~15 MB（Tauri 原生） |
 | **数据存储** | JSON 文件 (~/.opencc/) | SQLite (~/.cc-switch/) |
-| **适用场景** | 企业内网 API 网关接入、需要协议转换、需要请求级监控和审计 | 多供应商频繁切换、多 CLI 工具统一管理、需要云同步配置 |
+| **适用场景** | 需要协议转换、请求级监控和审计、本地代理层统一管理 | 多供应商频繁切换、多 CLI 工具统一管理、需要云同步配置 |
 
 ### 总结
 
@@ -250,7 +249,7 @@ npm run format              # 格式化代码
 
 ### 如何贡献
 
-1. clone 本仓库
+1. Fork 本仓库
 2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
 3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
 4. 推送到分支 (`git push origin feature/AmazingFeature`)
@@ -286,7 +285,7 @@ npm run format              # 格式化代码
 
 ## 📞 联系方式
 
-- **erp**: lujiashuai.1
+- **GitHub**: [@jiashuaiLu](https://github.com/jiashuaiLu)
 
 ---
 
