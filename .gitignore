@@ -1,0 +1,19 @@
+# 依赖
+node_modules/
+
+# 构建产物
+dist/
+release/
+build/
+
+# 日志与缓存
+*.log
+.cache/
+logs/
+
+# 系统文件
+.DS_Store
+
+# 本地环境
+.env
+.env.local

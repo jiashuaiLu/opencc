@@ -1,0 +1,159 @@
+/* Usage Ranking Page — Three-level: Department / Group / User */
+
+/* View Tabs */
+.ranking-view-tabs {
+  margin-bottom: 20px;
+}
+
+/* Stat Cards Grid */
+.ranking-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.ranking-stat-card-v2 {
+  text-align: center;
+  padding: 16px 12px;
+  border-radius: 12px;
+  transition: border-color 200ms ease;
+}
+
+.ranking-stat-card-v2:hover {
+  border-color: rgba(255, 220, 150, 0.15);
+}
+
+body.light-theme .ranking-stat-card-v2:hover {
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+.ranking-stat-card-v2 .stat-card-icon {
+  font-size: 20px;
+  margin-bottom: 6px;
+}
+
+.ranking-stat-card-v2 .stat-card-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-color);
+  font-family: 'SF Mono', 'Menlo', monospace;
+  line-height: 1.3;
+}
+
+.ranking-stat-card-v2 .stat-card-label {
+  font-size: 11px;
+  color: var(--text-secondary-color);
+  margin-top: 4px;
+}
+
+/* C2 Selector */
+.ranking-c2-selector {
+  min-width: 240px;
+}
+
+/* Medal/Rank Styles */
+.ranking-medal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.ranking-medal-gold {
+  background: linear-gradient(135deg, #ffd700, #ffaa00);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(255, 170, 0, 0.35);
+}
+
+.ranking-medal-silver {
+  background: linear-gradient(135deg, #c0c0c0, #a0a0a0);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(160, 160, 160, 0.35);
+}
+
+.ranking-medal-bronze {
+  background: linear-gradient(135deg, #cd7f32, #a0522d);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(205, 127, 50, 0.35);
+}
+
+.ranking-medal-normal {
+  background: var(--input-bg);
+  color: var(--text-secondary-color);
+}
+
+/* ERP Display */
+.ranking-erp-tag {
+  font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+  font-size: 13px;
+}
+
+.ranking-erp-current {
+  color: var(--primary-color);
+  font-weight: 600;
+  font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+  font-size: 13px;
+}
+
+/* Token Display */
+.ranking-token-total {
+  color: #f59e0b;
+  font-weight: 600;
+  font-family: 'SF Mono', 'Menlo', monospace;
+  font-size: 13px;
+}
+
+/* C2 ComboBox Dropdown */
+.c2-combo-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 240px;
+  overflow-y: auto;
+  background: rgba(246, 246, 248, 0.95);
+  backdrop-filter: blur(30px) saturate(200%);
+  -webkit-backdrop-filter: blur(30px) saturate(200%);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 4px;
+  z-index: 1050;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+body.dark-theme .c2-combo-dropdown {
+  background: rgba(35, 33, 42, 0.97);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.c2-combo-option {
+  padding: 6px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--text-color);
+  transition: background 100ms;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.c2-combo-option:hover {
+  background: var(--hover-bg);
+}
+
+.c2-combo-option-active {
+  background: rgba(59, 130, 246, 0.08);
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+/* Row clickable enhancement */
+.g-table-row-clickable:hover td {
+  background: var(--hover-bg) !important;
+}

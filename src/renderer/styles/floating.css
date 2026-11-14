@@ -1,0 +1,153 @@
+/* Token 消耗悬浮窗样式
+ * 整窗透明（主进程 transparent:true），由 .floating-box 提供圆角方形卡片。
+ *
+ * 关键：投影必须完全落在透明外边距（inset 间隙）内消散 —— 若阴影范围超出间隙撞到
+ *   窗口矩形边界，会被硬裁成带直角的灰色"衬底"。故窗口 190、卡片 inset:20（可视约150），
+ *   阴影最大扩散 < 20px，安全不裁切。
+ * 关键：不使用 backdrop-filter —— Windows 透明窗口下会回退绘制矩形不透明底。
+ *
+ * 视觉区分（组合方案）：柔和投影悬浮 + 品牌蓝细描边 + 顶部内高光 + 冷色渐变磨砂底，
+ *   在白页 / 深色 / 彩色背景上均有清晰边界。随亮/暗模式（body.dark-theme）切换。
+ */
+
+/* 仅悬浮窗页面：锁死文档尺寸并禁用滚动（floating.css 会进主包，故用 body class 限定作用域） */
+body.floating-mode,
+body.floating-mode #root {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.floating-box {
+  /* 四周留 20px 透明外边距容纳投影（阴影扩散 < 20px，不会被窗口边界裁切） */
+  position: fixed;
+  inset: 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 12px 12px;
+  border-radius: 20px;
+  overflow: hidden;
+  /* 可拖拽整窗移动 */
+  -webkit-app-region: drag;
+  user-select: none;
+  /* 冷色渐变磨砂底：顶部更亮、底部微冷，区别于纯白页面 */
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.97) 0%, rgba(243, 246, 252, 0.95) 100%);
+  /* 品牌蓝细描边 */
+  border: 1px solid rgba(59, 130, 246, 0.22);
+  /* 柔和投影（悬浮）+ 顶部内高光（受光感），均落在外边距内不裁切 */
+  box-shadow:
+    0 4px 12px rgba(20, 30, 55, 0.14),
+    0 2px 5px rgba(20, 30, 55, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  color: var(--text-color, #1f1f1f);
+}
+
+body.dark-theme .floating-box {
+  background: linear-gradient(155deg, rgba(42, 39, 52, 0.97) 0%, rgba(26, 24, 34, 0.98) 100%);
+  border: 1px solid rgba(96, 150, 255, 0.26);
+  box-shadow:
+    0 4px 13px rgba(0, 0, 0, 0.5),
+    0 2px 5px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.no-drag {
+  -webkit-app-region: no-drag;
+}
+
+/* 顶部：时间尺度切换（关闭按钮绝对定位到右上角，不占据行宽） */
+.floating-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floating-range {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 7px;
+  background: var(--input-bg, rgba(0, 0, 0, 0.04));
+}
+
+.floating-range-item {
+  border: none;
+  background: transparent;
+  color: var(--text-secondary-color, #8c8c8c);
+  font-size: 10px;
+  line-height: 1;
+  padding: 3px 6px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.floating-range-item:hover {
+  color: var(--text-color, #1f1f1f);
+}
+
+.floating-range-item.is-active {
+  background: var(--primary-color, #1890ff);
+  color: #fff;
+}
+
+.floating-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-secondary-color, #8c8c8c);
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.floating-close:hover {
+  background: var(--hover-bg, rgba(0, 0, 0, 0.06));
+  color: var(--danger-color, #ff4d4f);
+}
+
+/* 主体：大号总 token + 输入/输出浅色小字 */
+.floating-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+}
+
+.floating-total {
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.5px;
+  color: var(--primary-color, #1890ff);
+  font-variant-numeric: tabular-nums;
+}
+
+.floating-total-label {
+  font-size: 10px;
+  color: var(--text-secondary-color, #8c8c8c);
+  margin-top: 2px;
+}
+
+.floating-breakdown {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  margin-top: 6px;
+  font-size: 10px;
+  color: var(--text-secondary-color, #8c8c8c);
+  opacity: 0.85;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
